@@ -1,4 +1,4 @@
 # kcg-scapper
 
-# For install requirements run  
-$pip install -r requirements
+# After cloning the repo run the following command to install all the needed requirements.  
+$ pip install -r requirements

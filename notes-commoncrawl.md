@@ -1,3 +1,3 @@
 Run scraper
 
-$scrapy crawl example
+$scrapy crawl VginsightsCrawl
