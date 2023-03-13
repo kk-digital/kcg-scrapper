@@ -52,7 +52,7 @@ ROBOTSTXT_OBEY = True
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
 #    "kcg.middlewares.KcgDownloaderMiddleware": 543,
-    # "kcg.middlewares.WarcioDownloaderMiddleware": 543,
+     "kcg.warcio.middlewares.WarcioDownloaderMiddleware": 543,
 }
 
 # Enable or disable extensions

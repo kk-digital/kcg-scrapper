@@ -1,3 +1,2 @@
 scrapy==2.8.0
-scrapy_warc==0.10.0
 scrapy-warcio==0.0.8
