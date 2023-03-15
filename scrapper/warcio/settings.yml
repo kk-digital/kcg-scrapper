@@ -7,4 +7,4 @@ operator: vginsights # operator email address
 robots: vginsights  # robots policy (obey or ignore)
 user_agent: vginsights # your user-agent
 warc_prefix: .warc # WARC filename prefix
-warc_dest: ./data # WARC files destination
+warc_dest: ./data/vginsights.com # WARC files destination
