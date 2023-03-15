@@ -2,11 +2,13 @@ import os
 import scrapy
 from scrapy.selector import Selector
 import xml.etree.ElementTree as ET
+import scrapy_warcio
 
 class VginsightsSpider(scrapy.Spider):
     os.environ['SCRAPY_WARCIO_SETTINGS'] = 'kcg/warcio/settings.yml'
     name = "VginsightsCrawl"
     links_arr = []
+    warcio = scrapy_warcio.ScrapyWarcIo()
     # allowed_domains = ["https://vginsights.com/sitemap.xml"]
     start_urls = ["https://vginsights.com/sitemap.xml"]
 
@@ -26,6 +28,9 @@ class VginsightsSpider(scrapy.Spider):
             link = child[0].text
             self.links_arr.append(link)
 
+        response.request.meta['WARC-Date'] = scrapy_warcio.warc_date()
+        self.warcio.write(response, response.request)
+        
         item[response.url] = self.links_arr
         yield item
 

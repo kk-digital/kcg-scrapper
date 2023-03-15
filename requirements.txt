@@ -1,2 +1,5 @@
 scrapy==2.8.0
 scrapy-warcio==0.0.8
+scrapy_splash==0.9.0
+playwright==1.31.1
+scrapy_playwright==0.0.26

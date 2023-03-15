@@ -11,6 +11,7 @@ BOT_NAME = "kcg"
 
 SPIDER_MODULES = ["kcg.spiders"]
 NEWSPIDER_MODULE = "kcg.spiders"
+SPLASH_URL = 'http://0.0.0.0:8050'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
@@ -44,16 +45,22 @@ ROBOTSTXT_OBEY = True
 
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
-#SPIDER_MIDDLEWARES = {
-#    "kcg.middlewares.KcgSpiderMiddleware": 543,
-#}
+# SPIDER_MIDDLEWARES = {
+#   "kcg.middlewares.KcgSpiderMiddleware": 543,
+# }
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
 #    "kcg.middlewares.KcgDownloaderMiddleware": 543,
-     "kcg.warcio.middlewares.WarcioDownloaderMiddleware": 543,
 }
+
+DOWNLOAD_HANDLERS = {
+    "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+    "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+}
+
+TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
