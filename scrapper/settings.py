@@ -11,7 +11,32 @@ BOT_NAME = "scrapper"
 
 SPIDER_MODULES = ["scrapper.spiders"]
 NEWSPIDER_MODULE = "scrapper.spiders"
+COOKIES_ENABLED = True
+COOKIES_DEBUG = True
 
+# DOWNLOADER_MIDDLEWARES = {
+#     'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware': 400,
+#     'scrapy.contrib.downloadermiddleware.cookies.CookiesMiddleware':700
+# }
+
+# DEFAULT_REQUEST_HEADERS={
+#     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+#     'Accept-Language': 'en',
+#     'X-JAVASCRIPT-ENABLED': 'True'
+# }
+
+DOWNLOAD_HANDLERS = {
+    "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+    "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+}
+
+TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
+PLAYWRIGHT_BROWSER_TYPE = "chromium"
+
+PLAYWRIGHT_LAUNCH_OPTIONS = {
+    "headless": False,
+    "timeout": 20 * 1000,  # 20 seconds
+}
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = "scrapper (+http://www.yourdomain.com)"
@@ -52,7 +77,7 @@ ROBOTSTXT_OBEY = True
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
 #    "scrapper.middlewares.scrapperDownloaderMiddleware": 543,
-     "scrapper.warcio.middlewares.WarcioDownloaderMiddleware": 543,
+    #  "scrapper.warcio.middlewares.WarcioDownloaderMiddleware": 543,
 }
 
 # Enable or disable extensions
