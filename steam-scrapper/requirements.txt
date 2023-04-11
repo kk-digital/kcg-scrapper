@@ -1,0 +1,4 @@
+pysondb-v2==2.1.0
+Scrapy==2.8.0
+scrapy-warcio==0.0.8
+colorlog==6.7.0

@@ -1,0 +1,10 @@
+warc_spec: https://iipc.github.io/warc-specifications/specifications/warc-format/warc-1.0/
+max_warc_size: 500000000  # 500MB
+
+collection: Steam apps # collection name
+description: steam apps  # collection description
+operator: steam apps # operator email address
+robots: obey  # robots policy (obey or ignore)
+user_agent: none # your user-agent
+warc_prefix: steam-apps # WARC filename prefix
+warc_dest: files/warc-files # WARC files destination
