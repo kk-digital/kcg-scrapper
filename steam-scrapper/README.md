@@ -67,7 +67,7 @@ Extracted app data have the following fields:
 - game_title: str
 - publisher: str
 - developer: str
-- publish_date: float|str = timestamp|'Coming soon...'
+- publish_date: str = date|'Coming soon...'
 - tags: list
 - images_path: list
 - videos_path: list

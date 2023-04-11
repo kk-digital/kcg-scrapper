@@ -4,21 +4,11 @@
 # https://docs.scrapy.org/en/latest/topics/items.html
 
 import re
-from datetime import datetime
 
 import scrapy
 from itemloaders.processors import TakeFirst, MapCompose, Identity, Compose
 from scrapy import Field
 from scrapy.loader import ItemLoader
-
-
-def get_timestamp(str_date):
-    try:
-        date = datetime.strptime(str_date, '%d %b, %Y')
-        return datetime.timestamp(date)
-    except ValueError:
-        return str_date
-
 
 clean_review_count_processor = Compose(TakeFirst(),
                                        lambda reviews: re.sub(r'[(),]', '', reviews),
@@ -48,7 +38,6 @@ class AppLoader(ItemLoader):
     default_input_processor = TakeFirst()
     default_item_class = AppItem
 
-    publish_date_in = Compose(TakeFirst(), get_timestamp)
     tags_in = MapCompose(str.strip)
     tags_out = Identity()
     review_count_in = clean_review_count_processor

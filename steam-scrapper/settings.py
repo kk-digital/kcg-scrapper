@@ -25,6 +25,11 @@ FEEDS = {'data.jsonl': {
     'overwrite': False
 }}
 
+# logging
+LOG_ENABLED = True
+LOG_LEVEL = 'INFO'
+DOWNLOAD_WARNSIZE = 0
+
 # creating files fodler
 os.makedirs('files/warc-files', exist_ok=True)
 os.makedirs('files/media', exist_ok=True)
