@@ -29,6 +29,9 @@ class MyFilesPipeline(FilesPipeline):
         adapter = ItemAdapter(item)
         file_urls = adapter.get('file_urls')
 
+        if file_urls is None:
+            return
+
         for file_url in file_urls:
             yield Request(file_url, meta={'is_resource': True})
 
