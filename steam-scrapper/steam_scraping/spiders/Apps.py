@@ -77,6 +77,9 @@ class AppsSpider(Spider):
         loader.add_css('developer', '#developers_list a::text')
         loader.add_css('publish_date', '.date::text')
         loader.add_css('tags', '#glanceCtnResponsiveRight a::text')
+        loader.add_css('review_count', '#review_type_all+ label .user_reviews_count::text')
+        loader.add_css('positive_review_count', '#review_type_positive+ label .user_reviews_count::text')
+        loader.add_css('negative_review_count', '#review_type_negative+ label .user_reviews_count::text')
         loader.add_value('file_urls', urls)
 
         return loader.load_item()

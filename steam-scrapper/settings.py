@@ -18,7 +18,8 @@ FEEDS = {'data.jsonl': {
     'format': 'jsonl',
     'encoding': 'utf8',
     'store_empty': True,
-    'fields': ['app_id', 'game_title', 'publisher', 'developer', 'publish_date', 'tags', 'images_path', 'videos_path'],
+    'fields': ['app_id', 'game_title', 'publisher', 'developer', 'publish_date', 'tags', 'review_count',
+               'positive_review_count', 'negative_review_count', 'images_path', 'videos_path'],
     'indent': 4,
     # whether overwrite or append
     'overwrite': False
