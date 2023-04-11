@@ -21,7 +21,7 @@ FEEDS = {'data.jsonl': {
     'fields': ['app_id', 'game_title', 'publisher', 'developer', 'publish_date', 'tags', 'images_path', 'videos_path'],
     'indent': 4,
     # whether overwrite or append
-    'overwrite': True
+    'overwrite': False
 }}
 
 # creating files fodler
