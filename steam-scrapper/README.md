@@ -69,6 +69,9 @@ Extracted app data have the following fields:
 - developer: str
 - publish_date: str = date|'Coming soon...'
 - tags: list
+- review_count: int (all/total reviews count)
+- positive_review_count: int
+- negative_review_count: int
 - images_path: list
 - videos_path: list
 
