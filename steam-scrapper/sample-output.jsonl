@@ -1,0 +1,260 @@
+{
+  "app_id": 766300,
+  "game_title": "Mazetools Soniface Lab",
+  "publisher": "Ectoplastic UG",
+  "developer": "Stephan Kloss",
+  "publish_date": "Mar 28, 2018",
+  "tags": [
+    "Audio Production",
+    "Design & Illustration",
+    "Animation & Modeling",
+    "Music",
+    "Relaxing",
+    "Music-Based Procedural Generation"
+  ],
+  "review_count": 5,
+  "positive_review_count": 5,
+  "images_path": [
+    "files/media/766300/header.jpg",
+    "files/media/766300/ss_91a9cfd7baf6c44cab6b15f6562a9928b01d47ed.1920x1080.jpg",
+    "files/media/766300/ss_3f8c36be09872f76b568415c812be4da86d55df0.1920x1080.jpg",
+    "files/media/766300/ss_e3c8536c16c155df27fce78fc7c87c7cfb2370a7.1920x1080.jpg",
+    "files/media/766300/ss_17ae350ee0acafe916499bb571f3ef7242d82da9.1920x1080.jpg",
+    "files/media/766300/ss_28d242da2cbc576496e8171ffa0f561f5d09f28f.1920x1080.jpg",
+    "files/media/766300/ss_366b00bfe14a7db011d052ae748af41972081942.1920x1080.jpg",
+    "files/media/766300/ss_a8878adb4e2bd624ed82a96249520eb56c605dfe.1920x1080.jpg",
+    "files/media/766300/ss_aeb1f3ab150f8481a8b845e44a531b934a809a42.1920x1080.jpg",
+    "files/media/766300/ss_9b579a4640fb518f48c8bdc317ab2d903949d309.1920x1080.jpg",
+    "files/media/766300/ss_dbe04ec51b43105cc5d1447342dfcae154d7a129.1920x1080.jpg",
+    "files/media/766300/ss_173aebe123fac2021611edfc42b58f341652a44e.1920x1080.jpg",
+    "files/media/766300/ss_d2583d8b3870801d65cb34dad0898185bf56d8ee.1920x1080.jpg",
+    "files/media/766300/ss_4c200102aabb482562fd206d61e01d88e3472ef5.1920x1080.jpg",
+    "files/media/766300/ss_48d8d7171248d7c872800d2e6bda93b61ce34a1e.1920x1080.jpg"
+  ],
+  "videos_path": []
+}
+{
+  "app_id": 1860560,
+  "game_title": "OFFERING APP",
+  "publisher": "unvoid",
+  "developer": "unvoid",
+  "publish_date": "Q3 2023",
+  "tags": [
+    "Adventure",
+    "Psychological Horror",
+    "Old School",
+    "Puzzle",
+    "Design & Illustration",
+    "Horror",
+    "Action-Adventure",
+    "Audio Production",
+    "2D Platformer",
+    "Puzzle Platformer",
+    "Exploration",
+    "Souls-like",
+    "Real Time Tactics",
+    "Story Rich",
+    "2D",
+    "Top-Down",
+    "Minimalist",
+    "Psychedelic",
+    "Atmospheric",
+    "Colorful"
+  ],
+  "images_path": [
+    "files/media/1860560/header.jpg",
+    "files/media/1860560/ss_089461d3dfeb25e4ee4c6b18585a3c17d623d995.1920x1080.jpg",
+    "files/media/1860560/ss_07d5ba3ec3900cac34421601901cdbc4324df015.1920x1080.jpg",
+    "files/media/1860560/ss_ce812de4c51a69e3c5682cfecd8b31da0497b7a6.1920x1080.jpg",
+    "files/media/1860560/ss_bd7f33c34f62d899ce6553887b54c9fcef87ee8f.1920x1080.jpg",
+    "files/media/1860560/ss_50216df4d8213d132e6032c4771683abd5856a8b.1920x1080.jpg",
+    "files/media/1860560/ss_6eb6d001a670009053b763928d01183d2f276328.1920x1080.jpg",
+    "files/media/1860560/ss_1272f418c76e020b7e062684b850009dea6758cc.1920x1080.jpg",
+    "files/media/1860560/ss_7ecd8eff7fbab61742c244d4f99d8e91168020ad.1920x1080.jpg",
+    "files/media/1860560/ss_eb5d0c2243b482264dbe3fe0c74abb3e1ceecb81.1920x1080.jpg",
+    "files/media/1860560/ss_7c7944087e2291ec1fac64659fdd99275d030494.1920x1080.jpg",
+    "files/media/1860560/ss_1583cfcf8b4a1ce93e7063fdc4902dc9b19a790c.1920x1080.jpg",
+    "files/media/1860560/ss_4cb820c82f38da485b410477414f1de3776260fb.1920x1080.jpg",
+    "files/media/1860560/ss_d031f8a85e3fda311cd182cd9b30f44dcc6c61bf.1920x1080.jpg",
+    "files/media/1860560/ss_c649118a790588665af8c8efcf40413878291ea3.1920x1080.jpg",
+    "files/media/1860560/ss_9f48f4d59d7a3590fa1742b3dd5eaa08f6d0270e.1920x1080.jpg",
+    "files/media/1860560/ss_72f026f375b310be533b641f81ca36bb4988c85e.1920x1080.jpg",
+    "files/media/1860560/ss_a7c029ccdfc91730fd1f7b77b4828f590feba22f.1920x1080.jpg",
+    "files/media/1860560/ss_a7167013e5e2884e4651606b42666b31f89b195b.1920x1080.jpg",
+    "files/media/1860560/STEAM_APP_IMAGE.png",
+    "files/media/1860560/STEAM_APP_IMAGE_TWO.png",
+    "files/media/1860560/STEAM_APP_IMAGE_THREE.png"
+  ],
+  "videos_path": [
+    "files/media/1860560/movie_max.mp4",
+    "files/media/1860560/movie_max.mp4"
+  ]
+}
+{
+  "app_id": 1341580,
+  "game_title": "Railway Empire - Original Soundtrack",
+  "publisher": "Kalypso Media",
+  "developer": "Gaming Minds Studios",
+  "publish_date": "Jun 25, 2020",
+  "tags": [
+    "Simulation",
+    "Strategy",
+    "Soundtrack"
+  ],
+  "review_count": 10,
+  "positive_review_count": 10,
+  "images_path": [
+    "files/media/1341580/header.jpg",
+    "files/media/1341580/ss_bd9d252517adda0647b5ddbfe2d03a3f4f3e5d9f.1920x1080.jpg"
+  ],
+  "videos_path": []
+}
+{
+  "app_id": 1313120,
+  "game_title": "Cannonship",
+  "publisher": "Two Hands Lab",
+  "developer": "Two Hands Lab",
+  "publish_date": "Jun 8, 2020",
+  "tags": [
+    "Action",
+    "Indie",
+    "Arcade",
+    "Local Co-Op",
+    "Singleplayer"
+  ],
+  "review_count": 8,
+  "positive_review_count": 7,
+  "negative_review_count": 1,
+  "images_path": [
+    "files/media/1313120/header.jpg",
+    "files/media/1313120/ss_5ce60e99259de6bf8923000261c6cb2d7caf47b8.1920x1080.jpg",
+    "files/media/1313120/ss_12ed04e9aa704c307148df58d741a1b492dfce7d.1920x1080.jpg",
+    "files/media/1313120/ss_de082847998c7c5702e1eb95b3ed0a45eb9f6f76.1920x1080.jpg",
+    "files/media/1313120/ss_2a8e989a558b72abbfc2a66d893dd82cdaafd294.1920x1080.jpg",
+    "files/media/1313120/ss_8045fab3b9b4bebceab36dd6cb9b9adace98dc34.1920x1080.jpg",
+    "files/media/1313120/ss_5ffafbc17963857922e0c84cdfc8e1efec4bf90b.1920x1080.jpg",
+    "files/media/1313120/ss_ddeed820ba7876fd135c2973afcfe732541fd8c6.1920x1080.jpg",
+    "files/media/1313120/ss_5d7bad37b2a4be279129c51be4bc162688ca8ba4.1920x1080.jpg",
+    "files/media/1313120/poc1b.gif",
+    "files/media/1313120/poc1a.gif",
+    "files/media/1313120/poc1c.gif"
+  ],
+  "videos_path": [
+    "files/media/1313120/movie_max.mp4"
+  ]
+}
+{
+  "app_id": 816030,
+  "game_title": "Alice Must Find The Key To Escape (Hidden Objects)",
+  "publisher": "Tonee Ltd",
+  "developer": "Tonee Ltd",
+  "publish_date": "Mar 26, 2018",
+  "tags": [
+    "Strategy",
+    "Adventure",
+    "Indie"
+  ],
+  "review_count": 2,
+  "positive_review_count": 1,
+  "negative_review_count": 1,
+  "images_path": [
+    "files/media/816030/header.jpg",
+    "files/media/816030/ss_76e5724c91cfc9d1ec9e506c96b57fbf98186a8b.1920x1080.jpg",
+    "files/media/816030/ss_dc67d3f5adc56a355e64e7dcedfc2d10f1a3c870.1920x1080.jpg",
+    "files/media/816030/ss_5ecfda19ffd64c7f5869c3c7367433b103f2a92b.1920x1080.jpg",
+    "files/media/816030/ss_6c1532dccd9f91500aafc8196bbb87656aea9aaf.1920x1080.jpg",
+    "files/media/816030/ss_f43225bbe68b454d0e3c1dc460aaac499b85e861.1920x1080.jpg",
+    "files/media/816030/GAME_ITEMS.jpg",
+    "files/media/816030/TRAPS.jpg"
+  ],
+  "videos_path": [
+    "files/media/816030/movie_max.mp4"
+  ]
+}
+{
+  "app_id": 2086570,
+  "game_title": "MMI",
+  "publisher": "Studio2760",
+  "developer": "Studio2760",
+  "publish_date": "Nov 20, 2022",
+  "tags": [
+    "Casual",
+    "Arcade",
+    "2D Platformer",
+    "Puzzle Platformer",
+    "2D",
+    "Cute",
+    "Minimalist",
+    "Noir",
+    "Atmospheric",
+    "Action",
+    "Adventure",
+    "Indie",
+    "Linear",
+    "Singleplayer"
+  ],
+  "review_count": 19,
+  "positive_review_count": 18,
+  "negative_review_count": 1,
+  "images_path": [
+    "files/media/2086570/header.jpg",
+    "files/media/2086570/ss_2911a46ab74e21ddd6757f14c8cfca5de0726908.1920x1080.jpg",
+    "files/media/2086570/ss_d2feb44f26d53645d61319567902e7fe10da2635.1920x1080.jpg",
+    "files/media/2086570/ss_80eb5c02de6bf9a287f4d083c87631c1fd1f324f.1920x1080.jpg",
+    "files/media/2086570/ss_3eef0068d34afb032985aab3ce7a937616d4b77a.1920x1080.jpg",
+    "files/media/2086570/ss_8b20a74625d4c9654ebcda87a25f898c022bafe6.1920x1080.jpg",
+    "files/media/2086570/ss_e86ca6c6746b31b4809667ea2a877b4e53d07d2d.1920x1080.jpg",
+    "files/media/2086570/ss_d473a43e0154219fb7f46348ce1f98038bf2753a.1920x1080.jpg",
+    "files/media/2086570/LOGO_en.png"
+  ],
+  "videos_path": [
+    "files/media/2086570/movie_max.mp4"
+  ]
+}
+{
+  "app_id": 766630,
+  "game_title": "Dust and Salt",
+  "publisher": "Prime Games",
+  "developer": "Prime Games",
+  "publish_date": "Jan 25, 2018",
+  "tags": [
+    "Indie",
+    "Adventure",
+    "Casual",
+    "RPG",
+    "Turn-Based Strategy",
+    "2D",
+    "Story Rich",
+    "Turn-Based Combat",
+    "Singleplayer",
+    "Design & Illustration",
+    "Roguelike",
+    "Strategy RPG",
+    "Turn-Based Tactics",
+    "Replay Value",
+    "Choose Your Own Adventure",
+    "Tactical",
+    "Tabletop",
+    "Roguelite",
+    "Isometric",
+    "Medieval"
+  ],
+  "review_count": 68,
+  "positive_review_count": 58,
+  "negative_review_count": 10,
+  "images_path": [
+    "files/media/766630/header.jpg",
+    "files/media/766630/ss_41fc2de2fda33c0d01757413e21fc2f92f252177.1920x1080.jpg",
+    "files/media/766630/ss_85526bac8aeaed23e582401674ac35d7eb590c45.1920x1080.jpg",
+    "files/media/766630/ss_3ad12cf9978b885d9901c7bf291892277588b593.1920x1080.jpg",
+    "files/media/766630/ss_c3ad2d008fa0f9a2a37964984dff78cb3b79554e.1920x1080.jpg",
+    "files/media/766630/ss_032f0c67f67eec717b742b34c0bf2b321615d228.1920x1080.jpg",
+    "files/media/766630/ss_101ed033e6ce1cda40cd32946ba47dc8c43fd4ee.1920x1080.jpg",
+    "files/media/766630/ss_2951fc22b87a3e8a631e523966ce09799c3bc2e6.1920x1080.jpg",
+    "files/media/766630/Steam_Features_Banner_-_Features.png"
+  ],
+  "videos_path": [
+    "files/media/766630/movie_max.mp4",
+    "files/media/766630/movie_max.mp4"
+  ]
+}
