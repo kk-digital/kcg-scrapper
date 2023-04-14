@@ -1,3 +1,5 @@
+import json
+import os
 from os import path
 from pathlib import PurePosixPath
 from urllib.parse import urlparse
@@ -58,5 +60,36 @@ class MyFilesPipeline(FilesPipeline):
 
         adapter['images_path'] = images_path
         adapter['videos_path'] = videos_path
+
+        return item
+
+
+class SetDefaultPipeline:
+    def process_item(self, item, spider):
+        adapter = ItemAdapter(item)
+
+        for key in item.fields:
+            adapter.setdefault(key, None)
+
+        return item
+
+
+class SaveItemAsJSONPipeline:
+    @classmethod
+    def from_crawler(cls, crawler):
+        pipeline = cls()
+        pipeline.FILES_STORE = crawler.settings.get('FILES_STORE')
+
+        return pipeline
+
+    def process_item(self, item, spider):
+        adapter = ItemAdapter(item)
+        app_id = adapter['app_id']
+        app_path = path.join(self.FILES_STORE, str(app_id))
+        os.makedirs(app_path, exist_ok=True)
+
+        json_path = path.join(app_path, f'data.json')
+        with open(json_path, 'w', encoding='utf-8') as fh:
+            json.dump(adapter.asdict(), fh)
 
         return item

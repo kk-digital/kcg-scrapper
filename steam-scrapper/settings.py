@@ -14,16 +14,17 @@ import scrapy.utils.log
 from colorlog import ColoredFormatter
 
 # modify here the name of output file
-FEEDS = {'data.jsonl': {
-    'format': 'jsonl',
-    'encoding': 'utf8',
-    'store_empty': True,
-    'fields': ['app_id', 'url', 'game_title', 'publisher', 'developer', 'publish_date', 'tags', 'review_count',
-               'positive_review_count', 'negative_review_count', 'images_path', 'videos_path'],
-    'indent': 4,
-    # whether overwrite or append
-    'overwrite': False
-}}
+# now handled with custom json pipeline
+# FEEDS = {'data.jsonl': {
+#     'format': 'jsonl',
+#     'encoding': 'utf8',
+#     'store_empty': True,
+#     'fields': ['app_id', 'url', 'game_title', 'publisher', 'developer', 'publish_date', 'tags', 'review_count',
+#                'positive_review_count', 'negative_review_count', 'images_path', 'videos_path'],
+#     'indent': 4,
+#     # whether overwrite or append
+#     'overwrite': False
+# }}
 
 # logging
 LOG_ENABLED = True
@@ -32,7 +33,7 @@ DOWNLOAD_WARNSIZE = 0
 
 # creating files fodler
 os.makedirs('files/warc-files', exist_ok=True)
-os.makedirs('files/media', exist_ok=True)
+os.makedirs('files/apps', exist_ok=True)
 
 # set config file location of warcio in env variable
 os.environ['SCRAPY_WARCIO_SETTINGS'] = 'warcio-settings.yml'
@@ -113,9 +114,12 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'steam_scraping.pipelines.MyFilesPipeline': 1
+    'steam_scraping.pipelines.MyFilesPipeline': 10,
+    'steam_scraping.pipelines.SetDefaultPipeline': 20,
+    'steam_scraping.pipelines.SaveItemAsJSONPipeline': 100,
+
 }
-FILES_STORE = 'files/media'
+FILES_STORE = 'files/apps'
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -126,7 +130,7 @@ AUTOTHROTTLE_START_DELAY = 2
 # AUTOTHROTTLE_MAX_DELAY = 60
 # The average number of requests Scrapy should be sending in parallel to
 # each remote server
-AUTOTHROTTLE_TARGET_CONCURRENCY = 2.0
+# AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
 # Enable showing throttling stats for every response received:
 AUTOTHROTTLE_DEBUG = True
 

@@ -64,6 +64,7 @@ Html is written to warc file only if response is in 200 range.
 Extracted app data have the following fields:
 
 - app_id: int
+- url: str
 - game_title: str
 - publisher: str
 - developer: str
@@ -75,20 +76,4 @@ Extracted app data have the following fields:
 - images_path: list
 - videos_path: list
 
-Warc files are saved to `files/warc-files`, media content to `files/media/<app_id>`
-
-### Export format
-
-In `settings.py` you can modify everything related to the file in which the extracted data is stored:
-
-```py
-FEEDS = {'data.jsonl': {  # name of file
-    'format': 'jsonl',
-    'encoding': 'utf8',
-    'store_empty': True,
-    'fields': ['app_id', 'game_title', 'publisher', 'developer', 'publish_date', 'tags', 'images_path', 'videos_path'],
-    'indent': 4,
-    # whether overwrite or append
-    'overwrite': False
-}}
-```
+Warc files are saved to `files/warc-files`, app data and media content to `files/apps/<app_id>`
