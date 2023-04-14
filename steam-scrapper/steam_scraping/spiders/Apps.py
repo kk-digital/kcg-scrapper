@@ -72,6 +72,7 @@ class AppsSpider(Spider):
         loader = AppLoader(response=response)
         loader.add_value('app_id', app_id)
         loader.add_value('db_id', db_id)
+        loader.add_value('url', response.url)
         loader.add_css('game_title', '#appHubAppName::text')
         loader.add_css('publisher', '#game_highlights .dev_row+ .dev_row a::text')
         loader.add_css('developer', '#developers_list a::text')

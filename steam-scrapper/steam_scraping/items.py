@@ -20,6 +20,7 @@ class AppItem(scrapy.Item):
     # name = scrapy.Field()
     app_id = Field()
     db_id = Field()
+    url = Field()
     game_title = Field()
     publisher = Field()
     developer = Field()
