@@ -77,10 +77,10 @@ class SetDefaultPipeline:
 class SaveItemAsJSONPipeline:
     @classmethod
     def from_crawler(cls, crawler):
-        pipeline = cls()
-        pipeline.FILES_STORE = crawler.settings.get('FILES_STORE')
+        return cls(crawler.settings)
 
-        return pipeline
+    def __init__(self, settings):
+        self.FILES_STORE = settings.get('FILES_STORE')
 
     def process_item(self, item, spider):
         adapter = ItemAdapter(item)
