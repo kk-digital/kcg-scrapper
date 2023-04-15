@@ -7,4 +7,4 @@ operator: steam apps # operator email address
 robots: obey  # robots policy (obey or ignore)
 user_agent: none # your user-agent
 warc_prefix: steam-apps # WARC filename prefix
-warc_dest: files/warc-files # WARC files destination
+warc_dest: output/warc-files # WARC files destination

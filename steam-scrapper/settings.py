@@ -32,8 +32,8 @@ LOG_LEVEL = 'INFO'
 DOWNLOAD_WARNSIZE = 0
 
 # creating files fodler
-os.makedirs('files/warc-files', exist_ok=True)
-os.makedirs('files/apps', exist_ok=True)
+os.makedirs('output/warc-files', exist_ok=True)
+os.makedirs('output/apps', exist_ok=True)
 
 # set config file location of warcio in env variable
 os.environ['SCRAPY_WARCIO_SETTINGS'] = 'warcio-settings.yml'
@@ -129,7 +129,7 @@ ITEM_PIPELINES = {
     'steam_scraping.pipelines.SaveItemAsJSONPipeline': 100,
 
 }
-FILES_STORE = 'files/apps'
+FILES_STORE = 'output/apps'
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

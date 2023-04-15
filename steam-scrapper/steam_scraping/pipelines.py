@@ -49,9 +49,8 @@ class MyFilesPipeline(FilesPipeline):
             if not ok:
                 continue
 
-            file_path = info_or_failure['path']
+            file_path = path.basename(info_or_failure['path'])
             is_mp4 = file_path.endswith('.mp4')
-            file_path = path.normpath(path.join(self.STORE_URI, file_path))
 
             if is_mp4:
                 videos_path.append(file_path)
