@@ -10,7 +10,7 @@ Create and environment and run:
 
 `pip install -r requirements.txt`
 
-If you're on windows and have problems running the spider, run:
+Just in case you're having problems to tun the spider, run:
 
 `pip install python-magic-bin`
 
