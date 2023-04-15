@@ -41,21 +41,25 @@ Jobs have the following fields:
 
 ### 2. Start scraping
 
+To run the scrapper run:
+
 `scrapy crawl apps`
 
-The spider scrape jobs marked as pending by default, you can modify this behavior passing arguments to spider:
+If you run the scrapper with no arguments (DEFAULT), like above, only jobs marked in db as pending will be taken.
 
-- retryfailed=true
-- retrypartial=true
+You can also provide arguments to the spider and modify the default behavior:
 
-`scrapy crawl apps -a retryfailed=true`
+- `retryfailed=true` take jobs marked as 'failed'
+- `retrypartial=true` take jobs marked as 'partial'
+
+E.g: `scrapy crawl apps -a retryfailed=true`
 
 There is also a test mode that randomly picks 100 apps:
 
 `scrapy crawl apps -a testmode=true`
 
-Notice that the number of scraped pages may be lower than the number of apps in the db since many app ids are not valid,
-causing steam redirecting to the homepage.
+Redirect is disabled since many app ids are invalid,
+causing steam redirecting to the homepage. Causing the amount of scrapped apps may be lower than the apps in db.
 
 ## Storage
 
@@ -76,4 +80,4 @@ Extracted app data have the following fields:
 - images_path: list
 - videos_path: list
 
-Warc files are saved to `files/warc-files`, app data and media content to `files/apps/<app_id>`
+Warc files are saved to `output/warc-files`, app data and media content to `output/apps/<app_id>`
