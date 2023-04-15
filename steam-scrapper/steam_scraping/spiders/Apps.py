@@ -44,13 +44,15 @@ class AppsSpider(Spider):
 
     def errback(self, failure):
         request = failure.request
-        db_id = request.cb_kwargs['db_id']
+        cb_kwargs = request.cb_kwargs
+        db_id = cb_kwargs['db_id']
+        app_id = cb_kwargs['app_id']
         url = request.url
         err_msg = failure.getErrorMessage()
 
         self.db.update_by_id(db_id,
                              {'status': 'failed', 'err_msg': err_msg})
-        self.logger.info(f'{url} failed to be scraped: {err_msg}')
+        self.logger.warning(f'App {app_id}, url: {url} failed to be scraped: {err_msg}')
 
     def get_media_links(self, response: TextResponse):
         # preview media

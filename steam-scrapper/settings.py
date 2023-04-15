@@ -8,6 +8,7 @@
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 import copy
+import logging
 import os
 
 import scrapy.utils.log
@@ -156,6 +157,18 @@ AUTOTHROTTLE_DEBUG = True
 REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
+
+# logging config
+
+logging.getLogger('scrapy_warcio.warcio').setLevel('WARNING')
+
+apps_logger = logging.getLogger('apps')
+apps_logger.setLevel('WARNING')
+apps_logger.propagate = True
+apps_file_handler = logging.FileHandler('output/error_logs.log', 'a', 'utf-8')
+apps_file_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(name)s - %(funcName)s - %(message)s')
+apps_file_handler.setFormatter(apps_file_formatter)
+apps_logger.addHandler(apps_file_handler)
 
 # coloring scrapy output
 color_formatter = ColoredFormatter(
