@@ -18,26 +18,30 @@ Just in case you're having problems to tun the spider, run:
 
 All commands described below must be run in the project's root.
 
-### 1. Create jobs database
+### 1. Command utility
 
-⚠️ Make sure to run it only once before starting the scraping job because purges the database, loosing all jobs state
-data.
+⚠️The following command purge the db and delete the output folder:
 
-The database is already provided but if you need to re-create it with up to date steam apps data, just
-replace the `steamcmd_appid.json` file and run:
+`python command clean-db-and-output`
 
-`python steam_scraping/create_json_db.py`
+The database is already provided, but if you need to add more apps, use the following
+command `extract-apps <file_name>`.
+
+Place the file next to the command module and replace file_name with the name of the file, which can be any text based
+file that contains steam app urls. It's decoded using utf-8 and the regex used to extract app ids
+is `https://store\.steampowered\.com/app/(\d+)`. No duplicates are inserted.
+
+`python command extract-apps data.html`
 
 Jobs have the following fields:
 
 1. appid
-2. name
-3. status
+2. status:
     - pending: (default)
     - partial: some media content failed to be downloaded/saved
     - complete
     - failed
-4. err_msg: in case of partial or failed
+3. err_msg: in case of partial or failed
 
 ### 2. Start scraping
 
