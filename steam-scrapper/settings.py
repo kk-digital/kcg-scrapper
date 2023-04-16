@@ -14,6 +14,9 @@ import os
 import scrapy.utils.log
 from colorlog import ColoredFormatter
 
+# set the database to use
+JOBS_DB_NAME = 'small-apps-db.json'
+
 # modify here the name of output file
 # now handled with custom json pipeline
 # FEEDS = {'data.jsonl': {

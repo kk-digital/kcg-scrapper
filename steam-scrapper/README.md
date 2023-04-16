@@ -45,6 +45,9 @@ Jobs have the following fields:
 
 ### 2. Start scraping
 
+To start scrapping, you must first know what db you're pulling jobs from. You can set the db name in setting by
+modifying `JOBS_DB_NAME`.
+
 To run the scrapper run:
 
 `scrapy crawl apps`

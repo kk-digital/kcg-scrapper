@@ -2,6 +2,8 @@ import random
 
 from pysondb import PysonDB
 
+from settings import JOBS_DB_NAME
+
 
 def filter_by_status(status: str, data: dict) -> bool:
     if data['status'] == status:
@@ -31,4 +33,4 @@ def add_app(db: PysonDB, app_id: str):
     db.add(app)
 
 
-db = PysonDB("apps-db.json")
+db = PysonDB(JOBS_DB_NAME)
