@@ -20,9 +20,13 @@ All commands described below must be run in the project's root.
 
 ### 1. Command utility
 
+- #### clean-db-and-output:
+
 ⚠️The following command purge the db and delete the output folder:
 
 `python command clean-db-and-output`
+
+- #### extract-apps:
 
 The database is already provided, but if you need to add more apps, use the following
 command `extract-apps <file_name>`.
@@ -33,7 +37,18 @@ is `https://store\.steampowered\.com/app/(\d+)`. No duplicates are inserted.
 
 `python command extract-apps data.html`
 
-Jobs have the following fields:
+To gather app urls from multipe files into one file and feed the command above, use:
+
+`grep -r store.steampowered.com/app *.html > results.txt`
+
+Use `-r` to search in the current and children dirs.
+
+Specify the files to search in such as `urls.csv` or `*.html` for all html files, or `*` for all files.
+
+It'll store the entire lines matching the criteria into `results.txt`. Pass it to the command and let it do the work of
+extracting the app ids.
+
+The command extract the ids and insert jobs to the db with the following form:
 
 1. appid
 2. status:
@@ -45,8 +60,11 @@ Jobs have the following fields:
 
 ### 2. Start scraping
 
-To start scrapping, you must first know what db you're pulling jobs from. You can set the db name in setting by
+To start scrapping, you must first know what db you're pulling jobs from. You can set the db name in settings by
 modifying `JOBS_DB_NAME`.
+
+There are two db provided. `JOBS_DB_NAME` is set by default to `small-apps-db.json`, which contains a selection of apps;
+the other db provided is `apps-db.json` that contains almost 160,000 apps. Set it to the latter to use the big lis
 
 To run the scrapper run:
 
