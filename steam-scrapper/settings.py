@@ -15,7 +15,7 @@ import scrapy.utils.log
 from colorlog import ColoredFormatter
 
 # set the database to use
-JOBS_DB_NAME = 'small-apps-db.json'
+JOBS_DB_NAME = "small-apps-db.json"
 
 # modify here the name of output file
 # now handled with custom json pipeline
@@ -32,15 +32,15 @@ JOBS_DB_NAME = 'small-apps-db.json'
 
 # logging
 LOG_ENABLED = True
-LOG_LEVEL = 'INFO'
+LOG_LEVEL = "INFO"
 DOWNLOAD_WARNSIZE = 0
 
 # creating files fodler
-os.makedirs('output/warc-files', exist_ok=True)
-os.makedirs('output/apps', exist_ok=True)
+os.makedirs("output/warc-files", exist_ok=True)
+os.makedirs("output/apps", exist_ok=True)
 
 # set config file location of warcio in env variable
-os.environ['SCRAPY_WARCIO_SETTINGS'] = 'warcio-settings.yml'
+os.environ["SCRAPY_WARCIO_SETTINGS"] = "warcio-settings.yml"
 
 BOT_NAME = "steam_scraping"
 
@@ -48,14 +48,16 @@ SPIDER_MODULES = ["steam_scraping.spiders"]
 NEWSPIDER_MODULE = "steam_scraping.spiders"
 
 FAKEUSERAGENT_PROVIDERS = [
-    'scrapy_fake_useragent.providers.FakeUserAgentProvider',  # this is the first provider we'll try
-    'scrapy_fake_useragent.providers.FakerProvider',
+    "scrapy_fake_useragent.providers.FakeUserAgentProvider",  # this is the first provider we'll try
+    "scrapy_fake_useragent.providers.FakerProvider",
     # if FakeUserAgentProvider fails, we'll use faker to generate a user-agent string for us
-    'scrapy_fake_useragent.providers.FixedUserAgentProvider',  # fall back to USER_AGENT value
+    "scrapy_fake_useragent.providers.FixedUserAgentProvider",  # fall back to USER_AGENT value
 ]
 
-USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 ' \
-             'Safari/537.36'
+USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 "
+    "Safari/537.36"
+)
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
@@ -87,20 +89,20 @@ DEPTH_PRIORITY = -100
 
 # Override the default request headers:
 DEFAULT_REQUEST_HEADERS = {
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,'
-              'application/signed-exchange;v=b3;q=0.7',
-    'Accept-Language': 'en,es;q=0.9',
-    'Cache-Control': 'max-age=0',
-    'Connection': 'keep-alive',
-    'DNT': '1',
-    'Sec-Fetch-Dest': 'document',
-    'Sec-Fetch-Mode': 'navigate',
-    'Sec-Fetch-Site': 'same-origin',
-    'Sec-Fetch-User': '?1',
-    'Upgrade-Insecure-Requests': '1',
-    'sec-ch-ua': '"Google Chrome";v="111", "Not(A:Brand";v="8", "Chromium";v="111"',
-    'sec-ch-ua-mobile': '?0',
-    'sec-ch-ua-platform': '"Windows"',
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,"
+    "application/signed-exchange;v=b3;q=0.7",
+    "Accept-Language": "en,es;q=0.9",
+    "Cache-Control": "max-age=0",
+    "Connection": "keep-alive",
+    "DNT": "1",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "same-origin",
+    "Sec-Fetch-User": "?1",
+    "Upgrade-Insecure-Requests": "1",
+    "sec-ch-ua": '"Google Chrome";v="111", "Not(A:Brand";v="8", "Chromium";v="111"',
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": '"Windows"',
 }
 
 # Enable or disable spider middlewares
@@ -113,10 +115,10 @@ DEFAULT_REQUEST_HEADERS = {
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
     "steam_scraping.middlewares.WarcioDownloaderMiddleware": 80,
-    'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
-    'scrapy.downloadermiddlewares.retry.RetryMiddleware': None,
-    'scrapy_fake_useragent.middleware.RandomUserAgentMiddleware': 500,
-    'scrapy_fake_useragent.middleware.RetryUserAgentMiddleware': 550,
+    "scrapy.downloadermiddlewares.useragent.UserAgentMiddleware": None,
+    "scrapy.downloadermiddlewares.retry.RetryMiddleware": None,
+    "scrapy_fake_useragent.middleware.RandomUserAgentMiddleware": 500,
+    "scrapy_fake_useragent.middleware.RetryUserAgentMiddleware": 550,
 }
 
 # Enable or disable extensions
@@ -128,12 +130,11 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'steam_scraping.pipelines.MyFilesPipeline': 10,
-    'steam_scraping.pipelines.SetDefaultPipeline': 20,
-    'steam_scraping.pipelines.SaveItemAsJSONPipeline': 100,
-
+    "steam_scraping.pipelines.MyFilesPipeline": 10,
+    "steam_scraping.pipelines.SetDefaultPipeline": 20,
+    "steam_scraping.pipelines.SaveItemAsJSONPipeline": 100,
 }
-FILES_STORE = 'output/apps'
+FILES_STORE = "output/apps"
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -163,32 +164,34 @@ FEED_EXPORT_ENCODING = "utf-8"
 
 # logging config
 
-logging.getLogger('scrapy_warcio.warcio').setLevel('WARNING')
+logging.getLogger("scrapy_warcio.warcio").setLevel("WARNING")
 
-apps_logger = logging.getLogger('apps')
-apps_logger.setLevel('WARNING')
+apps_logger = logging.getLogger("apps")
+apps_logger.setLevel("WARNING")
 apps_logger.propagate = True
-apps_file_handler = logging.FileHandler('output/error_logs.log', 'a', 'utf-8')
-apps_file_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(name)s - %(funcName)s - %(message)s')
+apps_file_handler = logging.FileHandler("output/error_logs.log", "a", "utf-8")
+apps_file_formatter = logging.Formatter(
+    "%(asctime)s - %(levelname)s - %(name)s - %(funcName)s - %(message)s"
+)
 apps_file_handler.setFormatter(apps_file_formatter)
 apps_logger.addHandler(apps_file_handler)
 
 # coloring scrapy output
 color_formatter = ColoredFormatter(
     (
-        '%(log_color)s%(levelname)-5s%(reset)s '
-        '%(yellow)s[%(asctime)s]%(reset)s'
-        '%(white)s %(name)s %(funcName)s %(bold_purple)s:%(lineno)d%(reset)s '
-        '%(log_color)s%(message)s%(reset)s'
+        "%(log_color)s%(levelname)-5s%(reset)s "
+        "%(yellow)s[%(asctime)s]%(reset)s"
+        "%(white)s %(name)s %(funcName)s %(bold_purple)s:%(lineno)d%(reset)s "
+        "%(log_color)s%(message)s%(reset)s"
     ),
-    datefmt='%y-%m-%d %H:%M:%S',
+    datefmt="%y-%m-%d %H:%M:%S",
     log_colors={
-        'DEBUG': 'blue',
-        'INFO': 'bold_cyan',
-        'WARNING': 'red',
-        'ERROR': 'bg_bold_red',
-        'CRITICAL': 'red,bg_white',
-    }
+        "DEBUG": "blue",
+        "INFO": "bold_cyan",
+        "WARNING": "red",
+        "ERROR": "bg_bold_red",
+        "CRITICAL": "red,bg_white",
+    },
 )
 
 _get_handler = copy.copy(scrapy.utils.log._get_handler)

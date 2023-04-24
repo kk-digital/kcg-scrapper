@@ -12,7 +12,6 @@ from steam_scraping.db import db
 
 
 class MyFilesPipeline(FilesPipeline):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.db = db
@@ -29,19 +28,19 @@ class MyFilesPipeline(FilesPipeline):
 
     def get_media_requests(self, item, info):
         adapter = ItemAdapter(item)
-        file_urls = adapter.get('file_urls')
+        file_urls = adapter.get("file_urls")
 
         if file_urls is None:
             return
 
         for file_url in file_urls:
-            yield Request(file_url, meta={'is_resource': True})
+            yield Request(file_url, meta={"is_resource": True})
 
     def item_completed(self, results, item, info):
         adapter = ItemAdapter(item)
         all_ok = all([result[0] for result in results])
         if all_ok and self.test_mode is None:
-            self.db.update_by_id(adapter['db_id'], {'status': 'complete'})
+            self.db.update_by_id(adapter["db_id"], {"status": "complete"})
 
         images_path = []
         videos_path = []
@@ -49,16 +48,16 @@ class MyFilesPipeline(FilesPipeline):
             if not ok:
                 continue
 
-            file_path = path.basename(info_or_failure['path'])
-            is_mp4 = file_path.endswith('.mp4')
+            file_path = path.basename(info_or_failure["path"])
+            is_mp4 = file_path.endswith(".mp4")
 
             if is_mp4:
                 videos_path.append(file_path)
                 continue
             images_path.append(file_path)
 
-        adapter['images_path'] = images_path
-        adapter['videos_path'] = videos_path
+        adapter["images_path"] = images_path
+        adapter["videos_path"] = videos_path
 
         return item
 
@@ -79,16 +78,16 @@ class SaveItemAsJSONPipeline:
         return cls(crawler.settings)
 
     def __init__(self, settings):
-        self.FILES_STORE = settings.get('FILES_STORE')
+        self.FILES_STORE = settings.get("FILES_STORE")
 
     def process_item(self, item, spider):
         adapter = ItemAdapter(item)
-        app_id = adapter['app_id']
+        app_id = adapter["app_id"]
         app_path = path.join(self.FILES_STORE, str(app_id))
         os.makedirs(app_path, exist_ok=True)
 
-        json_path = path.join(app_path, f'data.json')
-        with open(json_path, 'w', encoding='utf-8') as fh:
+        json_path = path.join(app_path, f"data.json")
+        with open(json_path, "w", encoding="utf-8") as fh:
             json.dump(adapter.asdict(), fh)
 
         return item

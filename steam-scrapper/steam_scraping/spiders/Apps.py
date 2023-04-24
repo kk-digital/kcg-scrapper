@@ -7,9 +7,11 @@ from steam_scraping.items import AppLoader
 
 class AppsSpider(Spider):
     name = "apps"
-    allowed_domains = ['steampowered.com', 'steamstatic.com']
+    allowed_domains = ["steampowered.com", "steamstatic.com"]
 
-    def __init__(self, testmode=None, retryfailed=None, retrypartial=None, *args, **kwargs):
+    def __init__(
+        self, testmode=None, retryfailed=None, retrypartial=None, *args, **kwargs
+    ):
         super().__init__(*args, **kwargs)
         self.test_mode = testmode
         self.retry_failed = retryfailed
@@ -21,50 +23,59 @@ class AppsSpider(Spider):
         if self.test_mode:
             apps = get_100_random(db)
         elif self.retry_failed:
-            get_by_status = 'failed'
+            get_by_status = "failed"
         elif self.retry_partial:
-            get_by_status = 'partial'
+            get_by_status = "partial"
         else:
-            get_by_status = 'pending'
+            get_by_status = "pending"
 
         if get_by_status:
-            apps = self.db.get_by_query(lambda data: filter_by_status(get_by_status, data))
+            apps = self.db.get_by_query(
+                lambda data: filter_by_status(get_by_status, data)
+            )
 
         url = "https://store.steampowered.com/app/"
         meta = {}
         if self.test_mode:
-            meta['test_mode'] = True
+            meta["test_mode"] = True
 
         for db_id, app in apps.items():
             app_id = app["appid"]
             app_url = url + str(app_id)
 
-            yield Request(app_url, callback=self.parse, errback=self.errback,
-                          cb_kwargs={'db_id': db_id, 'app_id': app_id}, meta=meta)
+            yield Request(
+                app_url,
+                callback=self.parse,
+                errback=self.errback,
+                cb_kwargs={"db_id": db_id, "app_id": app_id},
+                meta=meta,
+            )
 
     def errback(self, failure):
         request = failure.request
         cb_kwargs = request.cb_kwargs
-        db_id = cb_kwargs['db_id']
-        app_id = cb_kwargs['app_id']
+        db_id = cb_kwargs["db_id"]
+        app_id = cb_kwargs["app_id"]
         url = request.url
         err_msg = failure.getErrorMessage()
 
-        self.db.update_by_id(db_id,
-                             {'status': 'failed', 'err_msg': err_msg})
-        self.logger.warning(f'App {app_id}, url: {url} failed to be scraped: {err_msg}')
+        self.db.update_by_id(db_id, {"status": "failed", "err_msg": err_msg})
+        self.logger.warning(f"App {app_id}, url: {url} failed to be scraped: {err_msg}")
 
     def get_media_links(self, response: TextResponse):
         # preview media
-        preview_section = response.css('#game_highlights')
+        preview_section = response.css("#game_highlights")
         main_image_selector = '.game_header_image_full::attr("src")'
         preview_img_selector = '.highlight_screenshot a::attr("href")'
         preview_videos_selector = '.highlight_movie::attr("data-mp4-hd-source")'
         links = preview_section.css(
-            ', '.join([main_image_selector, preview_img_selector, preview_videos_selector])).getall()
+            ", ".join(
+                [main_image_selector, preview_img_selector, preview_videos_selector]
+            )
+        ).getall()
 
         # description section media
-        description_section = response.css('#aboutThisGame')
+        description_section = response.css("#aboutThisGame")
         description_img_gif_selector = 'img::attr("src")'
         links += description_section.css(description_img_gif_selector).getall()
 
@@ -72,24 +83,32 @@ class AppsSpider(Spider):
 
     def load_item(self, response: TextResponse, app_id, db_id, urls):
         loader = AppLoader(response=response)
-        loader.add_value('app_id', app_id)
-        loader.add_value('db_id', db_id)
-        loader.add_value('url', response.url)
-        loader.add_css('game_title', '#appHubAppName::text')
-        loader.add_css('publisher', '#game_highlights .dev_row+ .dev_row a::text')
-        loader.add_css('developer', '#developers_list a::text')
-        loader.add_css('publish_date', '.date::text')
-        loader.add_css('tags', '#glanceCtnResponsiveRight a::text')
-        loader.add_css('review_count', '#review_type_all+ label .user_reviews_count::text')
-        loader.add_css('positive_review_count', '#review_type_positive+ label .user_reviews_count::text')
-        loader.add_css('negative_review_count', '#review_type_negative+ label .user_reviews_count::text')
-        loader.add_value('file_urls', urls)
+        loader.add_value("app_id", app_id)
+        loader.add_value("db_id", db_id)
+        loader.add_value("url", response.url)
+        loader.add_css("game_title", "#appHubAppName::text")
+        loader.add_css("publisher", "#game_highlights .dev_row+ .dev_row a::text")
+        loader.add_css("developer", "#developers_list a::text")
+        loader.add_css("publish_date", ".date::text")
+        loader.add_css("tags", "#glanceCtnResponsiveRight a::text")
+        loader.add_css(
+            "review_count", "#review_type_all+ label .user_reviews_count::text"
+        )
+        loader.add_css(
+            "positive_review_count",
+            "#review_type_positive+ label .user_reviews_count::text",
+        )
+        loader.add_css(
+            "negative_review_count",
+            "#review_type_negative+ label .user_reviews_count::text",
+        )
+        loader.add_value("file_urls", urls)
 
         return loader.load_item()
 
     def parse(self, response, db_id, app_id):
         if self.test_mode is None:
-            self.db.update_by_id(db_id, {'status': 'partial'})
+            self.db.update_by_id(db_id, {"status": "partial"})
 
         links = self.get_media_links(response)
         return self.load_item(response, app_id, db_id, links)

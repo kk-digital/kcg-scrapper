@@ -13,6 +13,6 @@ db.purge()
 for app in apps:
     # 3 possible status pending, complete, failed, partial
     app["status"] = "pending"
-    app['err_msg'] = ''
+    app["err_msg"] = ""
 
 db.add_many(apps)

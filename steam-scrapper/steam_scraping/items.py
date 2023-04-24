@@ -10,9 +10,9 @@ from itemloaders.processors import TakeFirst, MapCompose, Identity, Compose
 from scrapy import Field
 from scrapy.loader import ItemLoader
 
-clean_review_count_processor = Compose(TakeFirst(),
-                                       lambda reviews: re.sub(r'[(),]', '', reviews),
-                                       int)
+clean_review_count_processor = Compose(
+    TakeFirst(), lambda reviews: re.sub(r"[(),]", "", reviews), int
+)
 
 
 class AppItem(scrapy.Item):
