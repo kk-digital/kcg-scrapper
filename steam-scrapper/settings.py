@@ -10,12 +10,23 @@
 import copy
 import logging
 import os
+from os import path
+from pathlib import Path
 
 import scrapy.utils.log
 from colorlog import ColoredFormatter
 
+# MODIFIABLE
+
+# whether to download videos or gif
+DOWNLOAD_VIDEOS = False
+# output folder
+OUTPUT_FOLDER = r'output'
+
 # set the database to use
 JOBS_DB_NAME = "small-apps-db.json"
+
+# DON'T MODIFY
 
 # modify here the name of output file
 # now handled with custom json pipeline
@@ -30,14 +41,12 @@ JOBS_DB_NAME = "small-apps-db.json"
 #     'overwrite': False
 # }}
 
-# logging
-LOG_ENABLED = True
-LOG_LEVEL = "INFO"
-DOWNLOAD_WARNSIZE = 0
 
-# creating files fodler
-os.makedirs("output/warc-files", exist_ok=True)
-os.makedirs("output/apps", exist_ok=True)
+OUTPUT_FOLDER = Path(OUTPUT_FOLDER).expanduser()
+FILES_STORE = path.join(OUTPUT_FOLDER, 'apps')
+WARC_STORE = path.join(OUTPUT_FOLDER, 'warc-files')
+# creating files folder
+os.makedirs(WARC_STORE, exist_ok=True)
 
 # set config file location of warcio in env variable
 os.environ["SCRAPY_WARCIO_SETTINGS"] = "warcio-settings.yml"
@@ -90,7 +99,7 @@ DEPTH_PRIORITY = -100
 # Override the default request headers:
 DEFAULT_REQUEST_HEADERS = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,"
-    "application/signed-exchange;v=b3;q=0.7",
+              "application/signed-exchange;v=b3;q=0.7",
     "Accept-Language": "en,es;q=0.9",
     "Cache-Control": "max-age=0",
     "Connection": "keep-alive",
@@ -134,7 +143,6 @@ ITEM_PIPELINES = {
     "steam_scraping.pipelines.SetDefaultPipeline": 20,
     "steam_scraping.pipelines.SaveItemAsJSONPipeline": 100,
 }
-FILES_STORE = "output/apps"
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -164,12 +172,16 @@ FEED_EXPORT_ENCODING = "utf-8"
 
 # logging config
 
+LOG_ENABLED = True
+LOG_LEVEL = "INFO"
+DOWNLOAD_WARNSIZE = 0
+
 logging.getLogger("scrapy_warcio.warcio").setLevel("WARNING")
 
 apps_logger = logging.getLogger("apps")
-apps_logger.setLevel("WARNING")
 apps_logger.propagate = True
-apps_file_handler = logging.FileHandler("output/error_logs.log", "a", "utf-8")
+apps_file_handler = logging.FileHandler(path.join(OUTPUT_FOLDER, 'error_logs.log'), "a", "utf-8")
+apps_file_handler.setLevel('WARNING')
 apps_file_formatter = logging.Formatter(
     "%(asctime)s - %(levelname)s - %(name)s - %(funcName)s - %(message)s"
 )
