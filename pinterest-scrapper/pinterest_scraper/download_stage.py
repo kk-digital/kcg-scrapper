@@ -67,7 +67,7 @@ class DownloadStage(Stage):
         return basename
 
     def __download_pin_img(
-            self, session: Session, pin: Row, pin_uuid: uuid.UUID
+        self, session: Session, pin: Row, pin_uuid: uuid.UUID
     ) -> str:
         img_urls = self.__get_img_urls(pin["img_url"])
         for img_url in img_urls:
