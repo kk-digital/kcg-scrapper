@@ -1,6 +1,5 @@
 import logging
 import os
-import time
 import uuid
 from os import path
 from sqlite3 import Row
@@ -11,7 +10,7 @@ from requests import Session, RequestException, Response
 from selenium.common import TimeoutException
 
 from pinterest_scraper.stage import Stage
-from settings import MAX_RETRY, OUTPUT_FOlDER, TIMEOUT, DOWNLOAD_DELAY
+from settings import MAX_RETRY, OUTPUT_FOlDER, TIMEOUT
 
 logger = logging.getLogger(f"scraper.{__name__}")
 
@@ -59,7 +58,7 @@ class DownloadStage(Stage):
             fh.write(res.content)
 
     def __download_pin_img(
-        self, session: Session, pin: Row, pin_uuid: uuid.UUID
+            self, session: Session, pin: Row, pin_uuid: uuid.UUID
     ) -> None:
         img_urls = self.__get_img_urls(pin["img_url"])
         for img_url in img_urls:
@@ -103,7 +102,6 @@ class DownloadStage(Stage):
                         self._db.update_board_or_pin_done_by_url("pin", pin["url"], 1)
                         retries = 0
                         logger.info(f"Successfully scraped pin {pin['url']}.")
-                        time.sleep(DOWNLOAD_DELAY)
 
                     break
                 except (RequestException, TimeoutException):
