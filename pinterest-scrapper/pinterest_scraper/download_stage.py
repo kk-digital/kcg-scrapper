@@ -2,13 +2,13 @@ import logging
 import os
 import time
 import uuid
-from datetime import timedelta
 from os import path
 from sqlite3 import Row
 from typing import List
 from urllib.parse import urlparse, urlunparse
 
 from requests import Session, RequestException, Response
+from selenium.common import TimeoutException
 
 from pinterest_scraper.stage import Stage
 from settings import MAX_RETRY, OUTPUT_FOlDER, TIMEOUT, DOWNLOAD_DELAY
@@ -50,23 +50,20 @@ class DownloadStage(Stage):
 
         return new_urls
 
-    def __save_img(self, res: Response, img_url: str) -> None:
+    def __save_img(self, res: Response, img_url: str, pin_uuid: uuid.UUID) -> None:
         ext = path.splitext(img_url)[1]
-        basename = f"{uuid.uuid1()}{ext}"
+        basename = f"{pin_uuid}{ext}"
         img_path = path.join(self.__images_path, basename)
 
         with open(img_path, "wb") as fh:
             fh.write(res.content)
 
-    def __download_pin_img(self, session: Session, pin: Row) -> None:
+    def __download_pin_img(
+        self, session: Session, pin: Row, pin_uuid: uuid.UUID
+    ) -> None:
         img_urls = self.__get_img_urls(pin["img_url"])
         for img_url in img_urls:
             res = session.get(img_url, timeout=TIMEOUT)
-
-            # sleeping for DOWNLOAD_DELAY seconds between requests
-            delta_diff = res.elapsed - timedelta(seconds=DOWNLOAD_DELAY)
-            if delta_diff.total_seconds() < 0:
-                time.sleep(abs(delta_diff.total_seconds()))
 
             # if xml, have to try with the other url
             if res.headers["content-type"] == "application/xml":
@@ -74,12 +71,19 @@ class DownloadStage(Stage):
 
             res.raise_for_status()
 
-            self.__save_img(res, img_url)
+            self.__save_img(res, img_url, pin_uuid)
 
             break
 
+    def __save_pin_html(self, session: Session, pin: Row, pin_uuid: uuid.UUID) -> None:
+        self._driver.get(pin["url"])
+
+        file_path = path.join(self.__html_path, f"{pin_uuid}.html")
+        with open(file_path, "w", encoding="utf-8") as fh:
+            fh.write(self._driver.page_source)
+
     def start_scraping(self) -> None:
-        # super().start_scraping() # todo revert this
+        super().start_scraping()
         self.__init_output_dir()
 
         with Session() as session:
@@ -92,14 +96,17 @@ class DownloadStage(Stage):
                         "pin", self._job["id"]
                     )
                     for pin in pins:
-                        self.__download_pin_img(session, pin)
+                        pin_uuid = uuid.uuid1()
+                        self.__download_pin_img(session, pin, pin_uuid)
+                        self.__save_pin_html(session, pin, pin_uuid)
 
                         self._db.update_board_or_pin_done_by_url("pin", pin["url"], 1)
                         retries = 0
                         logger.info(f"Successfully scraped pin {pin['url']}.")
+                        time.sleep(DOWNLOAD_DELAY)
 
                     break
-                except RequestException:
+                except (RequestException, TimeoutException):
                     if retries == MAX_RETRY:
                         raise
 
