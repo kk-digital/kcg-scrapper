@@ -20,6 +20,7 @@ logger = logging.getLogger(f"scraper.{__name__}")
 class DownloadStage(Stage):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.__session: Optional[Session] = None
         self.__json_fh: Optional[jsonlines.Writer] = None
 
     def __init_output_dir(self) -> None:
@@ -66,12 +67,10 @@ class DownloadStage(Stage):
 
         return basename
 
-    def __download_pin_img(
-        self, session: Session, pin: Row, pin_uuid: uuid.UUID
-    ) -> str:
+    def __download_pin_img(self, pin: Row, pin_uuid: uuid.UUID) -> str:
         img_urls = self.__get_img_urls(pin["img_url"])
         for img_url in img_urls:
-            res = session.get(img_url, timeout=TIMEOUT)
+            res = self.__session.get(img_url, timeout=TIMEOUT)
 
             # if xml, have to try with the other url
             if res.headers["content-type"] == "application/xml":
@@ -111,36 +110,36 @@ class DownloadStage(Stage):
         super().start_scraping()
         self.__init_output_dir()
 
-        with Session() as session:
-            retries = 0
-            while True:
-                try:
-                    # retrieve pins here to not re-download pins
-                    # successfully scraped before error
-                    pins = self._db.get_all_board_or_pin_by_job_id(
-                        "pin", self._job["id"]
-                    )
-                    for pin in pins:
-                        pin_uuid = uuid.uuid1()
-                        img_name = self.__download_pin_img(session, pin, pin_uuid)
-                        self.__save_pin_html(pin, pin_uuid)
-                        self.__add_to_json(pin_uuid, img_name)
+        self.__session = Session()
+        retries = 0
+        while True:
+            try:
+                # retrieve pins here to not re-download pins
+                # successfully scraped before error
+                pins = self._db.get_all_board_or_pin_by_job_id("pin", self._job["id"])
+                for pin in pins:
+                    pin_uuid = uuid.uuid1()
+                    img_name = self.__download_pin_img(pin, pin_uuid)
+                    self.__save_pin_html(pin, pin_uuid)
+                    self.__add_to_json(pin_uuid, img_name)
 
-                        self._db.update_board_or_pin_done_by_url("pin", pin["url"], 1)
-                        retries = 0
-                        logger.info(f"Successfully scraped pin {pin['url']}.")
-                        time.sleep(DOWNLOAD_DELAY)
+                    self._db.update_board_or_pin_done_by_url("pin", pin["url"], 1)
+                    retries = 0
+                    logger.info(f"Successfully scraped pin {pin['url']}.")
+                    time.sleep(DOWNLOAD_DELAY)
 
-                    break
-                except (RequestException, TimeoutException):
-                    if retries == MAX_RETRY:
-                        self.__json_fh.close()
-                        raise
+                break
+            except (RequestException, TimeoutException):
+                if retries == MAX_RETRY:
+                    self.__json_fh.close()
+                    self.__session.close()
+                    raise
 
-                    logger.exception(
-                        f"Exception downloading pin: {pin['url']}, retrying..."
-                    )
-                    retries += 1
+                # noinspection PyUnboundLocalVariable
+                logger.exception(
+                    f"Exception downloading pin: {pin['url']}, retrying..."
+                )
+                retries += 1
 
         self._db.update_job_stage(self._job["id"], "completed")
         logger.info(f"Finished scraping of job for query {self._job['query']}.")
