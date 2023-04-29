@@ -105,4 +105,15 @@ Extracted app data have the following fields:
 - images_path: list
 - videos_path: list
 
-Warc files are saved to `output/warc-files`, app data and media content to `output/apps/<app_id>`
+## Settings
+
+You can alter the behavior of certain parts of the scraper modifying the following settings in `settings.py`:
+
+- `DOWNLOAD_VIDEOS` whether to download videos or gifs, default to `False`
+- `OUTPUT_FOLDER` folder to store all outputs, default to `output` in the project root. You can set it to relative or
+  absolute path such as:
+    - `~/apps/output`
+    - `C:\Users\<user>\Desktop\New folder`
+- `JOBS_DB_NAME` database to pull jobs from
+
+

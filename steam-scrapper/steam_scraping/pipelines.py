@@ -1,8 +1,9 @@
 import json
 import os
+import urllib
+import urllib.parse
 from os import path
 from pathlib import PurePosixPath
-from urllib.parse import urlparse
 
 from itemadapter import ItemAdapter
 from scrapy import Request
@@ -11,20 +12,28 @@ from scrapy.pipelines.files import FilesPipeline
 from steam_scraping.db import db
 
 
+def is_video(path_str: str):
+    return True if path_str.endswith(".mp4") or path_str.endswith(".gif") else False
+
+
 class MyFilesPipeline(FilesPipeline):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.db = db
-        self.STORE_URI = args[0]
+        self.DOWNLOAD_VIDEOS = None
         self.test_mode = None
+        self.STORE_URI = None
 
     def open_spider(self, spider):
-        self.test_mode = spider.test_mode
         super().open_spider(spider)
+        self.STORE_URI = spider.settings["FILES_STORE"]
+        self.DOWNLOAD_VIDEOS = spider.settings["DOWNLOAD_VIDEOS"]
+        self.test_mode = spider.test_mode
 
     def file_path(self, request, response=None, info=None, *, item=None):
         adapter = ItemAdapter(item)
-        return f'{adapter["app_id"]}/{PurePosixPath(urlparse(request.url).path).name}'
+        filename = PurePosixPath(urllib.parse.urlparse(request.url).path).name
+        return f'{adapter["app_id"]}/{filename}'
 
     def get_media_requests(self, item, info):
         adapter = ItemAdapter(item)
@@ -34,6 +43,11 @@ class MyFilesPipeline(FilesPipeline):
             return
 
         for file_url in file_urls:
+            filename = PurePosixPath(urllib.parse.urlparse(file_url).path).name
+
+            if is_video(filename) and not self.DOWNLOAD_VIDEOS:
+                continue
+
             yield Request(file_url, meta={"is_resource": True})
 
     def item_completed(self, results, item, info):
@@ -49,9 +63,8 @@ class MyFilesPipeline(FilesPipeline):
                 continue
 
             file_path = path.basename(info_or_failure["path"])
-            is_mp4 = file_path.endswith(".mp4")
 
-            if is_mp4:
+            if is_video(file_path):
                 videos_path.append(file_path)
                 continue
             images_path.append(file_path)
@@ -73,12 +86,11 @@ class SetDefaultPipeline:
 
 
 class SaveItemAsJSONPipeline:
-    @classmethod
-    def from_crawler(cls, crawler):
-        return cls(crawler.settings)
+    def __init__(self):
+        self.FILES_STORE = None
 
-    def __init__(self, settings):
-        self.FILES_STORE = settings.get("FILES_STORE")
+    def open_spider(self, spider):
+        self.FILES_STORE = spider.settings["FILES_STORE"]
 
     def process_item(self, item, spider):
         adapter = ItemAdapter(item)
