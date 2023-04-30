@@ -47,7 +47,7 @@ class DownloadStage(Stage):
         path_parts = parsed_url.path.split("/")
         path_parts[1] = "originals"
 
-        extensions = ["jpg", "png"]
+        extensions = ["jpg", "png", 'gif']
         new_urls = []
         for ext in extensions:
             filename = path.splitext(path_parts[-1])[0]
