@@ -63,9 +63,8 @@ def create_job(query: str, stage: str = "board") -> int:
     return curr.lastrowid
 
 
-def delete_job_by_query(job: Row) -> None:
+def delete_job(job: Row) -> None:
     job_id = job["id"]
-    query = job["query"]
     _conn.executescript(
         f"""
     BEGIN;
@@ -78,13 +77,6 @@ def delete_job_by_query(job: Row) -> None:
     COMMIT;
     """
     )
-
-    # _conn.execute('''
-    # DELETE FROM job
-    # WHERE query = ?
-    # ''', (query.lower()))
-
-    # _conn.commit()
 
 
 def get_all_jobs() -> List[Row]:

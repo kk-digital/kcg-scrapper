@@ -33,7 +33,7 @@ class Command:
             print("There is no job for query.")
             return
 
-        db.delete_job_by_query(job)
+        db.delete_job(job)
         print("Successfully deleted.")
 
     def start_scraping(self, query: str, headed: bool = False, output: str = None):
@@ -41,8 +41,8 @@ class Command:
 
         if not job:
             logger.info(f"Job created for query: {query}.")
-            job_id = db.create_job(query)
-            job = {"id": job_id, "query": query, "stage": "board"}
+            db.create_job(query)
+            job = db.get_job_by_query(query)
 
         if output:
             settings.OUTPUT_FOlDER = path.expanduser(output)
@@ -76,6 +76,19 @@ class Command:
             db.close_conn()
             # noinspection PyUnboundLocalVariable
             stage_instance.close()
+
+    def test_scrape_board(self, url: str, headed: bool = False, output: str = None):
+        query = 'test'
+        job = db.get_job_by_query(query)
+
+        if job:
+            db.delete_job(job)
+
+        db.create_job(query, 'pin')
+        job = db.get_job_by_query(query)
+        db.create_many_board([(job['id'], url)])
+
+        self.start_scraping(query, headed, output)
 
 
 fire.Fire(Command)
