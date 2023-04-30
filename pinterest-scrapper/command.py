@@ -47,8 +47,6 @@ class Command:
         if output:
             settings.OUTPUT_FOlDER = path.expanduser(output)
 
-        print(settings.OUTPUT_FOlDER)
-
         stage = job["stage"]
         if stage == "board":
             from pinterest_scraper.board_stage import BoardStage
@@ -76,9 +74,8 @@ class Command:
             )
         finally:
             db.close_conn()
-
-            if stage_instance._driver:  # todo keep this?
-                stage_instance.close()
+            # noinspection PyUnboundLocalVariable
+            stage_instance.close()
 
 
 fire.Fire(Command)
