@@ -1,7 +1,9 @@
 import logging
 import os
+import shutil
 import time
 import uuid
+from datetime import datetime
 from os import path
 from sqlite3 import Row
 from typing import List, Optional
@@ -12,7 +14,7 @@ from requests import Session, RequestException, Response
 from selenium.common import TimeoutException
 
 from pinterest_scraper.stage import Stage
-from settings import MAX_RETRY, OUTPUT_FOlDER, TIMEOUT, DOWNLOAD_DELAY
+from settings import MAX_RETRY, OUTPUT_FOlDER, TIMEOUT, DOWNLOAD_DELAY, MAX_OUTPUT_SIZE
 
 logger = logging.getLogger(f"scraper.{__name__}")
 
@@ -22,6 +24,7 @@ class DownloadStage(Stage):
         super().__init__(*args, **kwargs)
         self.__session: Optional[Session] = None
         self.__json_fh: Optional[jsonlines.Writer] = None
+        self.__output_size = None
 
     def __init_output_dir(self) -> None:
         dir_path = path.join(OUTPUT_FOlDER, "jobs", self._job["query"])
@@ -30,6 +33,14 @@ class DownloadStage(Stage):
         self.__html_path = path.join(dir_path, "html")
         os.makedirs(self.__images_path, exist_ok=True)
         os.makedirs(self.__html_path, exist_ok=True)
+
+    def __init_output_size(self) -> None:
+        size = 0
+        for dir_path, dir_names, file_names in os.walk(self.__output_path):
+            for basename in file_names:
+                size += path.getsize(path.join(dir_path, basename))
+
+        self.__output_size = size
 
     def __get_img_urls(self, url: str) -> List[str]:
         parsed_url = urlparse(url)
@@ -65,6 +76,8 @@ class DownloadStage(Stage):
         with open(img_path, "wb") as fh:
             fh.write(res.content)
 
+        self.__output_size += path.getsize(img_path)
+
         return basename
 
     def __download_pin_img(self, pin: Row, pin_uuid: uuid.UUID) -> str:
@@ -92,6 +105,8 @@ class DownloadStage(Stage):
         with open(file_path, "w", encoding="utf-8") as fh:
             fh.write(self._driver.page_source)
 
+        self.__output_size += path.getsize(file_path)
+
     def __add_to_json(self, pin_uuid: uuid.UUID, img_name: str) -> None:
         if not self.__json_fh:
             self.__json_fh = jsonlines.open(
@@ -106,9 +121,25 @@ class DownloadStage(Stage):
             )
         )
 
+    def __check_output_size(self, ignore_check: bool = False) -> None:
+        exceed_size = self.__output_size >= MAX_OUTPUT_SIZE
+        if not exceed_size and not ignore_check:
+            return
+
+        self.__json_fh.close()
+        self.__json_fh = None
+
+        filename = f'{datetime.now().timestamp()}-{self._job["query"]}'
+        archive_path = path.join(OUTPUT_FOlDER, filename)
+        shutil.make_archive(archive_path, "zip", self.__output_path)
+        shutil.rmtree(self.__output_path)
+        self.__init_output_dir()
+        self.__output_size = 0
+
     def start_scraping(self) -> None:
         super().start_scraping()
         self.__init_output_dir()
+        self.__init_output_size()
 
         self.__session = Session()
         retries = 0
@@ -122,11 +153,14 @@ class DownloadStage(Stage):
                     img_name = self.__download_pin_img(pin, pin_uuid)
                     self.__save_pin_html(pin, pin_uuid)
                     self.__add_to_json(pin_uuid, img_name)
+                    self.__check_output_size()
 
                     self._db.update_board_or_pin_done_by_url("pin", pin["url"], 1)
                     retries = 0
                     logger.info(f"Successfully scraped pin {pin['url']}.")
                     time.sleep(DOWNLOAD_DELAY)
+
+                self.__check_output_size(True)
 
                 break
             except (RequestException, TimeoutException):
