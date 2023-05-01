@@ -7,14 +7,15 @@ import logging_config
 import settings
 from pinterest_scraper import db
 
-logging_config.configure()
-logger = logging.getLogger(f"scraper.{__name__}")
-
-# init db conn
-db.initialize()
-
 
 class Command:
+    def __init__(self):
+        logging_config.configure()
+        self.logger = logging.getLogger(f"scraper.{__name__}")
+
+        # init db conn
+        db.initialize()
+
     def show_jobs(self):
         jobs = db.get_all_jobs()
         if not jobs:
@@ -33,16 +34,16 @@ class Command:
             print("There is no job for query.")
             return
 
-        db.delete_job_by_query(job)
+        db.delete_job(job)
         print("Successfully deleted.")
 
     def start_scraping(self, query: str, headed: bool = False, output: str = None):
         job = db.get_job_by_query(query)
 
         if not job:
-            logger.info(f"Job created for query: {query}.")
-            job_id = db.create_job(query)
-            job = {"id": job_id, "query": query, "stage": "board"}
+            self.logger.info(f"Job created for query: {query}.")
+            db.create_job(query)
+            job = db.get_job_by_query(query)
 
         if output:
             settings.OUTPUT_FOlDER = path.expanduser(output)
@@ -68,14 +69,29 @@ class Command:
             stage_instance = stage_cls(job, headless=not headed)
             stage_instance.start_scraping()
         except:
-            logger.critical(
+            self.logger.critical(
                 f'Unable to handle exception on {stage_cls.__name__}, for query "{job["query"]}".',
                 exc_info=True,
             )
         finally:
-            db.close_conn()
             # noinspection PyUnboundLocalVariable
             stage_instance.close()
+
+    def test_scrape_board(self, url: str, headed: bool = False, output: str = None):
+        query = 'test'
+        job = db.get_job_by_query(query)
+
+        if job:
+            db.delete_job(job)
+
+        db.create_job(query, 'pin')
+        job = db.get_job_by_query(query)
+        db.create_many_board([(job['id'], url)])
+
+        self.start_scraping(query, headed, output)
+
+    def __del__(self):
+        db.close_conn()
 
 
 fire.Fire(Command)

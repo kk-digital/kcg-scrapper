@@ -127,3 +127,5 @@ dmypy.json
 
 output
 .idea
+*.sqlite
+logs
