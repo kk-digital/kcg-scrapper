@@ -90,8 +90,8 @@ class Command:
 
         self.start_scraping(query, headed, output)
 
-    def __del__(self):
-        db.close_conn()
 
-
-fire.Fire(Command)
+try:
+    fire.Fire(Command)
+finally:
+    db.close_conn()
