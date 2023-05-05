@@ -39,7 +39,7 @@ def _create_tables() -> None:
 
 def initialize() -> None:
     global _conn
-    _conn = sqlite3.connect(DATABASE_NAME)
+    _conn = sqlite3.connect(DATABASE_NAME, check_same_thread=False)
     _conn.execute("PRAGMA foreign_keys = ON")
     _conn.row_factory = Row
     _create_tables()
@@ -48,6 +48,7 @@ def initialize() -> None:
 
 def close_conn() -> None:
     _conn.close()
+    logger.debug("Db conn closed.")
 
 
 def create_job(query: str, stage: str = "board") -> int:

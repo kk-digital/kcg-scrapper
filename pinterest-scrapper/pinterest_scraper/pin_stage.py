@@ -1,4 +1,8 @@
+import concurrent
 import logging
+import queue
+from concurrent.futures import ThreadPoolExecutor
+from queue import SimpleQueue
 from typing import Callable
 from urllib.parse import urljoin
 
@@ -69,35 +73,56 @@ class PinStage(Stage):
         )
         self._db.create_many_pin(rows)
 
-    def start_scraping(self) -> None:
-        super().start_scraping()
-
+    def __start_scraping(self, board_queue: SimpleQueue) -> None:
+        board = board_queue.get_nowait()
         retries = 0
-        while True:
+        while board:
             try:
-                # retrieve boards here to not re-scrape boards
-                # successfully scraped before error
-                boards = self._db.get_all_board_or_pin_by_job_id(
-                    "board", self._job["id"]
-                )
-                for board in boards:
-                    url = board["url"]
-                    self._driver.get(url)
-                    self._scrape()
-                    self._db.update_board_or_pin_done_by_url("board", url, 1)
-                    retries = 0
-                    logger.info(f"Successfully scraped board {url}.")
-
-                break
+                super().start_scraping()
+                url = board["url"]
+                self._driver.get(url)
+                self._scrape()
+                self._db.update_board_or_pin_done_by_url("board", url, 1)
+                logger.info(f"Successfully scraped board {url}.")
+                board = board_queue.get_nowait()
+                retries = 0
 
             except TimeoutException:
                 if retries == MAX_RETRY:
+                    self.close()
                     raise
 
                 # noinspection PyUnboundLocalVariable
                 logger.exception(f"Timeout scraping boards from {url}, retrying...")
                 retries += 1
+            except:
+                self.close()
+                raise
+
+    def start_scraping(self) -> None:
+        boards = self._db.get_all_board_or_pin_by_job_id("board", self._job["id"])
+        board_queue = SimpleQueue()
+        for board in boards:
+            board_queue.put_nowait(board)
+        del boards
+
+        with ThreadPoolExecutor(self._max_workers) as executor:
+            futures = []
+            for _ in range(self._max_workers):
+                task = lambda: self.__class__(
+                    job=self._job, headless=self._headless
+                ).__start_scraping(board_queue)
+
+                futures.append(executor.submit(task))
+
+            for future in concurrent.futures.as_completed(futures):
+                try:
+                    future.result()
+                except queue.Empty:
+                    pass
 
         self._db.update_job_stage(self._job["id"], "download")
         logger.info("Finished scraping of pins, starting download stage.")
-        DownloadStage(self._job, self._driver, self._headless).start_scraping()
+        DownloadStage(
+            job=self._job, max_workers=self._max_workers, headless=self._headless
+        ).start_scraping()

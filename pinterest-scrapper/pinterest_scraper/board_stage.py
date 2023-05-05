@@ -55,10 +55,17 @@ class BoardStage(Stage):
                 break
             except TimeoutException:
                 if i == MAX_RETRY:
+                    self.close()
                     raise
 
                 logger.exception(f"Timeout scraping boards from {url}, retrying...")
+            except:
+                self.close()
+                raise
 
+        self.close()
         self._db.update_job_stage(self._job["id"], "pin")
         logger.info("Finished scraping of boards. Starting pins stage.")
-        PinStage(self._job, self._driver, self._headless).start_scraping()
+        PinStage(
+            job=self._job, max_workers=self._max_workers, headless=self._headless
+        ).start_scraping()
