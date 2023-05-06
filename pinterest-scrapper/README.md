@@ -7,7 +7,7 @@ Workflow:
 1. collect boards for query
 2. collect pins for each board in previous step
 3. download original pin img and save pin page source html
-4. compress output in 500 MB archives
+4. compress output in `MAX_OUTPUT_SIZE_MB` archives
 
 ## Getting Started
 
@@ -26,7 +26,7 @@ Workflow:
     ```sh
    cd pinterest-scrapper
    ```
-3. crete virutal environment:
+3. create virtual environment:
    ```sh
    python -m venv venv
    ```
@@ -41,16 +41,20 @@ Workflow:
 
 ## Usage
 
-The `command.py` is a cli with the following commnds:
+The `command.py` is a cli with the following commands:
 
-* `show-jobs`
+`show-jobs`
+
    ```sh
    python command.py  show-jobs
    ```
 
 Show jobs info, including query and current stage.
 
-* `delete-job <query>`
+---
+
+`delete-job <query>`
+
    ```sh
   python command.py delete-job t-shirts
   ```
@@ -58,26 +62,49 @@ Show jobs info, including query and current stage.
 ⚠️⚠️⚠️ Be careful. Find and delete the jobs that matches the provided query, loosing current state of all boards/pins
 already scraped.
 
-* `test-scrape-board <url> [--headed] [output]`
+#### Parameters
+
+- `query` type string: query associated with job to delete
+
+---
+
+`test-scrape-board <url> [--headed] [max-workers] [output]`
 
    ```sh
-  python command.py test-scrape-board --headed --output='~/test/output' https://www.pinterest.com/wilsonpercussio/cachicamo/
+  python command.py test-scrape-board --output='~/test/output' https://www.pinterest.com/wilsonpercussio/cachicamo/
   ```
 
 Scrape single board por testing purposes.
 
-* `start-scraping <query> [--headed] [output]`
+#### Parameters
+
+- `url` type string: board url to scrape
+
+---
+
+`start-scraping <query> [--headed] [max-workers] [output]`
 
    ```sh
-  python command.py start-scraping cachicamo 
+  python command.py start-scraping --max-workers=4 cachicamo 
   ```
 
 Start scraping the query provided. Job is implicitly created if not exists. If exists, job is continued where left in
 case of pause or error.
 
+#### Parameters
+
+- `query` type string: query to search boards and start scraping
+
+---
+
+### Global parameters
+
+- `headed` type boolean, default=0: whether to show browser GUI
+- `max-workers` type integer, default=1: number of workers to concurrently scrape
+- `output` type string, default='./output': path to store the output files
+
 ### Notes
 
-* if output is not provided will default to `./output`
 * can also use flags syntax for positional arguments, e.g.:
    ```sh
   python command.py start-scraping --query=cachicamo

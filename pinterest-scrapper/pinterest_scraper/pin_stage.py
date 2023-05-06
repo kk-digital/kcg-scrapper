@@ -1,6 +1,6 @@
-import concurrent
 import logging
 import queue
+import threading
 from concurrent.futures import ThreadPoolExecutor
 from queue import SimpleQueue
 from typing import Callable
@@ -10,15 +10,15 @@ from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 
+from pinterest_scraper.classes.scroll_stage import ScrollStage
 from pinterest_scraper.download_stage import DownloadStage
-from pinterest_scraper.stage import Stage
 from pinterest_scraper.utils import time_perf
 from settings import MAX_RETRY
 
 logger = logging.getLogger(f"scraper.{__name__}")
 
 
-class PinStage(Stage):
+class PinStage(ScrollStage):
     @time_perf("scroll to end of board and get all pins")
     def _scroll_and_scrape(self, fn: Callable) -> None:
         super()._scroll_and_scrape(fn)
@@ -73,10 +73,15 @@ class PinStage(Stage):
         )
         self._db.create_many_pin(rows)
 
-    def __start_scraping(self, board_queue: SimpleQueue) -> None:
+    def __start_scraping(
+        self, board_queue: SimpleQueue, stop_event: threading.Event
+    ) -> None:
         board = board_queue.get_nowait()
         retries = 0
         while board:
+            if stop_event.is_set():
+                break
+
             try:
                 super().start_scraping()
                 url = board["url"]
@@ -90,13 +95,16 @@ class PinStage(Stage):
             except TimeoutException:
                 if retries == MAX_RETRY:
                     self.close()
+                    stop_event.set()
                     raise
 
-                # noinspection PyUnboundLocalVariable
-                logger.exception(f"Timeout scraping boards from {url}, retrying...")
+                logger.exception(
+                    f"Timeout scraping boards from {board['url']}, retrying..."
+                )
                 retries += 1
             except:
                 self.close()
+                stop_event.set()
                 raise
 
     def start_scraping(self) -> None:
@@ -106,20 +114,22 @@ class PinStage(Stage):
             board_queue.put_nowait(board)
         del boards
 
+        stop_event = threading.Event()
+
         with ThreadPoolExecutor(self._max_workers) as executor:
             futures = []
             for _ in range(self._max_workers):
                 task = lambda: self.__class__(
                     job=self._job, headless=self._headless
-                ).__start_scraping(board_queue)
+                ).__start_scraping(board_queue=board_queue, stop_event=stop_event)
 
                 futures.append(executor.submit(task))
 
-            for future in concurrent.futures.as_completed(futures):
-                try:
-                    future.result()
-                except queue.Empty:
-                    pass
+        for future in futures:
+            try:
+                future.result()
+            except queue.Empty:
+                pass
 
         self._db.update_job_stage(self._job["id"], "download")
         logger.info("Finished scraping of pins, starting download stage.")

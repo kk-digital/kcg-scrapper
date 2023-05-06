@@ -1,53 +1,51 @@
+import json
 import logging
 import os
+import queue
 import shutil
+import threading
 import time
 import uuid
-from datetime import datetime
+import zipfile
+from concurrent.futures import ThreadPoolExecutor
 from os import path
+from queue import SimpleQueue
 from sqlite3 import Row
 from typing import List, Optional
 from urllib.parse import urlparse, urlunparse
 
-import jsonlines
 from requests import Session, RequestException, Response
 from selenium.common import TimeoutException
 
-from pinterest_scraper.stage import Stage
+from pinterest_scraper.classes.base_stage import BaseStage
 from settings import MAX_RETRY, OUTPUT_FOlDER, TIMEOUT, DOWNLOAD_DELAY, MAX_OUTPUT_SIZE
 
 logger = logging.getLogger(f"scraper.{__name__}")
 
 
-class DownloadStage(Stage):
-    def __init__(self, *args, **kwargs):
+class DownloadStage(BaseStage):
+    def __init__(self, json_entries: SimpleQueue = None, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.__json_entries = json_entries
         self.__session: Optional[Session] = None
-        self.__json_fh: Optional[jsonlines.Writer] = None
-        self.__output_size = None
 
-    def __init_output_dir(self) -> None:
+    def __init_output_dir(self, make_dirs: bool = False) -> None:
         dir_path = path.join(OUTPUT_FOlDER, "jobs", self._job["query"])
         self.__output_path = dir_path
         self.__images_path = path.join(dir_path, "images")
         self.__html_path = path.join(dir_path, "html")
-        os.makedirs(self.__images_path, exist_ok=True)
-        os.makedirs(self.__html_path, exist_ok=True)
+        self.__json_path = path.join(dir_path, "db.json")
 
-    def __init_output_size(self) -> None:
-        size = 0
-        for dir_path, dir_names, file_names in os.walk(self.__output_path):
-            for basename in file_names:
-                size += path.getsize(path.join(dir_path, basename))
-
-        self.__output_size = size
+        if make_dirs:
+            os.makedirs(self.__images_path, exist_ok=True)
+            os.makedirs(self.__html_path, exist_ok=True)
 
     def __get_img_urls(self, url: str) -> List[str]:
         parsed_url = urlparse(url)
         path_parts = parsed_url.path.split("/")
         path_parts[1] = "originals"
 
-        extensions = ["jpg", "png", 'gif']
+        extensions = ["jpg", "png", "gif"]
         new_urls = []
         for ext in extensions:
             filename = path.splitext(path_parts[-1])[0]
@@ -76,8 +74,6 @@ class DownloadStage(Stage):
         with open(img_path, "wb") as fh:
             fh.write(res.content)
 
-        self.__output_size += path.getsize(img_path)
-
         return basename
 
     def __download_pin_img(self, pin: Row, pin_uuid: uuid.UUID) -> str:
@@ -98,82 +94,142 @@ class DownloadStage(Stage):
         # noinspection PyUnboundLocalVariable
         return img_name
 
-    def __save_pin_html(self, pin: Row, pin_uuid: uuid.UUID) -> None:
-        self._driver.get(pin["url"])
+    def __save_pin_html(self, url: str, pin_uuid: uuid.UUID) -> None:
+        self._driver.get(url)
 
         file_path = path.join(self.__html_path, f"{pin_uuid}.html")
         with open(file_path, "w", encoding="utf-8") as fh:
             fh.write(self._driver.page_source)
 
-        self.__output_size += path.getsize(file_path)
-
-    def __add_to_json(self, pin_uuid: uuid.UUID, img_name: str) -> None:
-        if not self.__json_fh:
-            self.__json_fh = jsonlines.open(
-                path.join(self.__output_path, "pins.jsonl"), "a"
-            )
-
-        self.__json_fh.write(
+    def __add_to_json(self, pin_uuid: uuid.UUID, img_name: str, pin_url: str) -> None:
+        self.__json_entries.put_nowait(
             dict(
+                pin_url=pin_url,
                 query=self._job["query"],
                 img_name=img_name,
                 html_name=f"{pin_uuid}.html",
             )
         )
 
-    def __check_output_size(self, ignore_check: bool = False) -> None:
-        exceed_size = self.__output_size >= MAX_OUTPUT_SIZE
-        if not exceed_size and not ignore_check:
-            return
-
-        self.__json_fh.close()
-        self.__json_fh = None
-
-        filename = f'{datetime.now().timestamp()}-{self._job["query"]}'
-        archive_path = path.join(OUTPUT_FOlDER, filename)
-        shutil.make_archive(archive_path, "zip", self.__output_path)
-        shutil.rmtree(self.__output_path)
+    def __start_scraping(
+        self, pin_queue: SimpleQueue, stop_event: threading.Event
+    ) -> None:
         self.__init_output_dir()
-        self.__output_size = 0
-
-    def start_scraping(self) -> None:
-        super().start_scraping()
-        self.__init_output_dir()
-        self.__init_output_size()
-
         self.__session = Session()
+
+        pin = pin_queue.get_nowait()
         retries = 0
-        while True:
-            try:
-                # retrieve pins here to not re-download pins
-                # successfully scraped before error
-                pins = self._db.get_all_board_or_pin_by_job_id("pin", self._job["id"])
-                for pin in pins:
-                    pin_uuid = uuid.uuid1()
-                    img_name = self.__download_pin_img(pin, pin_uuid)
-                    self.__save_pin_html(pin, pin_uuid)
-                    self.__add_to_json(pin_uuid, img_name)
-                    self.__check_output_size()
-
-                    self._db.update_board_or_pin_done_by_url("pin", pin["url"], 1)
-                    retries = 0
-                    logger.info(f"Successfully scraped pin {pin['url']}.")
-                    time.sleep(DOWNLOAD_DELAY)
-
-                self.__check_output_size(True)
-
+        while pin:
+            if stop_event.is_set():
                 break
+
+            try:
+                super().start_scraping()
+                pin_url = pin["url"]
+                pin_uuid = uuid.uuid1()
+                img_name = self.__download_pin_img(pin, pin_uuid)
+                self.__save_pin_html(pin_url, pin_uuid)
+                self.__add_to_json(pin_uuid, img_name, pin_url)
+                self._db.update_board_or_pin_done_by_url("pin", pin["url"], 1)
+                logger.info(f"Successfully scraped pin {pin['url']}.")
+                pin = pin_queue.get_nowait()
+                retries = 0
+                time.sleep(DOWNLOAD_DELAY)
+
             except (RequestException, TimeoutException):
                 if retries == MAX_RETRY:
-                    self.__json_fh.close()
                     self.__session.close()
+                    stop_event.set()
                     raise
 
-                # noinspection PyUnboundLocalVariable
                 logger.exception(
                     f"Exception downloading pin: {pin['url']}, retrying..."
                 )
                 retries += 1
+            except:
+                self.__session.close()
+                stop_event.set()
+                raise
+
+    def __archive_output(self) -> None:
+        zip_count = 0
+        zip_name = "{}-{}.zip"
+        create_new_zip = True
+        zipf = None
+        zip_path = None
+
+        for file in os.listdir(self.__images_path):
+            if create_new_zip:
+                zip_path = path.join(
+                    self.__output_path, zip_name.format(zip_count, self._job["query"])
+                )
+                zipf = zipfile.ZipFile(file=zip_path, mode="w")
+                create_new_zip = False
+
+            filename = path.splitext(file)[0]
+            html_basename = f"{filename}.html"
+            zipf.write(
+                filename=path.join(self.__images_path, file), arcname=f"images/{file}"
+            )
+            zipf.write(
+                filename=path.join(self.__html_path, html_basename),
+                arcname=f"html/{html_basename}",
+            )
+
+            exceed_size = path.getsize(zip_path) >= MAX_OUTPUT_SIZE
+            if not exceed_size:
+                continue
+
+            zipf.close()
+            zip_count += 1
+            create_new_zip = True
+
+        zipf.close()
+        shutil.rmtree(self.__images_path)
+        shutil.rmtree(self.__html_path)
+
+    def start_scraping(self) -> None:
+        self.__init_output_dir(make_dirs=True)
+        json_entries = SimpleQueue()
+
+        pins = self._db.get_all_board_or_pin_by_job_id("pin", self._job["id"])
+        pins_queue = SimpleQueue()
+        for board in pins:
+            pins_queue.put_nowait(board)
+        del pins
+
+        stop_event = threading.Event()
+
+        with ThreadPoolExecutor(self._max_workers) as executor:
+            futures = []
+            for _ in range(self._max_workers):
+                task = lambda: self.__class__(
+                    job=self._job, headless=self._headless, json_entries=json_entries
+                ).__start_scraping(pin_queue=pins_queue, stop_event=stop_event)
+
+                futures.append(executor.submit(task))
+
+        if json_entries.qsize() > 0:
+            entries = []
+            while not json_entries.empty():
+                entries.append(json_entries.get_nowait())
+
+            if path.exists(self.__json_path):
+                with open(self.__json_path, "r", encoding="utf-8") as fh:
+                    entries += json.load(fh)
+
+            with open(self.__json_path, "w", encoding="utf-8") as fh:
+                json.dump(entries, fh)
+
+            del entries
+
+        for future in futures:
+            try:
+                future.result()
+            except queue.Empty:
+                pass
+
+        self.__archive_output()
 
         self._db.update_job_stage(self._job["id"], "completed")
         logger.info(f"Finished scraping of job for query {self._job['query']}.")

@@ -7,8 +7,8 @@ from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 
+from pinterest_scraper.classes.scroll_stage import ScrollStage
 from pinterest_scraper.pin_stage import PinStage
-from pinterest_scraper.stage import Stage
 from pinterest_scraper.utils import time_perf
 from settings import MAX_RETRY
 
@@ -16,7 +16,7 @@ logger = logging.getLogger(f"scraper.{__name__}")
 URL = "https://www.pinterest.com/search/boards/?q={}&rs=typed"
 
 
-class BoardStage(Stage):
+class BoardStage(ScrollStage):
     @time_perf("scroll to end of boards page")
     def _scroll_and_scrape(self, fn: Callable) -> None:
         super()._scroll_and_scrape(fn)
