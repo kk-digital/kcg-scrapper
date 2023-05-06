@@ -209,6 +209,7 @@ class DownloadStage(BaseStage):
 
                 futures.append(executor.submit(task))
 
+        logger.debug("Writing json.")
         if json_entries.qsize() > 0:
             entries = []
             while not json_entries.empty():
@@ -229,6 +230,7 @@ class DownloadStage(BaseStage):
             except queue.Empty:
                 pass
 
+        logger.debug("Archiving output.")
         self.__archive_output()
 
         self._db.update_job_stage(self._job["id"], "completed")

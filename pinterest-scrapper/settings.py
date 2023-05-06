@@ -4,6 +4,10 @@ LOG_LEVEL = "DEBUG"
 # path to output folder, relative and absolute allowed
 # can also set it with --output flag on cli
 OUTPUT_FOlDER = "output"
+# proxy list csv file path
+PROXY_LIST_PATH = None
+# time before rotate proxy in mins
+PROXY_ROTATE_MINUTES = 15
 
 # name of sqlite db the app will create to store persistent state of jobs
 DATABASE_NAME = "pinterest.sqlite"

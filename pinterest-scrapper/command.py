@@ -38,7 +38,12 @@ class Command:
         print("Successfully deleted.")
 
     def start_scraping(
-        self, query: str, headed: bool = False, max_workers: int = 1, output: str = None
+        self,
+        query: str,
+        headed: bool = False,
+        max_workers: int = 1,
+        output: str = None,
+        proxy_list: str = None,
     ):
         job = db.get_job_by_query(query)
 
@@ -49,6 +54,8 @@ class Command:
 
         if output:
             settings.OUTPUT_FOlDER = path.expanduser(output)
+        if proxy_list:
+            settings.PROXY_LIST_PATH = path.expanduser(proxy_list)
 
         stage = job["stage"]
         if stage == "board":
@@ -79,7 +86,12 @@ class Command:
             )
 
     def test_scrape_board(
-        self, url: str, headed: bool = False, max_workers: int = 1, output: str = None
+        self,
+        url: str,
+        headed: bool = False,
+        max_workers: int = 1,
+        output: str = None,
+        proxy_list: str = None,
     ):
         query = "test"
         job = db.get_job_by_query(query)
@@ -91,7 +103,13 @@ class Command:
         job = db.get_job_by_query(query)
         db.create_many_board([(job["id"], url)])
 
-        self.start_scraping(query, headed, max_workers, output)
+        self.start_scraping(
+            query=query,
+            headed=headed,
+            max_workers=max_workers,
+            output=output,
+            proxy_list=proxy_list,
+        )
         db.delete_job(job)
 
 

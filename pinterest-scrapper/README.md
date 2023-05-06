@@ -68,7 +68,7 @@ already scraped.
 
 ---
 
-`test-scrape-board <url> [--headed] [max-workers] [output]`
+`test-scrape-board <url> [--headed] [max-workers] [output] [proxy-list]`
 
    ```sh
   python command.py test-scrape-board --output='~/test/output' https://www.pinterest.com/wilsonpercussio/cachicamo/
@@ -82,7 +82,7 @@ Scrape single board por testing purposes.
 
 ---
 
-`start-scraping <query> [--headed] [max-workers] [output]`
+`start-scraping <query> [--headed] [max-workers] [output] [proxy-list]`
 
    ```sh
   python command.py start-scraping --max-workers=4 cachicamo 
@@ -102,6 +102,7 @@ case of pause or error.
 - `headed` type boolean, default=0: whether to show browser GUI
 - `max-workers` type integer, default=1: number of workers to concurrently scrape
 - `output` type string, default='./output': path to store the output files
+- `proxy-list` type string, default=None: path to proxy list csv file
 
 ### Notes
 
