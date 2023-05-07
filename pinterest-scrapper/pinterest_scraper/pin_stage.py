@@ -1,4 +1,8 @@
 import logging
+import queue
+import threading
+from concurrent.futures import ThreadPoolExecutor
+from queue import SimpleQueue
 from typing import Callable
 from urllib.parse import urljoin
 
@@ -6,15 +10,15 @@ from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 
+from pinterest_scraper.classes.scroll_stage import ScrollStage
 from pinterest_scraper.download_stage import DownloadStage
-from pinterest_scraper.stage import Stage
 from pinterest_scraper.utils import time_perf
 from settings import MAX_RETRY
 
 logger = logging.getLogger(f"scraper.{__name__}")
 
 
-class PinStage(Stage):
+class PinStage(ScrollStage):
     @time_perf("scroll to end of board and get all pins")
     def _scroll_and_scrape(self, fn: Callable) -> None:
         super()._scroll_and_scrape(fn)
@@ -69,35 +73,66 @@ class PinStage(Stage):
         )
         self._db.create_many_pin(rows)
 
-    def start_scraping(self) -> None:
-        super().start_scraping()
-
+    def __start_scraping(
+        self, board_queue: SimpleQueue, stop_event: threading.Event
+    ) -> None:
+        board = board_queue.get_nowait()
         retries = 0
-        while True:
-            try:
-                # retrieve boards here to not re-scrape boards
-                # successfully scraped before error
-                boards = self._db.get_all_board_or_pin_by_job_id(
-                    "board", self._job["id"]
-                )
-                for board in boards:
-                    url = board["url"]
-                    self._driver.get(url)
-                    self._scrape()
-                    self._db.update_board_or_pin_done_by_url("board", url, 1)
-                    retries = 0
-                    logger.info(f"Successfully scraped board {url}.")
-
+        while board:
+            if stop_event.is_set():
                 break
+
+            try:
+                super().start_scraping()
+                url = board["url"]
+                self._driver.get(url)
+                self._scrape()
+                self._db.update_board_or_pin_done_by_url("board", url, 1)
+                logger.info(f"Successfully scraped board {url}.")
+                board = board_queue.get_nowait()
+                retries = 0
 
             except TimeoutException:
                 if retries == MAX_RETRY:
+                    self.close()
+                    stop_event.set()
                     raise
 
-                # noinspection PyUnboundLocalVariable
-                logger.exception(f"Timeout scraping boards from {url}, retrying...")
+                logger.exception(
+                    f"Timeout scraping boards from {board['url']}, retrying..."
+                )
                 retries += 1
+            except:
+                self.close()
+                stop_event.set()
+                raise
+
+    def start_scraping(self) -> None:
+        boards = self._db.get_all_board_or_pin_by_job_id("board", self._job["id"])
+        board_queue = SimpleQueue()
+        for board in boards:
+            board_queue.put_nowait(board)
+        del boards
+
+        stop_event = threading.Event()
+
+        with ThreadPoolExecutor(self._max_workers) as executor:
+            futures = []
+            for _ in range(self._max_workers):
+                task = lambda: self.__class__(
+                    job=self._job, headless=self._headless
+                ).__start_scraping(board_queue=board_queue, stop_event=stop_event)
+
+                futures.append(executor.submit(task))
+
+        for future in futures:
+            try:
+                future.result()
+            except queue.Empty:
+                pass
 
         self._db.update_job_stage(self._job["id"], "download")
         logger.info("Finished scraping of pins, starting download stage.")
-        DownloadStage(self._job, self._driver, self._headless).start_scraping()
+        DownloadStage(
+            job=self._job, max_workers=self._max_workers, headless=self._headless
+        ).start_scraping()

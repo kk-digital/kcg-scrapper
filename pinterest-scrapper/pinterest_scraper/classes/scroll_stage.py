@@ -1,62 +1,18 @@
 import logging
 import math
 import time
-from sqlite3 import Row
-from typing import Callable, Optional
+from typing import Callable
 
-import undetected_chromedriver as webdriver
-from fake_useragent import UserAgent
 from selenium.common import StaleElementReferenceException, NoSuchElementException
 from selenium.webdriver import ActionChains
-from selenium.webdriver.support.wait import WebDriverWait
 
-from pinterest_scraper import db
-from settings import TIMEOUT, SCROLL_DELAY, MAX_RETRY
+from pinterest_scraper.classes.base_stage import BaseStage
+from settings import TIMEOUT, MAX_RETRY, SCROLL_DELAY
 
 logger = logging.getLogger(f"scraper.{__name__}")
 
 
-class Stage:
-    def __init__(
-        self, job: Row | dict, driver: webdriver.Chrome = None, headless: bool = True
-    ) -> None:
-        self._db = db
-        self._job = job
-        self._driver = driver
-        self._wait: Optional[WebDriverWait] = None
-        self._headless = headless
-
-    def __init_driver(self) -> None:
-        # init driver if not already provided
-        if isinstance(self._driver, webdriver.Chrome):
-            self._wait = WebDriverWait(self._driver, TIMEOUT)
-            return
-
-        ua = UserAgent(browsers=["chrome", "edge", "firefox", "safari", "opera"])
-        ua = ua.random
-        options = webdriver.ChromeOptions()
-        if self._headless:
-            options.add_argument("--headless=new")
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-dev-shm-usage")
-        options.add_argument("--disable-logging")
-        options.add_argument("--log-level=3")
-        options.add_argument(f"user-agent={ua}")
-        options.add_argument("--blink-settings=imagesEnabled=false")
-        self._driver = webdriver.Chrome(options=options)
-        self._driver.set_window_size(1280, 1024)
-        self._driver.set_page_load_timeout(TIMEOUT)
-        self._wait = WebDriverWait(self._driver, TIMEOUT)
-        logger.debug("Driver set up.")
-
-    def start_scraping(self) -> None:
-        logger.debug("Starting scraping.")
-        self.__init_driver()
-
-    def close(self) -> None:
-        self._driver.quit()
-        logger.debug("Driver closed.")
-
+class ScrollStage(BaseStage):
     def __get_scroll_height(self) -> int:
         return self._driver.execute_script("return document.body.scrollHeight")
 
@@ -85,9 +41,8 @@ class Stage:
 
             new_body_height = self.__get_scroll_height()
             scroll_y = self._driver.execute_script("return window.scrollY")
-            end_of_page = (
-                math.ceil(inner_height + scroll_y) >= new_body_height
-            )  # round up due to precision loss
+            # round up due to precision loss
+            end_of_page = math.ceil(inner_height + scroll_y) >= new_body_height
             if end_of_page and seconds_sleep >= TIMEOUT:
                 logger.debug("End of page reached.")
                 break
