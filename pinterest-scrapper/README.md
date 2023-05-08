@@ -9,6 +9,15 @@ Workflow:
 3. download original pin img and save pin page source html
 4. compress output in `MAX_OUTPUT_SIZE_MB` archives
 
+A proxy list can be provided, the scraper cycles through the proxy list, rotating every `PROXY_ROTATE_MINUTES`.
+
+The number of workers to run can be specified. Each worker is an instance of a Chrome browser, so be careful of having
+enough free ram, ~2 GB per worker. If using proxies, set workers to at most 25% of available proxies, so when the
+scraper rotates it uses a not recently used proxy.
+
+Most general configuration can be provided via cli parameters. For detailed control you can modify any entry in
+the `settings.py` file; each entry is documented.
+
 ## Getting Started
 
 ### Prerequisites
@@ -122,4 +131,3 @@ format `'test query 1, query2'`. Make sure to quote the argument and separate qu
   python command.py start-scraping --query=cachicamo
   ```
 * get help and more info for a command by passing `--help`
-* can fine-tune details in the `settings.py` file, each entry is documented
