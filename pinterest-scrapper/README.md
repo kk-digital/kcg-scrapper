@@ -97,6 +97,17 @@ case of pause or error.
 
 ---
 
+`start-scraping-list <query-list> [--headed] [max-workers] [output] [proxy-list]`
+
+Same as `start-scraping` but you can provide a query or list of queries in the
+format `'test query 1, query2'`. Make sure to quote the argument and separate queries by a comma `,`.
+
+#### Parameters
+
+- `query-list` type string: list of queries to scrape
+
+---
+
 ### Global parameters
 
 - `headed` type boolean, default=0: whether to show browser GUI

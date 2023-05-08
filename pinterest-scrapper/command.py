@@ -85,6 +85,23 @@ class Command:
                 exc_info=True,
             )
 
+    def start_scraping_list(
+        self,
+        query_list: str,
+        headed: bool = False,
+        max_workers: int = 1,
+        output: str = None,
+        proxy_list: str = None,
+    ):
+        for query in query_list:
+            self.start_scraping(
+                query=query,
+                headed=headed,
+                max_workers=max_workers,
+                output=output,
+                proxy_list=proxy_list,
+            )
+
     def test_scrape_board(
         self,
         url: str,
