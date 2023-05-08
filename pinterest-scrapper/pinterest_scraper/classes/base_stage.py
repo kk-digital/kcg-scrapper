@@ -16,7 +16,7 @@ logger = logging.getLogger(f"scraper.{__name__}")
 
 class BaseStage:
     def __init__(
-        self, job: Row | dict, max_workers: int = None, headless: bool = True
+            self, job: Row | dict, max_workers: int = None, headless: bool = True
     ) -> None:
         self._db = db
         self._job = job
@@ -45,7 +45,7 @@ class BaseStage:
         options.add_argument("--blink-settings=imagesEnabled=false")
         options.add_argument("--disable-extensions")
         if self.__get_next_proxy:
-            options.add_argument(f"--proxy-server=https://{self.__get_next_proxy()}")
+            options.add_argument(f"--proxy-server={self.__get_next_proxy()}")
             self.__last_proxy_rotation = datetime.now()
 
         self._driver = webdriver.Chrome(options=options)
