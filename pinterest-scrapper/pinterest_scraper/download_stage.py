@@ -112,7 +112,7 @@ class DownloadStage(BaseStage):
         )
 
     def __start_scraping(
-        self, pin_queue: SimpleQueue, stop_event: threading.Event
+            self, pin_queue: SimpleQueue, stop_event: threading.Event
     ) -> None:
         self.__init_output_dir()
         self.__session = Session()
@@ -127,24 +127,26 @@ class DownloadStage(BaseStage):
                 super().start_scraping()
                 pin_url = pin["url"]
                 pin_uuid = uuid.uuid1()
-                img_name = self.__download_pin_img(pin, pin_uuid)
                 self.__save_pin_html(pin_url, pin_uuid)
+                img_name = self.__download_pin_img(pin, pin_uuid)
                 self.__add_to_json(pin_uuid, img_name, pin_url)
                 self._db.update_board_or_pin_done_by_url("pin", pin["url"], 1)
                 logger.info(f"Successfully scraped pin {pin['url']}.")
-                pin = pin_queue.get_nowait()
                 retries = 0
+                pin = pin_queue.get_nowait()
                 time.sleep(DOWNLOAD_DELAY)
 
+            except queue.Empty:
+                self.close()
+                self.__session.close()
+                break
             except (RequestException, TimeoutException):
                 if retries == MAX_RETRY:
                     self.__session.close()
                     stop_event.set()
                     raise
 
-                logger.exception(
-                    f"Exception downloading pin: {pin['url']}, retrying..."
-                )
+                logger.exception(f"Exception downloading pin: {pin['url']}, retrying...")
                 retries += 1
             except:
                 self.__session.close()

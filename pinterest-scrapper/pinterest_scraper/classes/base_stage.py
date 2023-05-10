@@ -1,4 +1,6 @@
 import logging
+import threading
+import time
 from datetime import datetime
 from sqlite3 import Row
 from typing import Optional
@@ -12,11 +14,12 @@ from pinterest_scraper import db, utils
 from settings import TIMEOUT, PROXY_ROTATE_MINUTES
 
 logger = logging.getLogger(f"scraper.{__name__}")
+lock = threading.Lock()
 
 
 class BaseStage:
     def __init__(
-            self, job: Row | dict, max_workers: int = None, headless: bool = True
+        self, job: Row | dict, max_workers: int = None, headless: bool = True
     ) -> None:
         self._db = db
         self._job = job
@@ -48,7 +51,11 @@ class BaseStage:
             options.add_argument(f"--proxy-server={self.__get_next_proxy()}")
             self.__last_proxy_rotation = datetime.now()
 
-        self._driver = webdriver.Chrome(options=options)
+        with lock:
+            # give chance to uc to delete patched driver
+            time.sleep(2)
+            self._driver = webdriver.Chrome(options=options)
+
         self._driver.set_window_size(1280, 1024)
         self._driver.set_page_load_timeout(TIMEOUT)
         self._wait = WebDriverWait(self._driver, TIMEOUT)
@@ -75,5 +82,8 @@ class BaseStage:
         self.__init_driver()
 
     def close(self) -> None:
+        if not self._driver:
+            return
+
         self._driver.quit()
         logger.debug("Driver closed.")
