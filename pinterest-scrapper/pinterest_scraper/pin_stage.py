@@ -74,8 +74,9 @@ class PinStage(ScrollStage):
         self._db.create_many_pin(rows)
 
     def __start_scraping(
-        self, board_queue: SimpleQueue, stop_event: threading.Event
+            self, board_queue: SimpleQueue, stop_event: threading.Event
     ) -> None:
+
         board = board_queue.get_nowait()
         retries = 0
         while board:
@@ -89,18 +90,19 @@ class PinStage(ScrollStage):
                 self._scrape()
                 self._db.update_board_or_pin_done_by_url("board", url, 1)
                 logger.info(f"Successfully scraped board {url}.")
-                board = board_queue.get_nowait()
                 retries = 0
+                board = board_queue.get_nowait()
 
+            except queue.Empty:
+                self.close()
+                break
             except TimeoutException:
                 if retries == MAX_RETRY:
                     self.close()
                     stop_event.set()
                     raise
 
-                logger.exception(
-                    f"Timeout scraping boards from {board['url']}, retrying..."
-                )
+                logger.exception(f"Timeout scraping boards from {board['url']}, retrying...")
                 retries += 1
             except:
                 self.close()
