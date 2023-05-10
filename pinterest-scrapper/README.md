@@ -15,6 +15,9 @@ The number of workers to run can be specified. Each worker is an instance of a C
 enough free ram, ~2 GB per worker. If using proxies, set workers to at most 25% of available proxies, so when the
 scraper rotates it uses a not recently used proxy.
 
+The output folder can be configured via cli parameters, otherwise defaults to project root `output` folder. On the other
+hand, logs are always stored in `logs` folder in the root dir as well.
+
 Most general configuration can be provided via cli parameters. For detailed control you can modify any entry in
 the `settings.py` file; each entry is documented.
 
