@@ -48,7 +48,7 @@ class BaseStage:
 
         with lock:
             if build_next_proxy_extension:
-                options.add_extension(build_next_proxy_extension())
+                options.add_argument(f'--load-extension={build_next_proxy_extension()}')
                 self.__last_proxy_rotation = datetime.now()
 
             # give chance to uc to delete patched driver
