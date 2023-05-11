@@ -9,12 +9,12 @@ import undetected_chromedriver as webdriver
 from fake_useragent import UserAgent
 from selenium.webdriver.support.wait import WebDriverWait
 
-import settings
 from pinterest_scraper import db, utils
-from settings import TIMEOUT, PROXY_ROTATE_MINUTES
+from settings import PROXY_ROTATE_MINUTES, TIMEOUT
 
 logger = logging.getLogger(f"scraper.{__name__}")
 lock = threading.Lock()
+build_next_proxy_extension = utils.init_proxy()
 
 
 class BaseStage:
@@ -27,7 +27,6 @@ class BaseStage:
         self._driver: Optional[webdriver.Chrome] = None
         self._wait: Optional[WebDriverWait] = None
         self._headless = headless
-        self.__get_next_proxy = None
         self.__last_proxy_rotation = None
 
     def __init_driver(self) -> None:
@@ -46,12 +45,12 @@ class BaseStage:
         options.add_argument("--log-level=3")
         options.add_argument(f"user-agent={ua}")
         options.add_argument("--blink-settings=imagesEnabled=false")
-        options.add_argument("--disable-extensions")
-        if self.__get_next_proxy:
-            options.add_argument(f"--proxy-server={self.__get_next_proxy()}")
-            self.__last_proxy_rotation = datetime.now()
 
         with lock:
+            if build_next_proxy_extension:
+                options.add_extension(build_next_proxy_extension())
+                self.__last_proxy_rotation = datetime.now()
+
             # give chance to uc to delete patched driver
             time.sleep(2)
             self._driver = webdriver.Chrome(options=options)
@@ -62,6 +61,9 @@ class BaseStage:
         logger.debug("Driver set up.")
 
     def __check_proxy_rotation(self) -> None:
+        if not build_next_proxy_extension:
+            return
+
         delta = datetime.now() - self.__last_proxy_rotation
         delta_min = delta.total_seconds() / 60
         if delta_min >= PROXY_ROTATE_MINUTES:
@@ -71,15 +73,8 @@ class BaseStage:
 
     def start_scraping(self) -> None:
         logger.debug("Starting scraping.")
-
-        proxylist_path = settings.PROXY_LIST_PATH
-        if proxylist_path:
-            if not self.__get_next_proxy:
-                self.__get_next_proxy = utils.init_proxy_list(proxylist_path)
-            else:
-                self.__check_proxy_rotation()
-
         self.__init_driver()
+        self.__check_proxy_rotation()
 
     def close(self) -> None:
         if not self._driver:

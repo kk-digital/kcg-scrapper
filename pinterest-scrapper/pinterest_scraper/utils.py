@@ -1,10 +1,12 @@
 import csv
 import itertools
 import logging
-import threading
 import time
+import zipfile
 from functools import wraps
 from typing import Callable
+
+from settings import PROXY_LIST_PATH
 
 logger = logging.getLogger(f"scraper.{__name__}")
 
@@ -26,17 +28,79 @@ def time_perf(log_str: str):
     return decorator
 
 
-def init_proxy_list(proxy_list_path: str) -> Callable:
-    lock = threading.Lock()
+def init_proxy() -> Callable | None:
+    if not PROXY_LIST_PATH:
+        return
 
-    with open(proxy_list_path, "r", newline="", encoding="utf-8") as fh:
+    with open(PROXY_LIST_PATH, "r", newline="", encoding="utf-8") as fh:
         csv_reader = csv.reader(fh)
         proxy_list = [row[0] for row in csv_reader]
 
     proxy_list = itertools.cycle(proxy_list)
 
-    def get_next_proxy() -> str:
-        with lock:
-            return next(proxy_list)
+    manifest_json = """
+    {
+        "version": "1.0.0",
+        "manifest_version": 2,
+        "name": "Proxies",
+        "permissions": [
+            "proxy",
+            "tabs",
+            "unlimitedStorage",
+            "storage",
+            "<all_urls>",
+            "webRequest",
+            "webRequestBlocking"
+        ],
+        "background": {
+            "scripts": ["background.js"]
+        },
+        "minimum_chrome_version":"22.0.0"
+    }
+    """
+    background_js = """
+    var config = {
+            mode: "fixed_servers",
+            rules: {
+              singleProxy: {
+                scheme: "http",
+                host: "%s",
+                port: parseInt(%s)
+              },
+              bypassList: ["localhost"]
+            }
+          };
 
-    return get_next_proxy
+    chrome.proxy.settings.set({value: config, scope: "regular"}, function() {});
+
+    function callbackFn(details) {
+        return {
+            authCredentials: {
+                username: "%s",
+                password: "%s"
+            }
+        };
+    }
+
+    chrome.webRequest.onAuthRequired.addListener(
+                callbackFn,
+                {urls: ["<all_urls>"]},
+                ['blocking']
+    );
+    """
+    extension_name = "proxies_extension.zip"
+
+    def build_next_proxy_extension() -> str:
+        nonlocal background_js
+        proxy = next(proxy_list)
+        endpoint, port, username, password = proxy.split(":")
+
+        background_js = background_js % (endpoint, port, username, password)
+
+        with zipfile.ZipFile(extension_name, "w") as zp:
+            zp.writestr("manifest.json", manifest_json)
+            zp.writestr("background.js", background_js)
+
+        return extension_name
+
+    return build_next_proxy_extension
