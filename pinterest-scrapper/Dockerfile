@@ -18,6 +18,7 @@ RUN dpkg -i google-chrome-stable_current_amd64.deb
 
 # Clone repo
 WORKDIR /
+
 RUN git clone https://github.com/kk-digital/kcg-scrapper && mv kcg-scrapper/pinterest-scrapper /pinterest-scrapper
 WORKDIR /pinterest-scrapper
 
@@ -26,6 +27,7 @@ WORKDIR /pinterest-scrapper
 RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10
 RUN apt install -y python3.10-venv
 RUN pip3 install --no-cache -r requirements.txt
+
 
 EXPOSE 22
 CMD ["/usr/sbin/sshd", "-D"]
