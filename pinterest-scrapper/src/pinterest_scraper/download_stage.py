@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import queue
+import re
 import shutil
 import threading
 import time
@@ -14,11 +15,11 @@ from sqlite3 import Row
 from typing import List, Optional
 from urllib.parse import urlparse, urlunparse
 
-from requests import Session, RequestException, Response
+from requests import RequestException, Response, Session
 from selenium.common import TimeoutException
 
 from pinterest_scraper.classes.base_stage import BaseStage
-from settings import MAX_RETRY, OUTPUT_FOlDER, TIMEOUT, DOWNLOAD_DELAY, MAX_OUTPUT_SIZE
+from settings import DOWNLOAD_DELAY, MAX_OUTPUT_SIZE, MAX_RETRY, TIMEOUT, OUTPUT_FOlDER
 
 logger = logging.getLogger(f"scraper.{__name__}")
 
@@ -99,7 +100,14 @@ class DownloadStage(BaseStage):
 
         file_path = path.join(self.__html_path, f"{pin_uuid}.html")
         with open(file_path, "w", encoding="utf-8") as fh:
-            fh.write(self._driver.page_source)
+            source_code = self._driver.page_source
+            source_code = re.sub(
+                "<script.*?>.*?</script>|<style.*?>.*?</style>",
+                "",
+                source_code,
+                flags=re.DOTALL,
+            )
+            fh.write(source_code)
 
     def __add_to_json(self, pin_uuid: uuid.UUID, img_name: str, pin_url: str) -> None:
         self.__json_entries.put_nowait(
@@ -112,7 +120,7 @@ class DownloadStage(BaseStage):
         )
 
     def __start_scraping(
-            self, pin_queue: SimpleQueue, stop_event: threading.Event
+        self, pin_queue: SimpleQueue, stop_event: threading.Event
     ) -> None:
         self.__init_output_dir()
         self.__session = Session()
@@ -146,7 +154,9 @@ class DownloadStage(BaseStage):
                     stop_event.set()
                     raise
 
-                logger.exception(f"Exception downloading pin: {pin['url']}, retrying...")
+                logger.exception(
+                    f"Exception downloading pin: {pin['url']}, retrying..."
+                )
                 retries += 1
             except:
                 self.__session.close()
@@ -162,10 +172,10 @@ class DownloadStage(BaseStage):
 
         for file in os.listdir(self.__images_path):
             if create_new_zip:
-                new_zip_name = zip_name.format(self._job["query"], str(zip_count).zfill(6))
-                zip_path = path.join(
-                    self.__output_path, new_zip_name
+                new_zip_name = zip_name.format(
+                    self._job["query"], str(zip_count).zfill(6)
                 )
+                zip_path = path.join(self.__output_path, new_zip_name)
                 zipf = zipfile.ZipFile(file=zip_path, mode="w")
                 create_new_zip = False
 
