@@ -1,8 +1,8 @@
 import csv
 import itertools
 import logging
+import os
 import time
-import zipfile
 from functools import wraps
 from typing import Callable
 
@@ -88,18 +88,24 @@ def init_proxy() -> Callable | None:
                 ['blocking']
     );
     """
-    extension_name = "proxies_extension.zip"
+    extension_name = "proxies_extension"
+    os.makedirs(extension_name, exist_ok=True)
 
     def build_next_proxy_extension() -> str:
         nonlocal background_js
         proxy = next(proxy_list)
+        logger.debug(f"Using proxy: {proxy}")
         endpoint, port, username, password = proxy.split(":")
+        new_background_js = background_js % (endpoint, port, username, password)
 
-        background_js = background_js % (endpoint, port, username, password)
-
-        with zipfile.ZipFile(extension_name, "w") as zp:
-            zp.writestr("manifest.json", manifest_json)
-            zp.writestr("background.js", background_js)
+        files_to_create = {
+            "manifest.json": manifest_json,
+            "background.js": new_background_js,
+        }
+        for basename, content in files_to_create.items():
+            file_path = f"{extension_name}/{basename}"
+            with open(file_path, "w", encoding="utf-8") as fh:
+                fh.write(content)
 
         return extension_name
 

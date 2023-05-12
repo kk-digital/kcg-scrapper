@@ -154,7 +154,7 @@ class DownloadStage(BaseStage):
                 raise
 
     def __archive_output(self) -> None:
-        zip_count = 0
+        zip_count = 1
         zip_name = "{}-{}.zip"
         create_new_zip = True
         zipf = None
@@ -162,8 +162,9 @@ class DownloadStage(BaseStage):
 
         for file in os.listdir(self.__images_path):
             if create_new_zip:
+                new_zip_name = zip_name.format(self._job["query"], str(zip_count).zfill(6))
                 zip_path = path.join(
-                    self.__output_path, zip_name.format(zip_count, self._job["query"])
+                    self.__output_path, new_zip_name
                 )
                 zipf = zipfile.ZipFile(file=zip_path, mode="w")
                 create_new_zip = False

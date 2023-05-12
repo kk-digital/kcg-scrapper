@@ -1,3 +1,4 @@
+import csv
 import logging
 from os import path
 
@@ -93,9 +94,11 @@ class Command:
         output: str = None,
         proxy_list: str = None,
     ):
-        for query in query_list:
-            self.start_scraping(
-                query=query,
+        with open(query_list, "r", newline="", encoding="utf-8") as fh:
+            csv_reader = csv.reader(fh)
+            for row in csv_reader:
+                self.start_scraping(
+                query=row[0].strip(),
                 headed=headed,
                 max_workers=max_workers,
                 output=output,
