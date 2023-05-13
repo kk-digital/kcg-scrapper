@@ -3,11 +3,11 @@ import math
 import time
 from typing import Callable
 
-from selenium.common import StaleElementReferenceException, NoSuchElementException
+from selenium.common import NoSuchElementException, StaleElementReferenceException
 from selenium.webdriver import ActionChains
 
+from settings import MAX_RETRY, SCROLL_DELAY, TIMEOUT
 from src.classes.base_stage import BaseStage
-from settings import TIMEOUT, MAX_RETRY, SCROLL_DELAY
 
 logger = logging.getLogger(f"scraper.{__name__}")
 
@@ -16,7 +16,7 @@ class ScrollStage(BaseStage):
     def __get_scroll_height(self) -> int:
         return self._driver.execute_script("return document.body.scrollHeight")
 
-    def _scroll_and_scrape(self, fn: Callable) -> None:
+    def _scroll_and_scrape(self, fn: Callable, check_more_like_this=True) -> None:
         logger.debug("Starting to scroll.")
         # old_body_height = self.get_scroll_height()
         inner_height = self._driver.execute_script("return window.innerHeight")
@@ -49,6 +49,9 @@ class ScrollStage(BaseStage):
 
             if not end_of_page:
                 seconds_sleep = 0
+
+            if not check_more_like_this:
+                continue
 
             # check if more like this el enters viewport
             el_top = self._driver.execute_script(

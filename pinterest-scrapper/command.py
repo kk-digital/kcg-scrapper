@@ -115,18 +115,27 @@ class Command:
         proxy_list: str = None,
     ):
         query_rows = utils.read_csv(query_list)
-        output_rows = []
-        total_board_count = 0
-        total_pin_count = 0
+        job_ids = []
         for query_row in query_rows:
             query = query_row[0].strip()
+            job = db.get_job_by_query(query)
+            if job and job['stage'] == 'pin':
+                job_ids.append(job['id'])
+                continue
+
             job = self.start_scraping(
                 query=query,
                 headed=headed,
                 proxy_list=proxy_list,
                 execute_next_stage=False,
             )
-            boards = db.get_all_board_or_pin_by_job_id("board", job["id"])
+            job_ids.append(job["id"])
+
+        output_rows = []
+        total_board_count = 0
+        total_pin_count = 0
+        for id in job_ids:
+            boards = db.get_all_board_or_pin_by_job_id("board", id)
             boards = [
                 dict(
                     title=board["title"], url=board["url"], pin_count=board["pin_count"]

@@ -2,10 +2,11 @@ import logging
 import re
 import urllib.parse
 from collections import namedtuple
+from sqlite3 import Row
 from typing import Callable
 from urllib.parse import urljoin
 
-import selenium
+from bs4 import BeautifulSoup
 from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
@@ -20,31 +21,44 @@ URL = "https://www.pinterest.com/search/boards/?q={}&rs=typed"
 
 
 class BoardStage(ScrollStage):
-    @time_perf("scroll to end of boards page")
-    def _scroll_and_scrape(self, fn: Callable) -> None:
-        super()._scroll_and_scrape(fn)
+    def __init__(
+        self, job: Row | dict, max_workers: int = None, headless: bool = True
+    ) -> None:
+        super().__init__(job, max_workers, headless)
+        self.__first_wait = False
 
-    def _scrape_data(self, boards_data: set) -> None:
-        boards = self._wait.until(
-            ec.presence_of_all_elements_located(
-                (By.CSS_SELECTOR, "div[role=listitem] a")
+    @time_perf("scroll to end of boards page")
+    def _scroll_and_scrape(self, fn: Callable, check_more_like_this=True) -> None:
+        return super()._scroll_and_scrape(fn, check_more_like_this)
+
+    def _scrape_data(self, boards_data: list) -> None:
+        board_selector = "div[role=listitem] a"
+
+        if not self.__first_wait:
+            self._wait.until(
+                ec.presence_of_element_located((By.CSS_SELECTOR, board_selector))
             )
-        )
+            self.__first_wait = True
+
+        soup = BeautifulSoup(self._driver.page_source, "lxml")
+        boards = soup.select(board_selector)
 
         data = []
         for board in boards:
-            url = board.get_attribute("href")
-            title = board.find_element(By.CSS_SELECTOR, "[title]").text
-            pin_count = board.find_element(By.CSS_SELECTOR, ".O2T.swG").text
+            url = board["href"]
+            title = board.select_one("[title]").string
+            pin_count = board.select_one(".O2T.swG").get_text()
             pin_count = int(re.search(r"\d+", pin_count).group())
             BoardData = namedtuple("BoardData", ["url", "title", "pin_count"])
             data.append(BoardData(url, title, pin_count))
-        boards_data.update(data)
+        boards_data += data
 
     def _scrape(self) -> None:
-        boards_data = set()
+        boards_data = []
 
-        self._scroll_and_scrape(lambda: self._scrape_data(boards_data))
+        self._scroll_and_scrape(
+            lambda: self._scrape_data(boards_data), check_more_like_this=False
+        )
 
         rows = [
             (
@@ -82,10 +96,10 @@ class BoardStage(ScrollStage):
         self.close()
         self._db.update_job_stage(self._job["id"], "pin")
         logger.info("Finished scraping of boards. Starting pins stage.")
-        
+
         if not execute_next_stage:
             return
-        
+
         PinStage(
             job=self._job, max_workers=self._max_workers, headless=self._headless
         ).start_scraping()
