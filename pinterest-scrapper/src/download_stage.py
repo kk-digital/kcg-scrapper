@@ -17,7 +17,7 @@ from urllib.parse import urlparse, urlunparse
 from requests import Session, RequestException, Response
 from selenium.common import TimeoutException
 
-from pinterest_scraper.classes.base_stage import BaseStage
+from src.classes.base_stage import BaseStage
 from settings import MAX_RETRY, OUTPUT_FOlDER, TIMEOUT, DOWNLOAD_DELAY, MAX_OUTPUT_SIZE
 
 logger = logging.getLogger(f"scraper.{__name__}")
@@ -112,7 +112,7 @@ class DownloadStage(BaseStage):
         )
 
     def __start_scraping(
-            self, pin_queue: SimpleQueue, stop_event: threading.Event
+        self, pin_queue: SimpleQueue, stop_event: threading.Event
     ) -> None:
         self.__init_output_dir()
         self.__session = Session()
@@ -146,7 +146,9 @@ class DownloadStage(BaseStage):
                     stop_event.set()
                     raise
 
-                logger.exception(f"Exception downloading pin: {pin['url']}, retrying...")
+                logger.exception(
+                    f"Exception downloading pin: {pin['url']}, retrying..."
+                )
                 retries += 1
             except:
                 self.__session.close()
@@ -162,10 +164,10 @@ class DownloadStage(BaseStage):
 
         for file in os.listdir(self.__images_path):
             if create_new_zip:
-                new_zip_name = zip_name.format(self._job["query"], str(zip_count).zfill(6))
-                zip_path = path.join(
-                    self.__output_path, new_zip_name
+                new_zip_name = zip_name.format(
+                    self._job["query"], str(zip_count).zfill(6)
                 )
+                zip_path = path.join(self.__output_path, new_zip_name)
                 zipf = zipfile.ZipFile(file=zip_path, mode="w")
                 create_new_zip = False
 

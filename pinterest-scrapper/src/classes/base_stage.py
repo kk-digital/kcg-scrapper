@@ -9,7 +9,7 @@ import undetected_chromedriver as webdriver
 from fake_useragent import UserAgent
 from selenium.webdriver.support.wait import WebDriverWait
 
-from pinterest_scraper import db, utils
+from src import db, utils
 from settings import PROXY_ROTATE_MINUTES, TIMEOUT
 
 logger = logging.getLogger(f"scraper.{__name__}")
@@ -48,7 +48,7 @@ class BaseStage:
 
         with lock:
             if build_next_proxy_extension:
-                options.add_argument(f'--load-extension={build_next_proxy_extension()}')
+                options.add_argument(f"--load-extension={build_next_proxy_extension()}")
                 self.__last_proxy_rotation = datetime.now()
 
             # give chance to uc to delete patched driver

@@ -10,9 +10,10 @@ from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 
-from pinterest_scraper.classes.scroll_stage import ScrollStage
-from pinterest_scraper.download_stage import DownloadStage
-from pinterest_scraper.utils import time_perf
+# from pinterest_scraper.classes.scroll_stage import ScrollStage
+from src.classes.scroll_stage import ScrollStage
+from src.download_stage import DownloadStage
+from src.utils import time_perf
 from settings import MAX_RETRY
 
 logger = logging.getLogger(f"scraper.{__name__}")
@@ -74,9 +75,8 @@ class PinStage(ScrollStage):
         self._db.create_many_pin(rows)
 
     def __start_scraping(
-            self, board_queue: SimpleQueue, stop_event: threading.Event
+        self, board_queue: SimpleQueue, stop_event: threading.Event
     ) -> None:
-
         board = board_queue.get_nowait()
         retries = 0
         while board:
@@ -102,7 +102,9 @@ class PinStage(ScrollStage):
                     stop_event.set()
                     raise
 
-                logger.exception(f"Timeout scraping boards from {board['url']}, retrying...")
+                logger.exception(
+                    f"Timeout scraping boards from {board['url']}, retrying..."
+                )
                 retries += 1
             except:
                 self.close()

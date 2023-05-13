@@ -4,9 +4,9 @@ from os import path
 
 import fire
 
-import logging_config
 import settings
-from pinterest_scraper import db
+from src import logging_config
+from src.pinterest_scraper import db
 
 
 class Command:
@@ -60,15 +60,15 @@ class Command:
 
         stage = job["stage"]
         if stage == "board":
-            from pinterest_scraper.board_stage import BoardStage
+            from src.board_stage import BoardStage
 
             stage_cls = BoardStage
         elif stage == "pin":
-            from pinterest_scraper.pin_stage import PinStage
+            from src.pin_stage import PinStage
 
             stage_cls = PinStage
         elif stage == "download":
-            from pinterest_scraper.download_stage import DownloadStage
+            from src.download_stage import DownloadStage
 
             stage_cls = DownloadStage
         else:
@@ -98,12 +98,12 @@ class Command:
             csv_reader = csv.reader(fh)
             for row in csv_reader:
                 self.start_scraping(
-                query=row[0].strip(),
-                headed=headed,
-                max_workers=max_workers,
-                output=output,
-                proxy_list=proxy_list,
-            )
+                    query=row[0].strip(),
+                    headed=headed,
+                    max_workers=max_workers,
+                    output=output,
+                    proxy_list=proxy_list,
+                )
 
     def test_scrape_board(
         self,

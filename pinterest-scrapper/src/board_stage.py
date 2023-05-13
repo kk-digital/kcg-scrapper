@@ -7,9 +7,9 @@ from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 
-from pinterest_scraper.classes.scroll_stage import ScrollStage
-from pinterest_scraper.pin_stage import PinStage
-from pinterest_scraper.utils import time_perf
+from src.classes.scroll_stage import ScrollStage
+from src.pin_stage import PinStage
+from src.utils import time_perf
 from settings import MAX_RETRY
 
 logger = logging.getLogger(f"scraper.{__name__}")

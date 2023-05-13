@@ -6,7 +6,7 @@ from typing import Callable
 from selenium.common import StaleElementReferenceException, NoSuchElementException
 from selenium.webdriver import ActionChains
 
-from pinterest_scraper.classes.base_stage import BaseStage
+from src.classes.base_stage import BaseStage
 from settings import TIMEOUT, MAX_RETRY, SCROLL_DELAY
 
 logger = logging.getLogger(f"scraper.{__name__}")
