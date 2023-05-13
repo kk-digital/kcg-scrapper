@@ -6,10 +6,16 @@ import time
 from functools import wraps
 from typing import Callable
 
-from settings import PROXY_LIST_PATH
+import settings
 
 logger = logging.getLogger(f"scraper.{__name__}")
 
+
+def read_csv(filename) -> list:
+    with open(filename, "r", newline="", encoding="utf-8") as fh:
+            csv_reader = csv.reader(fh)
+            return [row for row in csv_reader]
+            
 
 def time_perf(log_str: str):
     def decorator(f):
@@ -29,10 +35,9 @@ def time_perf(log_str: str):
 
 
 def init_proxy() -> Callable | None:
-    if not PROXY_LIST_PATH:
+    if not settings.PROXY_LIST_PATH:
         return
-
-    with open(PROXY_LIST_PATH, "r", newline="", encoding="utf-8") as fh:
+    with open(settings.PROXY_LIST_PATH, "r", newline="", encoding="utf-8") as fh:
         csv_reader = csv.reader(fh)
         proxy_list = [row[0] for row in csv_reader]
 

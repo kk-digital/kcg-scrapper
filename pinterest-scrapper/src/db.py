@@ -22,6 +22,8 @@ def _create_tables() -> None:
         CREATE TABLE IF NOT EXISTS board(
         job_id INTEGER NOT NULL,
         url TEXT NOT NULL UNIQUE,
+        title TEXT NOT NULL,
+        pin_count INTEGER NOT NULL,
         done INT NOT NULL,
         FOREIGN KEY(job_id) REFERENCES job(id)
         );
@@ -117,8 +119,8 @@ def update_job_stage(job_id: int, stage: str) -> None:
 def create_many_board(rows: List[tuple]) -> None:
     _conn.executemany(
         f"""
-        INSERT OR IGNORE INTO board(job_id, url, done)
-        VALUES(?, ?, 0)
+        INSERT OR IGNORE INTO board(job_id, url, title, pin_count, done)
+        VALUES(?, ?, ?, ?, 0)
         """,
         rows,
     )

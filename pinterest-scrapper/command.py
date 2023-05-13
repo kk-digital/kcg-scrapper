@@ -1,12 +1,12 @@
-import csv
+import json
 import logging
+from datetime import datetime
 from os import path
 
 import fire
 
 import settings
-from src import logging_config
-from src.pinterest_scraper import db
+from src import db, logging_config, utils
 
 
 class Command:
@@ -45,6 +45,7 @@ class Command:
         max_workers: int = 1,
         output: str = None,
         proxy_list: str = None,
+        **kwargs,
     ):
         job = db.get_job_by_query(query)
 
@@ -79,7 +80,9 @@ class Command:
             stage_instance = stage_cls(
                 job=job, max_workers=max_workers, headless=not headed
             )
-            stage_instance.start_scraping()
+            stage_instance.start_scraping(**kwargs)
+
+            return job
         except:
             self.logger.critical(
                 f'Unable to handle exception on {stage_cls.__name__}, for query "{job["query"]}".',
@@ -94,16 +97,68 @@ class Command:
         output: str = None,
         proxy_list: str = None,
     ):
-        with open(query_list, "r", newline="", encoding="utf-8") as fh:
-            csv_reader = csv.reader(fh)
-            for row in csv_reader:
-                self.start_scraping(
-                    query=row[0].strip(),
-                    headed=headed,
-                    max_workers=max_workers,
-                    output=output,
-                    proxy_list=proxy_list,
+        rows = utils.read_csv(query_list)
+        for row in rows:
+            self.start_scraping(
+                query=row[0].strip(),
+                headed=headed,
+                max_workers=max_workers,
+                output=output,
+                proxy_list=proxy_list,
+            )
+
+    def board_search(
+        self,
+        query_list: str,
+        headed: bool = False,
+        output: str = None,
+        proxy_list: str = None,
+    ):
+        query_rows = utils.read_csv(query_list)
+        output_rows = []
+        total_board_count = 0
+        total_pin_count = 0
+        for query_row in query_rows:
+            query = query_row[0].strip()
+            job = self.start_scraping(
+                query=query,
+                headed=headed,
+                proxy_list=proxy_list,
+                execute_next_stage=False,
+            )
+            boards = db.get_all_board_or_pin_by_job_id("board", job["id"])
+            boards = [
+                dict(
+                    title=board["title"], url=board["url"], pin_count=board["pin_count"]
                 )
+                for board in boards
+            ]
+            board_count = len(boards)
+            pin_count = sum([board["pin_count"] for board in boards])
+            total_board_count += board_count
+            total_pin_count += pin_count
+            output_rows.append(
+                dict(
+                    query=query,
+                    board_count=board_count,
+                    total_pin_count=pin_count,
+                    boards=boards,
+                )
+            )
+
+        output_path = path.expanduser(output) if output else "."
+        output_path = path.join(
+            output_path, f"board-search-{datetime.now().timestamp()}.json"
+        )
+        with open(output_path, "w", encoding="utf-8") as fh:
+            json.dump(
+                dict(
+                    total_board_count=total_board_count,
+                    total_pin_count=total_pin_count,
+                    results=output_rows,
+                ),
+                fh,
+            )
 
     def test_scrape_board(
         self,
@@ -121,7 +176,7 @@ class Command:
 
         db.create_job(query, "pin")
         job = db.get_job_by_query(query)
-        db.create_many_board([(job["id"], url)])
+        db.create_many_board([(job["id"], url, "test title", 0)])
 
         self.start_scraping(
             query=query,
