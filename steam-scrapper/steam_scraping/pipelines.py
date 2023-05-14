@@ -2,6 +2,7 @@ import json
 import os
 import urllib
 import urllib.parse
+import uuid
 from os import path
 from pathlib import PurePosixPath
 
@@ -33,6 +34,8 @@ class MyFilesPipeline(FilesPipeline):
     def file_path(self, request, response=None, info=None, *, item=None):
         adapter = ItemAdapter(item)
         filename = PurePosixPath(urllib.parse.urlparse(request.url).path).name
+        ext = path.splitext(filename)[1]
+        filename = f'{uuid.uuid1()}{ext}'
         return f'{adapter["app_id"]}/{filename}'
 
     def get_media_requests(self, item, info):
