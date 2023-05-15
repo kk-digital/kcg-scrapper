@@ -3,7 +3,7 @@ import re
 import urllib.parse
 from collections import namedtuple
 from sqlite3 import Row
-from typing import Callable
+from typing import Callable, Optional
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
@@ -53,7 +53,7 @@ class BoardStage(ScrollStage):
             data.append(BoardData(url, title, pin_count))
         boards_data.update(data)
 
-    def _scrape(self) -> list | None:
+    def _scrape(self) -> Optional[list]:
         boards_data = set()
 
         self._scroll_and_scrape(lambda: self._scrape_data(boards_data))
@@ -74,7 +74,7 @@ class BoardStage(ScrollStage):
 
         self._db.create_many_board(rows)
 
-    def start_scraping(self, board_search: bool = False) -> list | None:
+    def start_scraping(self, board_search: bool = False) -> Optional[list]:
         self.__board_search = board_search
         super().start_scraping()
 

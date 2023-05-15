@@ -1,9 +1,8 @@
 import json
 import logging
 from datetime import datetime
-from enum import unique
 from os import path
-from typing import final
+from typing import Optional
 
 import fire
 
@@ -51,7 +50,7 @@ class Command:
         max_workers: int = 1,
         output: str = None,
         proxy_list: str = None,
-    ) -> list | None:
+    ) -> Optional[list]:
         job = db.get_or_create_job_by_query(query)
 
         if output:

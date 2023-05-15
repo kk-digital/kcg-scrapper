@@ -1,12 +1,12 @@
 import logging
 import sqlite3
 from sqlite3 import Row
-from typing import List
+from typing import List, Optional
 
 import settings
 
 logger = logging.getLogger(f"scraper.{__name__}")
-_conn: sqlite3.Connection | None = None
+_conn: Optional[sqlite3.Connection] = None
 
 
 def _create_tables() -> None:
@@ -66,7 +66,7 @@ def create_job(query: str, stage: str = "board") -> int:
     return curr.lastrowid
 
 
-def get_job_by_query(query: str) -> Row | None:
+def get_job_by_query(query: str) -> Optional[Row]:
     curr = _conn.execute(
         """
     SELECT * FROM job
