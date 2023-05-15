@@ -1,10 +1,11 @@
 import csv
+import itertools
 import logging
 import os
 import time
 from datetime import datetime
 from functools import wraps
-from typing import Callable
+from typing import Optional
 
 import settings
 
@@ -34,14 +35,7 @@ def time_perf(log_str: str):
     return decorator
 
 
-def init_proxy() -> Callable | None:
-    if not settings.PROXY_LIST_PATH:
-        return
-    with open(settings.PROXY_LIST_PATH, "r", newline="", encoding="utf-8") as fh:
-        csv_reader = csv.DictReader(fh)
-        proxy_list = [row for row in csv_reader]
-
-    manifest_json = """
+_manifest_json = """
     {
         "version": "1.0.0",
         "manifest_version": 2,
@@ -61,7 +55,7 @@ def init_proxy() -> Callable | None:
         "minimum_chrome_version":"22.0.0"
     }
     """
-    background_js = """
+_background_js = """
     var config = {
             mode: "fixed_servers",
             rules: {
@@ -91,31 +85,46 @@ def init_proxy() -> Callable | None:
                 ['blocking']
     );
     """
-    extension_name = "proxies_extension"
-    os.makedirs(extension_name, exist_ok=True)
+_extension_name = "proxies_extension"
+_proxy_list = None
+_proxy_list_cycle = None
 
-    def build_next_proxy_extension() -> str:
-        nonlocal background_js
-        proxy = min(*proxy_list, key=lambda x: float(x["lastused"]))
-        logger.debug(f"Using proxy: {proxy['proxy']}")
-        endpoint, port, username, password = proxy["proxy"].split(":")
-        new_background_js = background_js % (endpoint, port, username, password)
 
-        files_to_create = {
-            "manifest.json": manifest_json,
-            "background.js": new_background_js,
-        }
-        for basename, content in files_to_create.items():
-            file_path = f"{extension_name}/{basename}"
-            with open(file_path, "w", encoding="utf-8") as fh:
-                fh.write(content)
+def get_next_proxy() -> Optional[str]:
+    global _proxy_list
+    global _proxy_list_cycle
 
-        proxy["lastused"] = datetime.now().timestamp()
-        with open(settings.PROXY_LIST_PATH, "w", encoding="utf-8") as fh:
-            csv_writer = csv.DictWriter(fh, fieldnames=["proxy", "lastused"])
-            csv_writer.writeheader()
-            csv_writer.writerows(proxy_list)
+    if not settings.PROXY_LIST_PATH:
+        return
 
-        return extension_name
+    if not _proxy_list:
+        with open(settings.PROXY_LIST_PATH, "r", newline="", encoding="utf-8") as fh:
+            csv_reader = csv.DictReader(fh)
+            _proxy_list = sorted(list(csv_reader), key=lambda x: float(x["lastused"]))
 
-    return build_next_proxy_extension
+        _proxy_list_cycle = itertools.cycle(_proxy_list)
+        os.makedirs(_extension_name, exist_ok=True)
+
+    proxy = next(_proxy_list_cycle)
+    proxy["lastused"] = datetime.now().timestamp()
+    logger.debug(f"Using proxy: {proxy['proxy']}")
+    endpoint, port, username, password = proxy["proxy"].split(":")
+    new_background_js = _background_js % (endpoint, port, username, password)
+
+    # write proxy extension
+    files_to_create = {
+        "manifest.json": _manifest_json,
+        "background.js": new_background_js,
+    }
+    for filename, content in files_to_create.items():
+        file_path = f"{_extension_name}/{filename}"
+        with open(file_path, "w", encoding="utf-8") as fh:
+            fh.write(content)
+
+    # write proxies to persist lastused col
+    with open(settings.PROXY_LIST_PATH, "w", encoding="utf-8") as fh:
+        csv_writer = csv.DictWriter(fh, fieldnames=["proxy", "lastused"])
+        csv_writer.writeheader()
+        csv_writer.writerows(_proxy_list)
+
+    return _extension_name
