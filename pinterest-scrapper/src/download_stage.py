@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import queue
+import re
 import shutil
 import threading
 import time
@@ -98,7 +99,14 @@ class DownloadStage(BaseStage):
 
         file_path = path.join(self.__html_path, f"{pin_uuid}.html")
         with open(file_path, "w", encoding="utf-8") as fh:
-            fh.write(self._driver.page_source)
+            source_code = self._driver.page_source
+            source_code = re.sub(
+                "<script.*?>.*?</script>|<style.*?>.*?</style>",
+                "",
+                source_code,
+                flags=re.DOTALL,
+            )
+            fh.write(source_code)
 
     def __add_to_json(self, pin_uuid: uuid.UUID, img_name: str, pin_url: str) -> None:
         self.__json_entries.put_nowait(
