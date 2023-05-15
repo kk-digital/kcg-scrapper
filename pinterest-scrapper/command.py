@@ -59,7 +59,7 @@ class Command:
         if proxy_list:
             settings.PROXY_LIST_PATH = path.expanduser(proxy_list)
 
-        stage = "board" if self.start_args["board_search"] else job["stage"]
+        stage = "board" if self.start_args.get("board_search") else job["stage"]
         stages = {
             "board": BoardStage,
             "pin": PinStage,
@@ -122,7 +122,10 @@ class Command:
                 output=output,
                 proxy_list=proxy_list,
             )
-            boards = [dict(url=board[1], title=board[2], pin_count=board[3]) for board in boards]
+            boards = [
+                dict(url=board[1], title=board[2], pin_count=board[3])
+                for board in boards
+            ]
             output_rows.append(dict(query=query, boards=boards))
 
         total_board_count = 0
@@ -132,8 +135,8 @@ class Command:
             board_count = len(row["boards"])
             row["board_count"] = board_count
             total_board_count += board_count
-            unique_boards.update([board['url'] for board in row["boards"]])
-            pin_count = sum([board['pin_count'] for board in row["boards"]])
+            unique_boards.update([board["url"] for board in row["boards"]])
+            pin_count = sum([board["pin_count"] for board in row["boards"]])
             row["pin_count"] = pin_count
             total_pin_count += pin_count
 
