@@ -10,19 +10,18 @@ from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 
-# from pinterest_scraper.classes.scroll_stage import ScrollStage
+import settings
 from src.classes.scroll_stage import ScrollStage
 from src.download_stage import DownloadStage
 from src.utils import time_perf
-from settings import MAX_RETRY
 
 logger = logging.getLogger(f"scraper.{__name__}")
 
 
 class PinStage(ScrollStage):
     @time_perf("scroll to end of board and get all pins")
-    def _scroll_and_scrape(self, fn: Callable) -> None:
-        super()._scroll_and_scrape(fn)
+    def _scroll_and_scrape(self, fn: Callable, check_more_like_this=False) -> None:
+        super()._scroll_and_scrape(fn, check_more_like_this)
 
     def _scrape_urls(self, urls: set) -> None:
         pin_selector = '.qDf > .Hsu .Hsu > .a3i div.wsz.zmN > div[data-test-id="deeplink-wrapper"] a'
@@ -57,11 +56,15 @@ class PinStage(ScrollStage):
                 # re-selecting since on every section click els are removed
                 sections = get_sections()
                 sections[section_n].click()
-                self._scroll_and_scrape(lambda: self._scrape_urls(pin_urls))
+                self._scroll_and_scrape(
+                    lambda: self._scrape_urls(pin_urls), check_more_like_this=True
+                )
                 self._driver.back()
 
         # time to get the pins that are in main page
-        self._scroll_and_scrape(lambda: self._scrape_urls(pin_urls))
+        self._scroll_and_scrape(
+            lambda: self._scrape_urls(pin_urls), check_more_like_this=True
+        )
 
         pin_urls = list(pin_urls)
 
@@ -97,13 +100,13 @@ class PinStage(ScrollStage):
                 self.close()
                 break
             except TimeoutException:
-                if retries == MAX_RETRY:
+                if retries == settings.MAX_RETRY:
                     self.close()
                     stop_event.set()
                     raise
 
                 logger.exception(
-                    f"Timeout scraping boards from {board['url']}, retrying..."
+                    f"Timeout scraping pins from {board['url']}, retrying..."
                 )
                 retries += 1
             except:

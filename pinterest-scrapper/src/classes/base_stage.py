@@ -9,8 +9,8 @@ import undetected_chromedriver as webdriver
 from fake_useragent import UserAgent
 from selenium.webdriver.support.wait import WebDriverWait
 
+import settings
 from src import db, utils
-from settings import PROXY_ROTATE_MINUTES, TIMEOUT
 
 logger = logging.getLogger(f"scraper.{__name__}")
 lock = threading.Lock()
@@ -28,6 +28,7 @@ class BaseStage:
         self._wait: Optional[WebDriverWait] = None
         self._headless = headless
         self.__last_proxy_rotation = None
+        self._first_wait = False
 
     def __init_driver(self) -> None:
         # init driver if not already provided
@@ -56,8 +57,8 @@ class BaseStage:
             self._driver = webdriver.Chrome(options=options)
 
         self._driver.set_window_size(1280, 1024)
-        self._driver.set_page_load_timeout(TIMEOUT)
-        self._wait = WebDriverWait(self._driver, TIMEOUT)
+        self._driver.set_page_load_timeout(settings.TIMEOUT)
+        self._wait = WebDriverWait(self._driver, settings.TIMEOUT)
         logger.debug("Driver set up.")
 
     def __check_proxy_rotation(self) -> None:
@@ -66,7 +67,7 @@ class BaseStage:
 
         delta = datetime.now() - self.__last_proxy_rotation
         delta_min = delta.total_seconds() / 60
-        if delta_min >= PROXY_ROTATE_MINUTES:
+        if delta_min >= settings.PROXY_ROTATE_MINUTES:
             self.close()
             self._driver = None
             self.__init_driver()

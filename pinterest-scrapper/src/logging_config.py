@@ -4,9 +4,9 @@ from os import path
 
 import colorlog
 
-from settings import LOG_LEVEL
+import settings
 
-logs_path = "logs"
+logs_path = path.join(settings.OUTPUT_FOlDER, "logs")
 os.makedirs(logs_path, exist_ok=True)
 
 log_format = "%(asctime)s - %(levelname)s - %(name)s - %(funcName)s - %(message)s"
@@ -15,7 +15,7 @@ date_format = "%m-%d %H:%M:%S"
 
 def configure():
     scraper_logger = logging.getLogger("scraper")
-    scraper_logger.setLevel(LOG_LEVEL)
+    scraper_logger.setLevel(settings.LOG_LEVEL)
 
     stream_handler = logging.StreamHandler()
     stream_handler.setLevel("DEBUG")

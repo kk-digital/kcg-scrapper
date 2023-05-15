@@ -3,7 +3,7 @@ import sqlite3
 from sqlite3 import Row
 from typing import List
 
-from settings import DATABASE_NAME
+import settings
 
 logger = logging.getLogger(f"scraper.{__name__}")
 _conn: sqlite3.Connection | None = None
@@ -41,7 +41,7 @@ def _create_tables() -> None:
 
 def initialize() -> None:
     global _conn
-    _conn = sqlite3.connect(DATABASE_NAME, check_same_thread=False)
+    _conn = sqlite3.connect(settings.DATABASE_NAME, check_same_thread=False)
     _conn.execute("PRAGMA foreign_keys = ON")
     _conn.row_factory = Row
     _create_tables()
@@ -66,6 +66,51 @@ def create_job(query: str, stage: str = "board") -> int:
     return curr.lastrowid
 
 
+def get_job_by_query(query: str) -> Row | None:
+    curr = _conn.execute(
+        """
+    SELECT * FROM job
+    WHERE query = ?
+    """,
+        (query.lower(),),
+    )
+
+    return curr.fetchone()
+
+
+def get_or_create_job_by_query(query: str) -> Row:
+    job = get_job_by_query(query)
+
+    if not job:
+        logger.info(f"Job created for query: {query}.")
+        create_job(query)
+        job = get_job_by_query(query)
+
+    return job
+
+
+def get_all_jobs() -> List[Row]:
+    curr = _conn.execute(
+        """
+    SELECT * FROM job
+    """
+    )
+
+    return curr.fetchall()
+
+
+def update_job_stage(job_id: int, stage: str) -> None:
+    _conn.execute(
+        """
+    UPDATE job
+    SET stage = ?
+    WHERE id = ?
+    """,
+        (stage, job_id),
+    )
+    _conn.commit()
+
+
 def delete_job(job: Row) -> None:
     job_id = job["id"]
     _conn.executescript(
@@ -80,40 +125,6 @@ def delete_job(job: Row) -> None:
     COMMIT;
     """
     )
-
-
-def get_all_jobs() -> List[Row]:
-    curr = _conn.execute(
-        """
-    SELECT * FROM job
-    """
-    )
-
-    return curr.fetchall()
-
-
-def get_job_by_query(query: str) -> Row | None:
-    curr = _conn.execute(
-        """
-    SELECT * FROM job
-    WHERE query = ?
-    """,
-        (query.lower(),),
-    )
-
-    return curr.fetchone()
-
-
-def update_job_stage(job_id: int, stage: str) -> None:
-    _conn.execute(
-        """
-    UPDATE job
-    SET stage = ?
-    WHERE id = ?
-    """,
-        (stage, job_id),
-    )
-    _conn.commit()
 
 
 def create_many_board(rows: List[tuple]) -> None:

@@ -14,11 +14,11 @@ from sqlite3 import Row
 from typing import List, Optional
 from urllib.parse import urlparse, urlunparse
 
-from requests import Session, RequestException, Response
+from requests import RequestException, Response, Session
 from selenium.common import TimeoutException
 
+import settings
 from src.classes.base_stage import BaseStage
-from settings import MAX_RETRY, OUTPUT_FOlDER, TIMEOUT, DOWNLOAD_DELAY, MAX_OUTPUT_SIZE
 
 logger = logging.getLogger(f"scraper.{__name__}")
 
@@ -30,7 +30,7 @@ class DownloadStage(BaseStage):
         self.__session: Optional[Session] = None
 
     def __init_output_dir(self, make_dirs: bool = False) -> None:
-        dir_path = path.join(OUTPUT_FOlDER, "jobs", self._job["query"])
+        dir_path = path.join(settings.OUTPUT_FOlDER, "jobs", self._job["query"])
         self.__output_path = dir_path
         self.__images_path = path.join(dir_path, "images")
         self.__html_path = path.join(dir_path, "html")
@@ -79,7 +79,7 @@ class DownloadStage(BaseStage):
     def __download_pin_img(self, pin: Row, pin_uuid: uuid.UUID) -> str:
         img_urls = self.__get_img_urls(pin["img_url"])
         for img_url in img_urls:
-            res = self.__session.get(img_url, timeout=TIMEOUT)
+            res = self.__session.get(img_url, timeout=settings.TIMEOUT)
 
             # if xml, have to try with the other url
             if res.headers["content-type"] == "application/xml":
@@ -91,7 +91,6 @@ class DownloadStage(BaseStage):
 
             break
 
-        # noinspection PyUnboundLocalVariable
         return img_name
 
     def __save_pin_html(self, url: str, pin_uuid: uuid.UUID) -> None:
@@ -134,14 +133,14 @@ class DownloadStage(BaseStage):
                 logger.info(f"Successfully scraped pin {pin['url']}.")
                 retries = 0
                 pin = pin_queue.get_nowait()
-                time.sleep(DOWNLOAD_DELAY)
+                time.sleep(settings.DOWNLOAD_DELAY)
 
             except queue.Empty:
                 self.close()
                 self.__session.close()
                 break
             except (RequestException, TimeoutException):
-                if retries == MAX_RETRY:
+                if retries == settings.MAX_RETRY:
                     self.__session.close()
                     stop_event.set()
                     raise
@@ -181,7 +180,7 @@ class DownloadStage(BaseStage):
                 arcname=f"html/{html_basename}",
             )
 
-            exceed_size = path.getsize(zip_path) >= MAX_OUTPUT_SIZE
+            exceed_size = path.getsize(zip_path) >= settings.MAX_OUTPUT_SIZE
             if not exceed_size:
                 continue
 

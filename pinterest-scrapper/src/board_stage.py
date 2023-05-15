@@ -11,7 +11,7 @@ from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 
-from settings import MAX_RETRY
+import settings
 from src.classes.scroll_stage import ScrollStage
 from src.pin_stage import PinStage
 from src.utils import time_perf
@@ -25,40 +25,38 @@ class BoardStage(ScrollStage):
         self, job: Row | dict, max_workers: int = None, headless: bool = True
     ) -> None:
         super().__init__(job, max_workers, headless)
-        self.__first_wait = False
+        self.__board_search = None
 
     @time_perf("scroll to end of boards page")
-    def _scroll_and_scrape(self, fn: Callable, check_more_like_this=True) -> None:
+    def _scroll_and_scrape(self, fn: Callable, check_more_like_this=False) -> None:
         return super()._scroll_and_scrape(fn, check_more_like_this)
 
-    def _scrape_data(self, boards_data: list) -> None:
+    def _scrape_data(self, boards_data: set) -> None:
         board_selector = "div[role=listitem] a"
 
-        if not self.__first_wait:
+        if not self._first_wait:
             self._wait.until(
                 ec.presence_of_element_located((By.CSS_SELECTOR, board_selector))
             )
-            self.__first_wait = True
+            self._first_wait = True
 
         soup = BeautifulSoup(self._driver.page_source, "lxml")
         boards = soup.select(board_selector)
 
+        BoardData = namedtuple("BoardData", ["url", "title", "pin_count"])
         data = []
         for board in boards:
             url = board["href"]
             title = board.select_one("[title]").string
             pin_count = board.select_one(".O2T.swG").get_text()
             pin_count = int(re.search(r"\d+", pin_count).group())
-            BoardData = namedtuple("BoardData", ["url", "title", "pin_count"])
             data.append(BoardData(url, title, pin_count))
-        boards_data += data
+        boards_data.update(data)
 
-    def _scrape(self) -> None:
-        boards_data = []
+    def _scrape(self) -> list | None:
+        boards_data = set()
 
-        self._scroll_and_scrape(
-            lambda: self._scrape_data(boards_data), check_more_like_this=False
-        )
+        self._scroll_and_scrape(lambda: self._scrape_data(boards_data))
 
         rows = [
             (
@@ -70,21 +68,26 @@ class BoardStage(ScrollStage):
             for data in boards_data
         ]
         logger.info(f'Found {len(rows)} boards for {self._job["query"]}.')
+
+        if self.__board_search:
+            return rows
+
         self._db.create_many_board(rows)
 
-    def start_scraping(self, execute_next_stage: bool = True) -> None:
+    def start_scraping(self, board_search: bool = False) -> list | None:
+        self.__board_search = board_search
         super().start_scraping()
 
         query = urllib.parse.quote_plus(self._job["query"])
         url = URL.format(query)
 
-        for i in range(MAX_RETRY + 1):
+        for i in range(settings.MAX_RETRY + 1):
             try:
                 self._driver.get(url)
-                self._scrape()
+                boards = self._scrape()
                 break
             except TimeoutException:
-                if i == MAX_RETRY:
+                if i == settings.MAX_RETRY:
                     self.close()
                     raise
 
@@ -94,12 +97,12 @@ class BoardStage(ScrollStage):
                 raise
 
         self.close()
-        self._db.update_job_stage(self._job["id"], "pin")
         logger.info("Finished scraping of boards. Starting pins stage.")
 
-        if not execute_next_stage:
-            return
+        if self.__board_search:
+            return boards
 
+        self._db.update_job_stage(self._job["id"], "pin")
         PinStage(
             job=self._job, max_workers=self._max_workers, headless=self._headless
         ).start_scraping()

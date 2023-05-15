@@ -1,8 +1,8 @@
 import csv
-import itertools
 import logging
 import os
 import time
+from datetime import datetime
 from functools import wraps
 from typing import Callable
 
@@ -13,9 +13,9 @@ logger = logging.getLogger(f"scraper.{__name__}")
 
 def read_csv(filename) -> list:
     with open(filename, "r", newline="", encoding="utf-8") as fh:
-            csv_reader = csv.reader(fh)
-            return [row for row in csv_reader]
-            
+        csv_reader = csv.reader(fh)
+        return [row for row in csv_reader]
+
 
 def time_perf(log_str: str):
     def decorator(f):
@@ -38,10 +38,8 @@ def init_proxy() -> Callable | None:
     if not settings.PROXY_LIST_PATH:
         return
     with open(settings.PROXY_LIST_PATH, "r", newline="", encoding="utf-8") as fh:
-        csv_reader = csv.reader(fh)
-        proxy_list = [row[0] for row in csv_reader]
-
-    proxy_list = itertools.cycle(proxy_list)
+        csv_reader = csv.DictReader(fh)
+        proxy_list = [row for row in csv_reader]
 
     manifest_json = """
     {
@@ -98,9 +96,9 @@ def init_proxy() -> Callable | None:
 
     def build_next_proxy_extension() -> str:
         nonlocal background_js
-        proxy = next(proxy_list)
-        logger.debug(f"Using proxy: {proxy}")
-        endpoint, port, username, password = proxy.split(":")
+        proxy = min(*proxy_list, key=lambda x: float(x["lastused"]))
+        logger.debug(f"Using proxy: {proxy['proxy']}")
+        endpoint, port, username, password = proxy["proxy"].split(":")
         new_background_js = background_js % (endpoint, port, username, password)
 
         files_to_create = {
@@ -111,6 +109,12 @@ def init_proxy() -> Callable | None:
             file_path = f"{extension_name}/{basename}"
             with open(file_path, "w", encoding="utf-8") as fh:
                 fh.write(content)
+
+        proxy["lastused"] = datetime.now().timestamp()
+        with open(settings.PROXY_LIST_PATH, "w", encoding="utf-8") as fh:
+            csv_writer = csv.DictWriter(fh, fieldnames=["proxy", "lastused"])
+            csv_writer.writeheader()
+            csv_writer.writerows(proxy_list)
 
         return extension_name
 

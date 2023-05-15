@@ -6,7 +6,7 @@ from typing import Callable
 from selenium.common import NoSuchElementException, StaleElementReferenceException
 from selenium.webdriver import ActionChains
 
-from settings import MAX_RETRY, SCROLL_DELAY, TIMEOUT
+import settings
 from src.classes.base_stage import BaseStage
 
 logger = logging.getLogger(f"scraper.{__name__}")
@@ -16,7 +16,7 @@ class ScrollStage(BaseStage):
     def __get_scroll_height(self) -> int:
         return self._driver.execute_script("return document.body.scrollHeight")
 
-    def _scroll_and_scrape(self, fn: Callable, check_more_like_this=True) -> None:
+    def _scroll_and_scrape(self, fn: Callable, check_more_like_this=False) -> None:
         logger.debug("Starting to scroll.")
         # old_body_height = self.get_scroll_height()
         inner_height = self._driver.execute_script("return window.innerHeight")
@@ -24,11 +24,11 @@ class ScrollStage(BaseStage):
         seconds_sleep = 0
         while True:
             # exec fn in every scroll step
-            for i in range(MAX_RETRY + 1):
+            for i in range(settings.MAX_RETRY + 1):
                 try:
                     fn()
                 except (StaleElementReferenceException, NoSuchElementException):
-                    if i == MAX_RETRY:
+                    if i == settings.MAX_RETRY:
                         raise
                     logger.debug("Element stale or not present, retrying...")
 
@@ -36,14 +36,14 @@ class ScrollStage(BaseStage):
             # removing els not in viewport and adding new ones
             ActionChains(self._driver).scroll_by_amount(0, scroll_amount).perform()
             # a short delay that also gives chance to load more els
-            time.sleep(SCROLL_DELAY)
-            seconds_sleep += SCROLL_DELAY
+            time.sleep(settings.SCROLL_DELAY)
+            seconds_sleep += settings.SCROLL_DELAY
 
             new_body_height = self.__get_scroll_height()
             scroll_y = self._driver.execute_script("return window.scrollY")
             # round up due to precision loss
             end_of_page = math.ceil(inner_height + scroll_y) >= new_body_height
-            if end_of_page and seconds_sleep >= TIMEOUT:
+            if end_of_page and seconds_sleep >= settings.TIMEOUT:
                 logger.debug("End of page reached.")
                 break
 
