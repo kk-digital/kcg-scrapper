@@ -61,6 +61,9 @@ class BaseStage:
         logger.debug("Driver set up.")
 
     def __check_proxy_rotation(self) -> None:
+        if not self.__last_proxy_rotation:
+            return
+
         delta = datetime.now() - self.__last_proxy_rotation
         delta_min = delta.total_seconds() / 60
         if delta_min >= settings.PROXY_ROTATE_MINUTES:
