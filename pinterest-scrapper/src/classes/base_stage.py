@@ -14,6 +14,7 @@ from src import db, utils
 
 logger = logging.getLogger(f"scraper.{__name__}")
 lock = threading.Lock()
+stop_event = threading.Event()
 
 
 class BaseStage:
@@ -27,6 +28,7 @@ class BaseStage:
         self._wait: Optional[WebDriverWait] = None
         self._headless = headless
         self.__last_proxy_rotation = None
+        self._stop_event = stop_event
 
     def __init_driver(self) -> None:
         # init driver if not already provided
@@ -48,6 +50,7 @@ class BaseStage:
         with lock:
             proxy = utils.get_next_proxy()
             if proxy:
+                # load extension options does not work for uc
                 options.add_argument(f"--load-extension={proxy}")
                 self.__last_proxy_rotation = datetime.now()
 

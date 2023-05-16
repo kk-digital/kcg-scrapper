@@ -82,13 +82,11 @@ class PinStage(ScrollStage):
         )
         self._db.create_many_pin(rows)
 
-    def __start_scraping(
-        self, board_queue: SimpleQueue, stop_event: threading.Event
-    ) -> None:
+    def __start_scraping(self, board_queue: SimpleQueue) -> None:
         board = board_queue.get_nowait()
         retries = 0
         while board:
-            if stop_event.is_set():
+            if self._stop_event.is_set():
                 break
 
             try:
@@ -107,7 +105,7 @@ class PinStage(ScrollStage):
             except TimeoutException:
                 if retries == settings.MAX_RETRY:
                     self.close()
-                    stop_event.set()
+                    self._stop_event.set()
                     raise
 
                 logger.exception(
@@ -116,7 +114,7 @@ class PinStage(ScrollStage):
                 retries += 1
             except:
                 self.close()
-                stop_event.set()
+                self._stop_event.set()
                 raise
 
     def start_scraping(self) -> None:
@@ -126,14 +124,12 @@ class PinStage(ScrollStage):
             board_queue.put_nowait(board)
         del boards
 
-        stop_event = threading.Event()
-
         with ThreadPoolExecutor(self._max_workers) as executor:
             futures = []
             for _ in range(self._max_workers):
                 task = lambda: self.__class__(
                     job=self._job, headless=self._headless
-                ).__start_scraping(board_queue=board_queue, stop_event=stop_event)
+                ).__start_scraping(board_queue=board_queue)
 
                 futures.append(executor.submit(task))
 

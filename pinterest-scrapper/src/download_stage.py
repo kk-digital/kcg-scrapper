@@ -119,7 +119,7 @@ class DownloadStage(BaseStage):
         )
 
     def __start_scraping(
-        self, pin_queue: SimpleQueue, stop_event: threading.Event
+        self, pin_queue: SimpleQueue
     ) -> None:
         self.__init_output_dir()
         self.__session = Session()
@@ -127,7 +127,7 @@ class DownloadStage(BaseStage):
         pin = pin_queue.get_nowait()
         retries = 0
         while pin:
-            if stop_event.is_set():
+            if self._stop_event.is_set():
                 break
 
             try:
@@ -150,7 +150,7 @@ class DownloadStage(BaseStage):
             except (RequestException, TimeoutException):
                 if retries == settings.MAX_RETRY:
                     self.__session.close()
-                    stop_event.set()
+                    self._stop_event.set()
                     raise
 
                 logger.exception(
@@ -159,7 +159,7 @@ class DownloadStage(BaseStage):
                 retries += 1
             except:
                 self.__session.close()
-                stop_event.set()
+                self._stop_event.set()
                 raise
 
     def __archive_output(self) -> None:
@@ -210,14 +210,12 @@ class DownloadStage(BaseStage):
             pins_queue.put_nowait(board)
         del pins
 
-        stop_event = threading.Event()
-
         with ThreadPoolExecutor(self._max_workers) as executor:
             futures = []
             for _ in range(self._max_workers):
                 task = lambda: self.__class__(
                     job=self._job, headless=self._headless, json_entries=json_entries
-                ).__start_scraping(pin_queue=pins_queue, stop_event=stop_event)
+                ).__start_scraping(pin_queue=pins_queue)
 
                 futures.append(executor.submit(task))
 
