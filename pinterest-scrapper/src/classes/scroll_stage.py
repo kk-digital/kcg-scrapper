@@ -27,10 +27,10 @@ class ScrollStage(BaseStage):
             for i in range(settings.MAX_RETRY + 1):
                 try:
                     fn()
-                except (StaleElementReferenceException, NoSuchElementException):
+                except (NoSuchElementException):
                     if i == settings.MAX_RETRY:
                         raise
-                    logger.debug("Element stale or not present, retrying...")
+                    logger.debug("Element not present, retrying...")
 
             # scroll 20% of viewport height since dom is dynamically populated,
             # removing els not in viewport and adding new ones
