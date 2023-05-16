@@ -6,6 +6,7 @@ from queue import SimpleQueue
 from typing import Callable
 from urllib.parse import urljoin
 
+from bs4 import BeautifulSoup
 from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
@@ -25,13 +26,16 @@ class PinStage(ScrollStage):
 
     def _scrape_urls(self, urls: set) -> None:
         pin_selector = '.qDf > .Hsu .Hsu > .a3i div.wsz.zmN > div[data-test-id="deeplink-wrapper"] a'
-        pins = self._wait.until(
-            ec.presence_of_all_elements_located((By.CSS_SELECTOR, pin_selector))
+
+        self._wait.until(
+            ec.presence_of_element_located((By.CSS_SELECTOR, pin_selector))
         )
+        soup = BeautifulSoup(self._driver.page_source, "lxml")
+        pins = soup.select(pin_selector)
+
         for pin in pins:
-            pin_url = pin.get_attribute("href")
-            pin_img = pin.find_element(By.TAG_NAME, "img")
-            pin_img_url = pin_img.get_attribute("src")
+            pin_url = pin["href"]
+            pin_img_url = pin.select_one("img")["src"]
             pin_data = (pin_url, pin_img_url)
             urls.add(pin_data)
 
@@ -51,6 +55,7 @@ class PinStage(ScrollStage):
         except TimeoutException:
             pass
         else:
+            # not inside try block to not catch timeout exceptions from subsequent code
             n_sections = len(sections)
             for section_n in range(n_sections):
                 # re-selecting since on every section click els are removed
