@@ -26,6 +26,7 @@ class BoardStage(ScrollStage):
     ) -> None:
         super().__init__(job, max_workers, headless)
         self.__board_search = None
+        self.__first_wait = False
 
     @time_perf("scroll to end of boards page")
     def _scroll_and_scrape(self, fn: Callable, check_more_like_this=False) -> None:
@@ -34,11 +35,11 @@ class BoardStage(ScrollStage):
     def _scrape_data(self, boards_data: set) -> None:
         board_selector = "div[role=listitem] a"
 
-        if not self._first_wait:
+        if not self.__first_wait:
             self._wait.until(
                 ec.presence_of_element_located((By.CSS_SELECTOR, board_selector))
             )
-            self._first_wait = True
+            self.__first_wait = True
 
         soup = BeautifulSoup(self._driver.page_source, "lxml")
         boards = soup.select(board_selector)

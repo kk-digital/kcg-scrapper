@@ -27,7 +27,6 @@ class BaseStage:
         self._wait: Optional[WebDriverWait] = None
         self._headless = headless
         self.__last_proxy_rotation = None
-        self._first_wait = False
 
     def __init_driver(self) -> None:
         # init driver if not already provided
