@@ -24,7 +24,7 @@ class PinStage(ScrollStage):
         super()._scroll_and_scrape(fn, check_more_like_this)
 
     def _scrape_urls(self, urls: set) -> None:
-        pin_selector = '.qDf > .Hsu .Hsu > .a3i div.wsz.zmN > div[data-test-id="deeplink-wrapper"] a'
+        pin_selector = 'div.wsz.zmN > div[data-test-id="deeplink-wrapper"] a'
 
         self._wait.until(
             ec.presence_of_element_located((By.CSS_SELECTOR, pin_selector))
