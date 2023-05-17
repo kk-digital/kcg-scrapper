@@ -65,7 +65,17 @@ the `settings.py` file; each entry is documented.
 
 ## Usage
 
-The `command.py` is a cli with the following commands:
+The `command.py` is a cli with commands described below.
+
+### Global cli parameters
+
+- `query-list` type string: name of the csv file with query list
+- `headed` type boolean, default=0: whether to show browser GUI
+- `max-workers` type integer, default=1: number of workers to concurrently scrape
+- `output` type string, default='./output': path to store the output files
+- `proxy-list` type string, default=None: path to proxy list csv file
+
+---
 
 `show-jobs`
 
@@ -125,22 +135,23 @@ case of pause or error.
 
 Same as `start-scraping` but you can provide csv file with a list of queries. Make sure there is only one query per row.
 
-#### Parameters
-
-- `query-list` type string: name of the csv file with query list
-
 ```sh
 python command.py start-scraping-list --max-workers=4 cachicamo
 ```
 
 ---
 
-### Global cli parameters
+`board-search <query-list> [--headed] [output] [proxy-list]`
 
-- `headed` type boolean, default=0: whether to show browser GUI
-- `max-workers` type integer, default=1: number of workers to concurrently scrape
-- `output` type string, default='./output': path to store the output files
-- `proxy-list` type string, default=None: path to proxy list csv file
+Provide a query list csv file and get a json file with overview information such as total board count, total unique board count, total pin count, query board count, query pin count, board url, board title, board pin count.
+
+Note that all data found in this job is not stored in database. Also, this command doesn't have `max-workers` due to limitations. 
+
+```sh
+python command.py board-search --proxy-list=proxies.csv query-list.csv
+```
+
+---
 
 ### Notes
 
