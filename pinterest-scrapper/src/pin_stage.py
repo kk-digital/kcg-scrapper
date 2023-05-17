@@ -6,6 +6,7 @@ from queue import SimpleQueue
 from typing import Callable
 from urllib.parse import urljoin
 
+from bs4 import BeautifulSoup
 from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
@@ -25,13 +26,16 @@ class PinStage(ScrollStage):
 
     def _scrape_urls(self, urls: set) -> None:
         pin_selector = '.qDf > .Hsu .Hsu > .a3i div.wsz.zmN > div[data-test-id="deeplink-wrapper"] a'
-        pins = self._wait.until(
-            ec.presence_of_all_elements_located((By.CSS_SELECTOR, pin_selector))
+
+        self._wait.until(
+            ec.presence_of_element_located((By.CSS_SELECTOR, pin_selector))
         )
+        soup = BeautifulSoup(self._driver.page_source, "lxml")
+        pins = soup.select(pin_selector)
+
         for pin in pins:
-            pin_url = pin.get_attribute("href")
-            pin_img = pin.find_element(By.TAG_NAME, "img")
-            pin_img_url = pin_img.get_attribute("src")
+            pin_url = pin["href"]
+            pin_img_url = pin.select_one("img")["src"]
             pin_data = (pin_url, pin_img_url)
             urls.add(pin_data)
 
@@ -51,6 +55,7 @@ class PinStage(ScrollStage):
         except TimeoutException:
             pass
         else:
+            # not inside try block to not catch timeout exceptions from subsequent code
             n_sections = len(sections)
             for section_n in range(n_sections):
                 # re-selecting since on every section click els are removed
@@ -77,13 +82,11 @@ class PinStage(ScrollStage):
         )
         self._db.create_many_pin(rows)
 
-    def __start_scraping(
-        self, board_queue: SimpleQueue, stop_event: threading.Event
-    ) -> None:
+    def __start_scraping(self, board_queue: SimpleQueue) -> None:
         board = board_queue.get_nowait()
         retries = 0
         while board:
-            if stop_event.is_set():
+            if self._stop_event.is_set():
                 break
 
             try:
@@ -102,7 +105,7 @@ class PinStage(ScrollStage):
             except TimeoutException:
                 if retries == settings.MAX_RETRY:
                     self.close()
-                    stop_event.set()
+                    self._stop_event.set()
                     raise
 
                 logger.exception(
@@ -111,7 +114,7 @@ class PinStage(ScrollStage):
                 retries += 1
             except:
                 self.close()
-                stop_event.set()
+                self._stop_event.set()
                 raise
 
     def start_scraping(self) -> None:
@@ -121,14 +124,12 @@ class PinStage(ScrollStage):
             board_queue.put_nowait(board)
         del boards
 
-        stop_event = threading.Event()
-
         with ThreadPoolExecutor(self._max_workers) as executor:
             futures = []
             for _ in range(self._max_workers):
                 task = lambda: self.__class__(
                     job=self._job, headless=self._headless
-                ).__start_scraping(board_queue=board_queue, stop_event=stop_event)
+                ).__start_scraping(board_queue=board_queue)
 
                 futures.append(executor.submit(task))
 

@@ -1,9 +1,8 @@
 import json
 import logging
 from datetime import datetime
-from enum import unique
 from os import path
-from typing import final
+from typing import Optional
 
 import fire
 
@@ -51,7 +50,7 @@ class Command:
         max_workers: int = 1,
         output: str = None,
         proxy_list: str = None,
-    ) -> list | None:
+    ) -> Optional[list]:
         job = db.get_or_create_job_by_query(query)
 
         if output:
@@ -131,6 +130,8 @@ class Command:
         total_board_count = 0
         unique_boards = set()
         total_pin_count = 0
+        dict_order = {"query": 1, "board_count": 2, "pin_count": 3, "boards": 4}
+        ordered_output_rows = []
         for row in output_rows:
             board_count = len(row["boards"])
             row["board_count"] = board_count
@@ -139,6 +140,9 @@ class Command:
             pin_count = sum([board["pin_count"] for board in row["boards"]])
             row["pin_count"] = pin_count
             total_pin_count += pin_count
+            ordered_output_rows.append(
+                dict(sorted(row.items(), key=lambda x: dict_order[x[0]]))
+            )
 
         output_path = path.join(
             settings.OUTPUT_FOlDER, f"board-search-{datetime.now().timestamp()}.json"
@@ -149,7 +153,7 @@ class Command:
                     total_board_count=total_board_count,
                     unique_board_count=len(unique_boards),
                     total_pin_count=total_pin_count,
-                    results=output_rows,
+                    results=ordered_output_rows,
                 ),
                 fh,
             )

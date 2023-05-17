@@ -14,7 +14,7 @@ from src import db, utils
 
 logger = logging.getLogger(f"scraper.{__name__}")
 lock = threading.Lock()
-build_next_proxy_extension = utils.init_proxy()
+stop_event = threading.Event()
 
 
 class BaseStage:
@@ -28,7 +28,7 @@ class BaseStage:
         self._wait: Optional[WebDriverWait] = None
         self._headless = headless
         self.__last_proxy_rotation = None
-        self._first_wait = False
+        self._stop_event = stop_event
 
     def __init_driver(self) -> None:
         # init driver if not already provided
@@ -48,8 +48,10 @@ class BaseStage:
         options.add_argument("--blink-settings=imagesEnabled=false")
 
         with lock:
-            if build_next_proxy_extension:
-                options.add_argument(f"--load-extension={build_next_proxy_extension()}")
+            proxy = utils.get_next_proxy()
+            if proxy:
+                # load extension options does not work for uc
+                options.add_argument(f"--load-extension={proxy}")
                 self.__last_proxy_rotation = datetime.now()
 
             # give chance to uc to delete patched driver
@@ -62,7 +64,7 @@ class BaseStage:
         logger.debug("Driver set up.")
 
     def __check_proxy_rotation(self) -> None:
-        if not build_next_proxy_extension:
+        if not self.__last_proxy_rotation:
             return
 
         delta = datetime.now() - self.__last_proxy_rotation

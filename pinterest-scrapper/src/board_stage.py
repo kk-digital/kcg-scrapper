@@ -3,7 +3,7 @@ import re
 import urllib.parse
 from collections import namedtuple
 from sqlite3 import Row
-from typing import Callable
+from typing import Callable, Optional
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
@@ -26,6 +26,7 @@ class BoardStage(ScrollStage):
     ) -> None:
         super().__init__(job, max_workers, headless)
         self.__board_search = None
+        self.__first_wait = False
 
     @time_perf("scroll to end of boards page")
     def _scroll_and_scrape(self, fn: Callable, check_more_like_this=False) -> None:
@@ -34,11 +35,11 @@ class BoardStage(ScrollStage):
     def _scrape_data(self, boards_data: set) -> None:
         board_selector = "div[role=listitem] a"
 
-        if not self._first_wait:
+        if not self.__first_wait:
             self._wait.until(
                 ec.presence_of_element_located((By.CSS_SELECTOR, board_selector))
             )
-            self._first_wait = True
+            self.__first_wait = True
 
         soup = BeautifulSoup(self._driver.page_source, "lxml")
         boards = soup.select(board_selector)
@@ -53,7 +54,7 @@ class BoardStage(ScrollStage):
             data.append(BoardData(url, title, pin_count))
         boards_data.update(data)
 
-    def _scrape(self) -> list | None:
+    def _scrape(self) -> Optional[list]:
         boards_data = set()
 
         self._scroll_and_scrape(lambda: self._scrape_data(boards_data))
@@ -74,7 +75,7 @@ class BoardStage(ScrollStage):
 
         self._db.create_many_board(rows)
 
-    def start_scraping(self, board_search: bool = False) -> list | None:
+    def start_scraping(self, board_search: bool = False) -> Optional[list]:
         self.__board_search = board_search
         super().start_scraping()
 

@@ -1,0 +1,39 @@
+{
+  "total_board_count": 5,
+  "unique_board_count": 5,
+  "total_pin_count": 616,
+  "results": [
+    {
+      "query": "kcg characters",
+      "board_count": 5,
+      "pin_count": 616,
+      "boards": [
+        {
+          "url": "https://www.pinterest.com/synth3840/kcg-reference-character/",
+          "title": "kcg-reference-character",
+          "pin_count": 13
+        },
+        {
+          "url": "https://www.pinterest.com/synth3840/kcg-character-waifu/",
+          "title": "kcg-character-waifu",
+          "pin_count": 24
+        },
+        {
+          "url": "https://www.pinterest.com/synth3840/kcg-character-armour/",
+          "title": "kcg-character-armour",
+          "pin_count": 186
+        },
+        {
+          "url": "https://www.pinterest.com/synth3840/kcg-character/",
+          "title": "kcg-character",
+          "pin_count": 134
+        },
+        {
+          "url": "https://www.pinterest.com/synth3840/kcg-chibi-character-reference/",
+          "title": "kcg-chibi-character-reference",
+          "pin_count": 259
+        }
+      ]
+    }
+  ]
+}
