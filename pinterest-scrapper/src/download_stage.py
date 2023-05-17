@@ -4,7 +4,6 @@ import os
 import queue
 import re
 import shutil
-import threading
 import time
 import uuid
 import zipfile
@@ -118,9 +117,7 @@ class DownloadStage(BaseStage):
             )
         )
 
-    def __start_scraping(
-        self, pin_queue: SimpleQueue
-    ) -> None:
+    def __start_scraping(self, pin_queue: SimpleQueue) -> None:
         self.__init_output_dir()
         self.__session = Session()
 
