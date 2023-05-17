@@ -27,7 +27,8 @@ class ScrollStage(BaseStage):
             for i in range(settings.MAX_RETRY + 1):
                 try:
                     fn()
-                except NoSuchElementException:
+                # catch type error in case try to access non existing attr on bs4 tag
+                except (NoSuchElementException, TypeError):
                     if i == settings.MAX_RETRY:
                         raise
                     logger.debug("Element not present, retrying...")
