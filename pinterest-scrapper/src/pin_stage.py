@@ -34,10 +34,14 @@ class PinStage(ScrollStage):
         pins = soup.select(pin_selector)
 
         for pin in pins:
-            pin_url = pin["href"]
-            pin_img_url = pin.select_one("img")["src"]
-            pin_data = (pin_url, pin_img_url)
-            urls.add(pin_data)
+            # catch type error in case try to access non existing attr on bs4 tag
+            try:    
+                pin_url = pin["href"]
+                pin_img_url = pin.select_one("img")["src"]
+                pin_data = (pin_url, pin_img_url)
+                urls.add(pin_data)
+            except TypeError:
+                continue
 
     def _scrape(self) -> None:
         pin_urls = set()
