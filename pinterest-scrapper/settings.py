@@ -22,7 +22,7 @@ DOWNLOAD_DELAY = 2
 TIMEOUT = 30
 
 # number of retries in case of exception such as Timeout and NoSuchElement
-MAX_RETRY = 3
+MAX_RETRY = 5
 # max size before compressing
 MAX_OUTPUT_SIZE_MB = 500  # MB
 
