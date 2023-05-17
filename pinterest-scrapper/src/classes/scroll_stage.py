@@ -24,14 +24,16 @@ class ScrollStage(BaseStage):
         seconds_sleep = 0
         while True:
             # exec fn in every scroll step
-            for i in range(settings.MAX_RETRY + 1):
-                try:
-                    fn()
-                # catch type error in case try to access non existing attr on bs4 tag
-                except (NoSuchElementException, TypeError):
-                    if i == settings.MAX_RETRY:
-                        raise
-                    logger.debug("Element not present, retrying...")
+
+            try:
+                fn()
+            # catch type error in case try to access non existing attr on bs4 tag
+            except (
+                StaleElementReferenceException,
+                NoSuchElementException,
+                TypeError,
+            ) as e:
+                logger.debug(f"Error {e.__class__.__name__} accessing element, retrying...")
 
             # scroll 20% of viewport height since dom is dynamically populated,
             # removing els not in viewport and adding new ones
