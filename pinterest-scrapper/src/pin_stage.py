@@ -1,13 +1,12 @@
 import logging
 import queue
-import threading
 from concurrent.futures import ThreadPoolExecutor
 from queue import SimpleQueue
 from typing import Callable
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
-from selenium.common import TimeoutException
+from selenium.common import StaleElementReferenceException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 
@@ -57,14 +56,23 @@ class PinStage(ScrollStage):
         else:
             # not inside try block to not catch timeout exceptions from subsequent code
             n_sections = len(sections)
-            for section_n in range(n_sections):
-                # re-selecting since on every section click els are removed
-                sections = get_sections()
-                sections[section_n].click()
-                self._scroll_and_scrape(
-                    lambda: self._scrape_urls(pin_urls), check_more_like_this=True
-                )
-                self._driver.back()
+            section_n = 0
+            while True:
+                try:
+                    # re-selecting since on every section click els are removed
+                    sections = get_sections()
+                    sections[section_n].click()
+                    self._scroll_and_scrape(
+                        lambda: self._scrape_urls(pin_urls), check_more_like_this=True
+                    )
+                    self._driver.back()
+
+                    section_n += 1
+                    if section_n == n_sections:
+                        break
+
+                except StaleElementReferenceException:
+                    continue
 
         # time to get the pins that are in main page
         self._scroll_and_scrape(
