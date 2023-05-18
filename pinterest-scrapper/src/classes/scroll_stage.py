@@ -13,10 +13,6 @@ logger = logging.getLogger(f"scraper.{__name__}")
 
 
 class ScrollStage(BaseStage):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.__scroll = True
-
     def __get_scroll_height(self) -> int:
         return self._driver.execute_script("return document.body.scrollHeight")
 
@@ -30,7 +26,6 @@ class ScrollStage(BaseStage):
             # exec fn in every scroll step
             try:
                 fn()
-                self.__scroll = True
             # catch type error in case try to access non existing attr on bs4 tag
             except (
                 StaleElementReferenceException,
@@ -41,10 +36,7 @@ class ScrollStage(BaseStage):
                 # logger.debug(
                 #     f"Error {e.__class__.__name__} accessing element, retrying..."
                 # )
-                self.__scroll = False
-
-            if not self.__scroll:
-                continue
+                pass
 
             # scroll 20% of viewport height since dom is dynamically populated,
             # removing els not in viewport and adding new ones
