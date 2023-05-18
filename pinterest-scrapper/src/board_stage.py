@@ -101,6 +101,7 @@ class BoardStage(ScrollStage):
         logger.info("Finished scraping of boards. Starting pins stage.")
 
         if self.__board_search:
+            # noinspection PyUnboundLocalVariable
             return boards
 
         self._db.update_job_stage(self._job["id"], "pin")

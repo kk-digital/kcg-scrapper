@@ -91,6 +91,7 @@ class DownloadStage(BaseStage):
 
             break
 
+        # noinspection PyUnboundLocalVariable
         return img_name
 
     def __save_pin_html(self, url: str, pin_uuid: uuid.UUID) -> None:

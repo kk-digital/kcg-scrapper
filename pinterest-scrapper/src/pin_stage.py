@@ -41,15 +41,18 @@ class PinStage(ScrollStage):
     def _scrape(self) -> None:
         pin_urls = set()
 
+        section_selector = "div[data-test-id=board-section]"
+        wait_section_to_be_clickable = lambda: self._wait.until(
+            ec.element_to_be_clickable((By.CSS_SELECTOR, section_selector))
+        )
         get_sections = lambda: self._wait.until(
-            ec.presence_of_all_elements_located(
-                (By.CSS_SELECTOR, "div[data-test-id=board-section]")
-            )
+            ec.presence_of_all_elements_located((By.CSS_SELECTOR, section_selector))
         )
 
         try:
             # there may be sections or not
             # there is no need to scroll since all sections are in dom at first
+            wait_section_to_be_clickable()
             sections = get_sections()
         except TimeoutException:
             pass
@@ -60,8 +63,10 @@ class PinStage(ScrollStage):
             while True:
                 try:
                     # re-selecting since on every section click els are removed
+                    wait_section_to_be_clickable()
                     sections = get_sections()
                     sections[section_n].click()
+
                     self._scroll_and_scrape(
                         lambda: self._scrape_urls(pin_urls), check_more_like_this=True
                     )
