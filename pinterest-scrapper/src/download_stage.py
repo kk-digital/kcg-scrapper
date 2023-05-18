@@ -158,6 +158,9 @@ class DownloadStage(BaseStage):
             except:
                 self.__session.close()
                 self._stop_event.set()
+                logger.exception(
+                    f"Unhandled exception downloading pin: {pin['url']}, retrying..."
+                )
                 raise
 
     def __archive_output(self) -> None:

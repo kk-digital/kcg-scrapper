@@ -128,6 +128,9 @@ class PinStage(ScrollStage):
             except:
                 self.close()
                 self._stop_event.set()
+                logger.exception(
+                    f"Unhandled exception scraping pins from {board['url']}, retrying..."
+                )
                 raise
 
     def start_scraping(self) -> None:

@@ -79,8 +79,9 @@ class BoardStage(ScrollStage):
         self.__board_search = board_search
         super().start_scraping()
 
-        query = urllib.parse.quote_plus(self._job["query"])
-        url = URL.format(query)
+        query = self._job["query"]
+        quoted_query = urllib.parse.quote_plus(query)
+        url = URL.format(quoted_query)
 
         for i in range(settings.MAX_RETRY + 1):
             try:
@@ -92,9 +93,12 @@ class BoardStage(ScrollStage):
                     self.close()
                     raise
 
-                logger.exception(f"Timeout scraping boards from {url}, retrying...")
+                logger.exception(f"Timeout scraping boards for {query}, retrying...")
             except:
                 self.close()
+                logger.exception(
+                    f"Unhandled exception scraping boards from {query}, retrying..."
+                )
                 raise
 
         self.close()
