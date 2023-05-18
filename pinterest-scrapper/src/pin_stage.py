@@ -6,7 +6,12 @@ from typing import Callable
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
-from selenium.common import StaleElementReferenceException, TimeoutException
+from selenium.common import (
+    StaleElementReferenceException,
+    TimeoutException,
+    ElementClickInterceptedException,
+    NoSuchElementException,
+)
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 
@@ -75,7 +80,14 @@ class PinStage(ScrollStage):
                     section_n += 1
                     if section_n == n_sections:
                         break
-
+                except ElementClickInterceptedException as e:
+                    try:
+                        sign_up_close_el = self._driver.find_element(
+                            By.CSS_SELECTOR, ".p6V .qrs"
+                        )
+                        sign_up_close_el.click()
+                    except NoSuchElementException:
+                        raise e
                 except StaleElementReferenceException:
                     continue
 
