@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from datetime import datetime
 from os import path
 from typing import Optional
@@ -186,6 +187,22 @@ class Command:
             )
         finally:
             db.delete_job(job)
+
+    def delete_db(self) -> None:
+        while True:
+            answer = input(
+                "Do you really want to to delete database and output folder? y/n: "
+            )
+            if answer == "n":
+                return
+            elif answer == "y":
+                break
+
+        try:
+            os.remove(settings.DATABASE_NAME)
+            print("Db deleted.")
+        except FileNotFoundError:
+            print("No db was found")
 
 
 try:

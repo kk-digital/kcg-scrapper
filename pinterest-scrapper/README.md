@@ -153,6 +153,16 @@ python command.py board-search --proxy-list=proxies.csv query-list.csv
 
 ---
 
+`delete-db`
+
+Delete database. Ask for confirmation first. 
+
+```sh
+python command.py delete-db
+```
+
+---
+
 ### Notes
 
 - can also use flags syntax for positional arguments, e.g.:
