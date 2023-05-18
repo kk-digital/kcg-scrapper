@@ -33,7 +33,11 @@ class ScrollStage(BaseStage):
                 NoSuchElementException,
                 TypeError,
             ) as e:
-                logger.debug(f"Error {e.__class__.__name__} accessing element, retrying...")
+                # temporarily commented due to getting many logs
+                # logger.debug(
+                #     f"Error {e.__class__.__name__} accessing element, retrying..."
+                # )
+                pass
 
             # scroll 20% of viewport height since dom is dynamically populated,
             # removing els not in viewport and adding new ones
