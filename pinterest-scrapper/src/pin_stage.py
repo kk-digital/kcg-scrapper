@@ -30,9 +30,14 @@ class PinStage(ScrollStage):
     def _scrape_urls(self, urls: set) -> None:
         pin_selector = 'div.wsz.zmN > div[data-test-id="deeplink-wrapper"] a'
 
-        self._wait.until(
-            ec.presence_of_element_located((By.CSS_SELECTOR, pin_selector))
-        )
+        try:
+            self._wait.until(
+                ec.presence_of_element_located((By.CSS_SELECTOR, pin_selector))
+            )
+        # there is boards that has no pins, just sections
+        except TimeoutException:
+            return
+
         soup = BeautifulSoup(self._driver.page_source, "lxml")
         pins = soup.select(pin_selector)
 
@@ -59,7 +64,7 @@ class PinStage(ScrollStage):
 
         try:
             # there may be sections or not
-            # there is no need to scroll since all sections are in dom at first
+            # no need to scroll since all sections are in dom at first
             wait_section_to_be_clickable()
             sections = get_sections()
         except TimeoutException:
