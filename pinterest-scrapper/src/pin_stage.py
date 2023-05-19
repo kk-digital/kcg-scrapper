@@ -7,7 +7,6 @@ from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 from selenium.common import (
-    StaleElementReferenceException,
     TimeoutException,
     ElementClickInterceptedException,
     NoSuchElementException,
@@ -38,10 +37,14 @@ class PinStage(ScrollStage):
         pins = soup.select(pin_selector)
 
         for pin in pins:
-            pin_url = pin["href"]
-            pin_img_url = pin.select_one("img")["src"]
-            pin_data = (pin_url, pin_img_url)
-            urls.add(pin_data)
+            try:
+                pin_url = pin["href"]
+                pin_img_url = pin.select_one("img")["src"]
+                pin_data = (pin_url, pin_img_url)
+                urls.add(pin_data)
+            # catch type error in case try to access non-existing attr on bs4 tag
+            except TypeError:
+                continue
 
     def _scrape(self) -> None:
         pin_urls = set()
@@ -80,6 +83,8 @@ class PinStage(ScrollStage):
                     section_n += 1
                     if section_n == n_sections:
                         break
+                # test if sign up float window intercepted the click
+                # and close it
                 except ElementClickInterceptedException as e:
                     try:
                         sign_up_close_el = self._driver.find_element(
@@ -88,8 +93,6 @@ class PinStage(ScrollStage):
                         sign_up_close_el.click()
                     except NoSuchElementException:
                         raise e
-                except StaleElementReferenceException:
-                    continue
 
         # time to get the pins that are in main page
         self._scroll_and_scrape(
