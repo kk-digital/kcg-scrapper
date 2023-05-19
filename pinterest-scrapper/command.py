@@ -6,6 +6,7 @@ from os import path
 from typing import Optional
 
 import fire
+from selenium.common import NoSuchWindowException
 
 import settings
 from src import db, logging_config, utils
@@ -71,11 +72,16 @@ class Command:
             print("Job already completed.")
             return
 
+        execute_scraping = lambda: stage_cls(
+            job=job, max_workers=max_workers, headless=not headed
+        ).start_scraping(**self.start_args)
+
         try:
-            stage_instance = stage_cls(
-                job=job, max_workers=max_workers, headless=not headed
-            )
-            result = stage_instance.start_scraping(**self.start_args)
+            result = execute_scraping()
+
+            return result
+        except NoSuchWindowException:
+            result = execute_scraping()
 
             return result
         except:
