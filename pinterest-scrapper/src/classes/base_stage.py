@@ -3,7 +3,7 @@ import threading
 import time
 from datetime import datetime
 from sqlite3 import Row
-from typing import Optional
+from typing import Optional, Union
 
 import undetected_chromedriver as webdriver
 from fake_useragent import UserAgent
@@ -19,7 +19,7 @@ stop_event = threading.Event()
 
 class BaseStage:
     def __init__(
-        self, job: Row | dict, max_workers: int = None, headless: bool = True
+        self, job: Union[Row, dict], max_workers: int = None, headless: bool = True
     ) -> None:
         self._db = db
         self._job = job

@@ -3,7 +3,7 @@ import re
 import urllib.parse
 from collections import namedtuple
 from sqlite3 import Row
-from typing import Callable, Optional
+from typing import Callable, Optional, Union
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
@@ -22,7 +22,7 @@ URL = "https://www.pinterest.com/search/boards/?q={}&rs=typed"
 
 class BoardStage(ScrollStage):
     def __init__(
-        self, job: Row | dict, max_workers: int = None, headless: bool = True
+        self, job: Union[Row, dict], max_workers: int = None, headless: bool = True
     ) -> None:
         super().__init__(job, max_workers, headless)
         self.__board_search = None
