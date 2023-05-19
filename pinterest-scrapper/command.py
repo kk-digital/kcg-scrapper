@@ -72,16 +72,11 @@ class Command:
             print("Job already completed.")
             return
 
-        execute_scraping = lambda: stage_cls(
-            job=job, max_workers=max_workers, headless=not headed
-        ).start_scraping(**self.start_args)
-
         try:
-            result = execute_scraping()
-
-            return result
-        except NoSuchWindowException:
-            result = execute_scraping()
+            stage_instance = stage_cls(
+                job=job, max_workers=max_workers, headless=not headed
+            )
+            result = stage_instance.start_scraping(**self.start_args)
 
             return result
         except:
