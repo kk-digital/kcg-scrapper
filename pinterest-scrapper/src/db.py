@@ -5,6 +5,7 @@ from typing import List, Optional
 
 import settings
 
+sqlite3.threadsafety = 3
 logger = logging.getLogger(f"scraper.{__name__}")
 _conn: Optional[sqlite3.Connection] = None
 
