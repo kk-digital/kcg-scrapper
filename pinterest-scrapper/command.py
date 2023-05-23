@@ -6,6 +6,7 @@ from os import path
 from typing import Optional
 
 import fire
+from selenium.common import NoSuchWindowException
 
 import settings
 from src import db, logging_config, utils

@@ -3,9 +3,12 @@ import threading
 import time
 from datetime import datetime
 from sqlite3 import Row
-from typing import Optional
+from typing import Optional, Union
 
-import undetected_chromedriver as webdriver
+from selenium import webdriver
+# just import to install driver
+# noinspection PyUnresolvedReferences
+import chromedriver_autoinstaller
 from fake_useragent import UserAgent
 from selenium.webdriver.support.wait import WebDriverWait
 
@@ -19,7 +22,7 @@ stop_event = threading.Event()
 
 class BaseStage:
     def __init__(
-        self, job: Row | dict, max_workers: int = None, headless: bool = True
+        self, job: Union[Row, dict], max_workers: int = None, headless: bool = True
     ) -> None:
         self._db = db
         self._job = job
@@ -46,6 +49,10 @@ class BaseStage:
         options.add_argument("--log-level=3")
         options.add_argument(f"user-agent={ua}")
         options.add_argument("--blink-settings=imagesEnabled=false")
+        # anti detection options
+        options.add_argument("--disable-blink-features=AutomationControlled")
+        options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        options.add_experimental_option("useAutomationExtension", False)
 
         with lock:
             proxy = utils.get_next_proxy()
@@ -54,9 +61,11 @@ class BaseStage:
                 options.add_argument(f"--load-extension={proxy}")
                 self.__last_proxy_rotation = datetime.now()
 
-            # give chance to uc to delete patched driver
             time.sleep(2)
             self._driver = webdriver.Chrome(options=options)
+            self._driver.execute_script(
+                "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
+            )
 
         self._driver.set_window_size(1280, 1024)
         self._driver.set_page_load_timeout(settings.TIMEOUT)

@@ -21,46 +21,27 @@ hand, logs are always stored in `logs` folder in the root dir as well.
 Most general configuration can be provided via cli parameters. For detailed control you can modify any entry in
 the `settings.py` file; each entry is documented.
 
-## Getting Started
-
-### Prerequisites
-
-- python version 3.11.3
-- google-chrome binaries
-
-  Download first:
-
-  ```
-  wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-  ```
-
-  Install:
-
-  ```
-  sudo dpkg -i google-chrome-stable_current_amd64.deb
-  ```
-
-### Installation
+## Installation
 
 1. clone the repo
    ```sh
    git clone https://github.com/kk-digital/kcg-scrapper
    ```
-2. change cwd:
+2. change working directory:
    ```sh
-   cd pinterest-scrapper
+   cd kcg-scrapper/pinterest-scrapper
    ```
-3. create virtual environment:
+3. build docker image:
    ```sh
-   python -m venv venv
+   docker build -t pinterest .
    ```
-4. activate env:
+4. run container:
    ```sh
-   source venv/bin/activate
+   docker run -d -t -v .:/app --name pinterest pinterest
    ```
-5. install dependencies:
+5. get inside container:
    ```sh
-   pip install -r requirements.txt
+   docker exec -it pinterest bash
    ```
 
 ## Usage
@@ -143,9 +124,11 @@ python command.py start-scraping-list --max-workers=4 cachicamo
 
 `board-search <query-list> [--headed] [output] [proxy-list]`
 
-Provide a query list csv file and get a json file with overview information such as total board count, total unique board count, total pin count, query board count, query pin count, board url, board title, board pin count.
+Provide a query list csv file and get a json file with overview information such as total board count, total unique
+board count, total pin count, query board count, query pin count, board url, board title, board pin count.
 
-Note that all data found in this job is not stored in database. Also, this command doesn't have `max-workers` due to limitations. 
+Note that all data found in this job is not stored in database. Also, this command doesn't have `max-workers` due to
+limitations.
 
 ```sh
 python command.py board-search --proxy-list=proxies.csv query-list.csv
@@ -155,7 +138,7 @@ python command.py board-search --proxy-list=proxies.csv query-list.csv
 
 `delete-db`
 
-Delete database. Ask for confirmation first. 
+Delete database. Ask for confirmation first.
 
 ```sh
 python command.py delete-db

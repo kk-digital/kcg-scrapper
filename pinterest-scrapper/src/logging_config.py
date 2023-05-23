@@ -9,7 +9,7 @@ import settings
 logs_path = path.join(settings.OUTPUT_FOlDER, "logs")
 os.makedirs(logs_path, exist_ok=True)
 
-log_format = "%(asctime)s - %(levelname)s - %(name)s - %(funcName)s - %(message)s"
+log_format = "%(asctime)s - %(threadName)s - %(levelname)s - %(name)s - %(funcName)s - %(message)s"
 date_format = "%m-%d %H:%M:%S"
 
 

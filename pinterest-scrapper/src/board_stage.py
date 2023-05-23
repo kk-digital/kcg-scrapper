@@ -3,7 +3,7 @@ import re
 import urllib.parse
 from collections import namedtuple
 from sqlite3 import Row
-from typing import Callable, Optional
+from typing import Callable, Optional, Union
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
@@ -22,7 +22,7 @@ URL = "https://www.pinterest.com/search/boards/?q={}&rs=typed"
 
 class BoardStage(ScrollStage):
     def __init__(
-        self, job: Row | dict, max_workers: int = None, headless: bool = True
+        self, job: Union[Row, dict], max_workers: int = None, headless: bool = True
     ) -> None:
         super().__init__(job, max_workers, headless)
         self.__board_search = None
@@ -79,8 +79,9 @@ class BoardStage(ScrollStage):
         self.__board_search = board_search
         super().start_scraping()
 
-        query = urllib.parse.quote_plus(self._job["query"])
-        url = URL.format(query)
+        query = self._job["query"]
+        quoted_query = urllib.parse.quote_plus(query)
+        url = URL.format(quoted_query)
 
         for i in range(settings.MAX_RETRY + 1):
             try:
@@ -92,9 +93,12 @@ class BoardStage(ScrollStage):
                     self.close()
                     raise
 
-                logger.exception(f"Timeout scraping boards from {url}, retrying...")
+                logger.exception(f"Timeout scraping boards for {query}, retrying...")
             except:
                 self.close()
+                logger.exception(
+                    f"Unhandled exception scraping boards from {query}, retrying..."
+                )
                 raise
 
         self.close()

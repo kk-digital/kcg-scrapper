@@ -13,8 +13,16 @@ logger = logging.getLogger(f"scraper.{__name__}")
 
 
 class ScrollStage(BaseStage):
+    def __get_correct_val(self, val):
+        return 0 if val is None else val
+
     def __get_scroll_height(self) -> int:
-        return self._driver.execute_script("return document.body.scrollHeight")
+        scroll_height = self._driver.execute_script("return document.body.scrollHeight")
+        return self.__get_correct_val(scroll_height)
+
+    def __get_scroll_y(self) -> int:
+        scroll_y = self._driver.execute_script("return window.scrollY")
+        return self.__get_correct_val(scroll_y)
 
     def _scroll_and_scrape(self, fn: Callable, check_more_like_this=False) -> None:
         logger.debug("Starting to scroll.")
@@ -24,16 +32,14 @@ class ScrollStage(BaseStage):
         seconds_sleep = 0
         while True:
             # exec fn in every scroll step
-
             try:
                 fn()
-            # catch type error in case try to access non existing attr on bs4 tag
-            except (
-                StaleElementReferenceException,
-                NoSuchElementException,
-                TypeError,
-            ) as e:
-                logger.debug(f"Error {e.__class__.__name__} accessing element, retrying...")
+            except (StaleElementReferenceException, NoSuchElementException) as e:
+                # temporarily commented due to getting many logs
+                # logger.debug(
+                #     f"Error {e.__class__.__name__} accessing element, retrying..."
+                # )
+                pass
 
             # scroll 20% of viewport height since dom is dynamically populated,
             # removing els not in viewport and adding new ones
@@ -43,7 +49,7 @@ class ScrollStage(BaseStage):
             seconds_sleep += settings.SCROLL_DELAY
 
             new_body_height = self.__get_scroll_height()
-            scroll_y = self._driver.execute_script("return window.scrollY")
+            scroll_y = self.__get_scroll_y()
             # round up due to precision loss
             end_of_page = math.ceil(inner_height + scroll_y) >= new_body_height
             if end_of_page and seconds_sleep >= settings.TIMEOUT:

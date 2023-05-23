@@ -78,6 +78,7 @@ class DownloadStage(BaseStage):
 
     def __download_pin_img(self, pin: Row, pin_uuid: uuid.UUID) -> str:
         img_urls = self.__get_img_urls(pin["img_url"])
+        img_name = None
         for img_url in img_urls:
             res = self.__session.get(img_url, timeout=settings.TIMEOUT)
 
@@ -91,7 +92,8 @@ class DownloadStage(BaseStage):
 
             break
 
-        # noinspection PyUnboundLocalVariable
+        img_name = img_name if img_name else pin["img_url"]
+
         return img_name
 
     def __save_pin_html(self, url: str, pin_uuid: uuid.UUID) -> None:
@@ -158,6 +160,9 @@ class DownloadStage(BaseStage):
             except:
                 self.__session.close()
                 self._stop_event.set()
+                logger.exception(
+                    f"Unhandled exception downloading pin: {pin['url']}, retrying..."
+                )
                 raise
 
     def __archive_output(self) -> None:

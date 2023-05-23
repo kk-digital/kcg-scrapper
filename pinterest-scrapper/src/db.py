@@ -1,12 +1,25 @@
+import functools
 import logging
 import sqlite3
+import threading
 from sqlite3 import Row
-from typing import List, Optional
+from typing import List, Optional, Callable
 
 import settings
 
 logger = logging.getLogger(f"scraper.{__name__}")
 _conn: Optional[sqlite3.Connection] = None
+lock = threading.Lock()
+
+
+def lock_db(func: Callable) -> Callable:
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        with lock:
+            result = func(*args, **kwargs)
+            return result
+
+    return wrapper
 
 
 def _create_tables() -> None:
@@ -99,6 +112,7 @@ def get_all_jobs() -> List[Row]:
     return curr.fetchall()
 
 
+@lock_db
 def update_job_stage(job_id: int, stage: str) -> None:
     _conn.execute(
         """
@@ -111,6 +125,7 @@ def update_job_stage(job_id: int, stage: str) -> None:
     _conn.commit()
 
 
+@lock_db
 def delete_job(job: Row) -> None:
     job_id = job["id"]
     _conn.executescript(
@@ -127,6 +142,7 @@ def delete_job(job: Row) -> None:
     )
 
 
+@lock_db
 def create_many_board(rows: List[tuple]) -> None:
     _conn.executemany(
         f"""
@@ -138,6 +154,7 @@ def create_many_board(rows: List[tuple]) -> None:
     _conn.commit()
 
 
+@lock_db
 def create_many_pin(rows: List[tuple]) -> None:
     _conn.executemany(
         f"""
@@ -166,6 +183,7 @@ def get_all_board_or_pin_by_job_id(name: str, job_id: int) -> List[Row]:
     return curr.fetchall()
 
 
+@lock_db
 def update_board_or_pin_done_by_url(name: str, url: str, done: int) -> None:
     assert name in _name_list
 
