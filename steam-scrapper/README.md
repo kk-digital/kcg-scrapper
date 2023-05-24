@@ -2,7 +2,8 @@
 
 Scrapy project to scrape steam apps and save html in warc format, extract apps data and media.
 
-Coded and tested on python version 3.11.2.
+Output is stored by default in project's root output folder. Changes this in `settings.py`. Also, can compress output
+folder with `compress-output` command after scraping is done or send over the red is needed.
 
 ## Installation
 
@@ -27,7 +28,6 @@ Coded and tested on python version 3.11.2.
    docker exec -it steam bash
    ```
 
-
 ## How to run:
 
 All commands described below must be run in the project's root.
@@ -38,7 +38,7 @@ All commands described below must be run in the project's root.
 
 ⚠️The following command purge the db and delete the output folder:
 
-`python command clean-db-and-output`
+`python command.py clean-db-and-output`
 
 - #### extract-apps:
 
@@ -49,7 +49,7 @@ Place the file next to the command module and replace file_name with the name of
 file that contains steam app urls. It's decoded using utf-8 and the regex used to extract app ids
 is `https://store\.steampowered\.com/app/(\d+)`. No duplicates are inserted.
 
-`python command extract-apps data.html`
+`python command.py extract-apps data.html`
 
 To gather app urls from multipe files into one file and feed the command above, use:
 
@@ -71,6 +71,13 @@ The command extract the ids and insert jobs to the db with the following form:
     - complete
     - failed
 3. err_msg: in case of partial or failed
+
+- #### compress-output:
+
+Compress output, one zip per app id folder. Resulting zips are placed in the compressed-apps folder next to apps.
+
+`python command.py compress-output`
+
 
 ### 2. Start scraping
 
