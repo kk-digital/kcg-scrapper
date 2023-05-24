@@ -10,7 +10,7 @@ class WarcioDownloaderMiddleware:
 
     def __init__(self, settings):
         self.warcio = scrapy_warcio.ScrapyWarcIo()
-        self.warcio.config['warc_dest'] = settings['WARC_STORE']
+        self.warcio.config["warc_dest"] = settings["WARC_STORE"]
 
     def process_request(self, request, spider):
         request.meta["WARC-Date"] = scrapy_warcio.warc_date()
