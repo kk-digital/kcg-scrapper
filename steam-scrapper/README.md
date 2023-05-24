@@ -6,13 +6,27 @@ Coded and tested on python version 3.11.2.
 
 ## Installation
 
-Create and environment and run:
+1. clone the repo
+   ```sh
+   git clone https://github.com/kk-digital/kcg-scrapper
+   ```
+2. change working directory:
+   ```sh
+   cd kcg-scrapper/steam-scrapper
+   ```
+3. build docker image:
+   ```sh
+   docker build -t steam .
+   ```
+4. run container:
+   ```sh
+   docker run -d -t -v .:/app --name steam steam
+   ```
+5. get inside container:
+   ```sh
+   docker exec -it steam bash
+   ```
 
-`pip install -r requirements.txt`
-
-Just in case you're having problems to tun the spider, run:
-
-`pip install python-magic-bin`
 
 ## How to run:
 
