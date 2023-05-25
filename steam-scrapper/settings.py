@@ -26,6 +26,9 @@ OUTPUT_FOLDER = r"output"
 # set the database to use
 JOBS_DB_NAME = "small-apps-db.json"
 
+# proxy list path
+ROTATING_PROXY_LIST_PATH = "proxies.csv"
+
 # DON'T MODIFY
 
 # modify here the name of output file
@@ -128,6 +131,8 @@ DOWNLOADER_MIDDLEWARES = {
     "scrapy.downloadermiddlewares.retry.RetryMiddleware": None,
     "scrapy_fake_useragent.middleware.RandomUserAgentMiddleware": 500,
     "scrapy_fake_useragent.middleware.RetryUserAgentMiddleware": 550,
+    "rotating_proxies.middlewares.RotatingProxyMiddleware": 610,
+    "rotating_proxies.middlewares.BanDetectionMiddleware": 620,
 }
 
 # Enable or disable extensions
