@@ -2,17 +2,31 @@
 
 Scrapy project to scrape steam apps and save html in warc format, extract apps data and media.
 
-Coded and tested on python version 3.11.2.
+Output is stored by default in project's root output folder. Changes this in `settings.py`. Also, can compress output
+folder with `compress-output` command after scraping is done or send over the red is needed.
 
 ## Installation
 
-Create and environment and run:
-
-`pip install -r requirements.txt`
-
-Just in case you're having problems to tun the spider, run:
-
-`pip install python-magic-bin`
+1. clone the repo
+   ```sh
+   git clone https://github.com/kk-digital/kcg-scrapper
+   ```
+2. change working directory:
+   ```sh
+   cd kcg-scrapper/steam-scrapper
+   ```
+3. build docker image:
+   ```sh
+   docker build -t steam .
+   ```
+4. run container:
+   ```sh
+   docker run -d -t -v .:/app --name steam steam
+   ```
+5. get inside container:
+   ```sh
+   docker exec -it steam bash
+   ```
 
 ## How to run:
 
@@ -24,7 +38,7 @@ All commands described below must be run in the project's root.
 
 ⚠️The following command purge the db and delete the output folder:
 
-`python command clean-db-and-output`
+`python command.py clean-db-and-output`
 
 - #### extract-apps:
 
@@ -35,7 +49,7 @@ Place the file next to the command module and replace file_name with the name of
 file that contains steam app urls. It's decoded using utf-8 and the regex used to extract app ids
 is `https://store\.steampowered\.com/app/(\d+)`. No duplicates are inserted.
 
-`python command extract-apps data.html`
+`python command.py extract-apps data.html`
 
 To gather app urls from multipe files into one file and feed the command above, use:
 
@@ -57,6 +71,13 @@ The command extract the ids and insert jobs to the db with the following form:
     - complete
     - failed
 3. err_msg: in case of partial or failed
+
+- #### compress-output:
+
+Compress output, one zip per app id folder. Resulting zips are placed in the compressed-apps folder next to apps.
+
+`python command.py compress-output`
+
 
 ### 2. Start scraping
 
@@ -109,6 +130,7 @@ Extracted app data have the following fields:
 
 You can alter the behavior of certain parts of the scraper modifying the following settings in `settings.py`:
 
+- `ROTATING_PROXY_LIST_PATH` proxy list csv file location
 - `DOWNLOAD_VIDEOS` whether to download videos or gifs, default to `False`
 - `OUTPUT_FOLDER` folder to store all outputs, default to `output` in the project root. You can set it to relative or
   absolute path such as:

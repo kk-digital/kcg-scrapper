@@ -1,9 +1,11 @@
+import os
 import re
 import shutil
 from os import path
 
 import typer
 
+import settings
 from steam_scraping.db import db, add_app
 
 app = typer.Typer()
@@ -34,6 +36,34 @@ def extract_apps(file: str):
         add_app(db, app_id)
 
     print("Apps added.")
+
+
+@app.command()
+def compress_output():
+    while True:
+        proceed = input(
+            "The output folder location specified in settings will be used. Proceed? (y/n): "
+        )
+        if proceed == "y":
+            break
+        elif proceed == "n":
+            raise typer.Exit()
+
+    print("Compressing, please wait.")
+
+    zip_dest = path.join(settings.OUTPUT_FOLDER, "compressed-apps")
+    os.makedirs(zip_dest, exist_ok=True)
+    for file in os.listdir(settings.FILES_STORE):
+        zip_name = path.join(zip_dest, file)
+        shutil.make_archive(
+            base_name=zip_name,
+            format="zip",
+            root_dir=settings.FILES_STORE,
+            base_dir=file,
+        )
+        shutil.rmtree(path.join(settings.FILES_STORE, file))
+
+    print(f"Done. Check {zip_dest}.")
 
 
 if __name__ == "__main__":

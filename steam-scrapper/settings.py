@@ -21,10 +21,13 @@ from colorlog import ColoredFormatter
 # whether to download videos or gif
 DOWNLOAD_VIDEOS = False
 # output folder
-OUTPUT_FOLDER = r'output'
+OUTPUT_FOLDER = r"output"
 
 # set the database to use
 JOBS_DB_NAME = "small-apps-db.json"
+
+# proxy list path
+ROTATING_PROXY_LIST_PATH = "proxies.csv"
 
 # DON'T MODIFY
 
@@ -43,8 +46,8 @@ JOBS_DB_NAME = "small-apps-db.json"
 
 
 OUTPUT_FOLDER = Path(OUTPUT_FOLDER).expanduser()
-FILES_STORE = path.join(OUTPUT_FOLDER, 'apps')
-WARC_STORE = path.join(OUTPUT_FOLDER, 'warc-files')
+FILES_STORE = path.join(OUTPUT_FOLDER, "apps")
+WARC_STORE = path.join(OUTPUT_FOLDER, "warc-files")
 # creating files folder
 os.makedirs(WARC_STORE, exist_ok=True)
 
@@ -99,7 +102,7 @@ DEPTH_PRIORITY = -100
 # Override the default request headers:
 DEFAULT_REQUEST_HEADERS = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,"
-              "application/signed-exchange;v=b3;q=0.7",
+    "application/signed-exchange;v=b3;q=0.7",
     "Accept-Language": "en,es;q=0.9",
     "Cache-Control": "max-age=0",
     "Connection": "keep-alive",
@@ -128,6 +131,8 @@ DOWNLOADER_MIDDLEWARES = {
     "scrapy.downloadermiddlewares.retry.RetryMiddleware": None,
     "scrapy_fake_useragent.middleware.RandomUserAgentMiddleware": 500,
     "scrapy_fake_useragent.middleware.RetryUserAgentMiddleware": 550,
+    "rotating_proxies.middlewares.RotatingProxyMiddleware": 610,
+    "rotating_proxies.middlewares.BanDetectionMiddleware": 620,
 }
 
 # Enable or disable extensions
@@ -180,8 +185,10 @@ logging.getLogger("scrapy_warcio.warcio").setLevel("WARNING")
 
 apps_logger = logging.getLogger("apps")
 apps_logger.propagate = True
-apps_file_handler = logging.FileHandler(path.join(OUTPUT_FOLDER, 'error_logs.log'), "a", "utf-8")
-apps_file_handler.setLevel('WARNING')
+apps_file_handler = logging.FileHandler(
+    path.join(OUTPUT_FOLDER, "error_logs.log"), "a", "utf-8"
+)
+apps_file_handler.setLevel("WARNING")
 apps_file_formatter = logging.Formatter(
     "%(asctime)s - %(levelname)s - %(name)s - %(funcName)s - %(message)s"
 )
