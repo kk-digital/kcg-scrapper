@@ -6,7 +6,7 @@ from os import path
 from typing import Optional
 
 import fire
-from selenium.common import NoSuchWindowException
+from selenium.common import WebDriverException
 
 import settings
 from src import db, logging_config, utils
@@ -46,12 +46,12 @@ class Command:
         print("Successfully deleted.")
 
     def start_scraping(
-        self,
-        query: str,
-        headed: bool = False,
-        max_workers: int = 1,
-        output: str = None,
-        proxy_list: str = None,
+            self,
+            query: str,
+            headed: bool = False,
+            max_workers: int = 1,
+            output: str = None,
+            proxy_list: str = None,
     ) -> Optional[list]:
         job = db.get_or_create_job_by_query(query)
 
@@ -79,6 +79,8 @@ class Command:
             result = stage_instance.start_scraping(**self.start_args)
 
             return result
+        except WebDriverException:
+            self.start_scraping(query, headed, max_workers, output, proxy_list)
         except:
             self.logger.critical(
                 f'Unable to handle exception for query "{job["query"]}".',
@@ -87,12 +89,12 @@ class Command:
             raise
 
     def start_scraping_list(
-        self,
-        query_list: str,
-        headed: bool = False,
-        max_workers: int = 1,
-        output: str = None,
-        proxy_list: str = None,
+            self,
+            query_list: str,
+            headed: bool = False,
+            max_workers: int = 1,
+            output: str = None,
+            proxy_list: str = None,
     ) -> None:
         rows = utils.read_csv(query_list)
         for row in rows:
@@ -105,11 +107,11 @@ class Command:
             )
 
     def board_search(
-        self,
-        query_list: str,
-        headed: bool = False,
-        output: str = None,
-        proxy_list: str = None,
+            self,
+            query_list: str,
+            headed: bool = False,
+            output: str = None,
+            proxy_list: str = None,
     ) -> None:
         self.start_args["board_search"] = True
 
@@ -161,12 +163,12 @@ class Command:
             )
 
     def test_scrape_board(
-        self,
-        url: str,
-        headed: bool = False,
-        max_workers: int = 1,
-        output: str = None,
-        proxy_list: str = None,
+            self,
+            url: str,
+            headed: bool = False,
+            max_workers: int = 1,
+            output: str = None,
+            proxy_list: str = None,
     ) -> None:
         query = "test"
         job = db.get_job_by_query(query)
