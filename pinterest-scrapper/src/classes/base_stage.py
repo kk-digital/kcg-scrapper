@@ -6,6 +6,7 @@ from sqlite3 import Row
 from typing import Optional, Union
 
 from selenium import webdriver
+
 # just import to install driver
 # noinspection PyUnresolvedReferences
 import chromedriver_autoinstaller

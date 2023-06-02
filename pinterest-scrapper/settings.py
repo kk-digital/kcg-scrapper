@@ -15,11 +15,11 @@ DATABASE_NAME = "pinterest.sqlite"
 # delay between scrolls when scraping boards and pins
 SCROLL_DELAY = 0.5
 # delay between requests to pin page and pin img
-DOWNLOAD_DELAY = 2
+DOWNLOAD_DELAY = 0
 
 # max time an operation such as page loading or finding an element on dom
 # waits before raising an exception
-TIMEOUT = 30
+TIMEOUT = 5
 
 # number of retries in case of exception such as Timeout and NoSuchElement
 MAX_RETRY = 5
