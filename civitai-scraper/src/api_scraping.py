@@ -19,22 +19,20 @@ class Scraper:
         self._job: Optional[sqlite3.Row] = None
         self._current_page: Optional[int] = None
 
-    def start_scraping(self) -> None:
-        job = self._db.get_job()
-        if not job:
-            self._db.start_job()
-            job = self._db.get_job()
-        elif job["done"]:
-            print("Job already completed.")
-            return
-        self._job = job
-        self._current_page = self._job["current_page"]
+    @tenacity.retry(
+        retry=tenacity.retry_if_exception_type((requests.HTTPError, requests.Timeout)),
+        stop=tenacity.stop_after_attempt(settings.MAX_RETRY)
+    )
+    def _make_request(self, url: str, params: dict) -> requests.Response:
+        proxy = next(self._proxy_list)
+        response = self._session.get(url, params=params, proxies=proxy)
 
-        try:
-            self._make_requests()
-        finally:
-            self._db.update_job_current_page(self._current_page)
-            self._db.close()
+        print(f"Using proxy: {proxy['http']}")
+        print(f"Scraping page n {params['page']}")
+
+        response.raise_for_status()
+
+        return response
 
     def _make_requests(self) -> None:
         while True:
@@ -57,17 +55,19 @@ class Scraper:
             # sleep between requests
             time.sleep(settings.DOWNLOAD_DELAY)
 
-    @tenacity.retry(
-        retry=tenacity.retry_if_exception_type((requests.HTTPError, requests.Timeout)),
-        stop=tenacity.stop_after_attempt(settings.MAX_RETRY)
-    )
-    def _make_request(self, url: str, params: dict) -> requests.Response:
-        proxy = next(self._proxy_list)
-        response = self._session.get(url, params=params, proxies=proxy)
+    def start_scraping(self) -> None:
+        job = self._db.get_job()
+        if not job:
+            self._db.start_job()
+            job = self._db.get_job()
+        elif job["done"]:
+            print("Job already completed.")
+            return
+        self._job = job
+        self._current_page = self._job["current_page"]
 
-        print(f"Using proxy: {proxy['http']}")
-        print(f"Scraping page n {params['page']}")
-
-        response.raise_for_status()
-
-        return response
+        try:
+            self._make_requests()
+        finally:
+            self._db.update_job_current_page(self._current_page)
+            self._db.close()
