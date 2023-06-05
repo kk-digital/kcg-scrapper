@@ -28,13 +28,13 @@ class Scraper:
                     image_id=image_data["id"], response=json.dumps(image_data)
                 )
 
-            self._current_page += 1
             is_last_page = self._current_page == response["metadata"]["totalPages"]
             if is_last_page:
                 self._db.update_job_status(1)
                 print("Job completed.")
                 break
 
+            self._current_page += 1
             # sleep between requests
             time.sleep(settings.DOWNLOAD_DELAY)
 
