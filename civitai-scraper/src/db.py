@@ -81,6 +81,16 @@ class DB:
 
         self._conn.commit()
 
+    def delete_job(self) -> None:
+        self._conn.execute(
+            """
+            DELETE FROM app
+            WHERE id = 1
+            """
+        )
+
+        self._conn.commit()
+
     def insert_image(self, image_id: int, response: str) -> None:
         self._conn.execute(
             """
