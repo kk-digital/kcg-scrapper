@@ -1,43 +1,26 @@
 import json
-import tenacity
 import sqlite3
 import time
 from typing import Optional
 
 import settings
-from src import utils
+from src import client
 from src.db import DB
-import requests
 
 
 class Scraper:
     def __init__(self) -> None:
         self._db = DB()
         self.api_url = "https://civitai.com/api/v1/images"
-        self._session = requests.Session()
-        self._proxy_list = iter(utils.get_proxy_list())
+        self._client = client.Client()
         self._job: Optional[sqlite3.Row] = None
         self._current_page: Optional[int] = None
-
-    @tenacity.retry(
-        retry=tenacity.retry_if_exception_type((requests.HTTPError, requests.Timeout)),
-        stop=tenacity.stop_after_attempt(settings.MAX_RETRY),
-    )
-    def _make_request(self, url: str, params: dict) -> requests.Response:
-        proxy = next(self._proxy_list)
-        response = self._session.get(url, params=params, proxies=proxy)
-
-        print(f"Using proxy: {proxy['http']}")
-        print(f"Scraping page n {params['page']}")
-
-        response.raise_for_status()
-
-        return response
 
     def _make_requests(self) -> None:
         while True:
             params = {"limit": self._job["page_size"], "page": self._current_page}
-            response = self._make_request(self.api_url, params=params)
+            print(f"Scraping page n {params['page']}")
+            response = self._client.make_request(self.api_url, params=params)
             response = response.json()
 
             for image_data in response["items"]:
@@ -71,3 +54,4 @@ class Scraper:
         finally:
             self._db.update_job_current_page(self._current_page)
             self._db.close()
+            self._client.close()
