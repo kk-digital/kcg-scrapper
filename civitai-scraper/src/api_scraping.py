@@ -21,7 +21,7 @@ class Scraper:
 
     @tenacity.retry(
         retry=tenacity.retry_if_exception_type((requests.HTTPError, requests.Timeout)),
-        stop=tenacity.stop_after_attempt(settings.MAX_RETRY)
+        stop=tenacity.stop_after_attempt(settings.MAX_RETRY),
     )
     def _make_request(self, url: str, params: dict) -> requests.Response:
         proxy = next(self._proxy_list)

@@ -5,4 +5,4 @@ DOWNLOAD_DELAY = 0
 # n of attempts when a request fails
 MAX_RETRY = 3
 # name of proxy csv file
-PROXY_LIST = 'proxies.csv'
+PROXY_LIST = "proxies.csv"
