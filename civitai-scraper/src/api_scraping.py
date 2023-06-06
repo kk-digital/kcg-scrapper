@@ -1,20 +1,25 @@
 import json
+import os
 import sqlite3
 import time
 from typing import Optional
 
 import settings
-from src import client
+from src.client import Client
 from src.db import DB
+from src.download_images import ImageDownloader
 
 
 class Scraper:
     def __init__(self) -> None:
         self._db = DB()
         self.api_url = "https://civitai.com/api/v1/images"
-        self._client = client.Client()
+        self._client = Client()
         self._job: Optional[sqlite3.Row] = None
         self._current_page: Optional[int] = None
+        # init output folder
+        os.makedirs(settings.FILES_STORE, exist_ok=True)
+        self._image_downloader = ImageDownloader(self._client, self._db)
 
     def _make_requests(self) -> None:
         while True:
@@ -30,8 +35,6 @@ class Scraper:
 
             is_last_page = self._current_page == response["metadata"]["totalPages"]
             if is_last_page:
-                self._db.update_job_status(1)
-                print("Job completed.")
                 break
 
             self._current_page += 1
@@ -43,15 +46,14 @@ class Scraper:
         if not job:
             self._db.start_job()
             job = self._db.get_job()
-        elif job["done"]:
-            print("Job already completed.")
-            return
         self._job = job
         self._current_page = self._job["current_page"]
 
         try:
             self._make_requests()
+            self._image_downloader.start_download()
         finally:
             self._db.update_job_current_page(self._current_page)
             self._db.close()
             self._client.close()
+            self._image_downloader.close()

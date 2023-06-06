@@ -6,3 +6,5 @@ DOWNLOAD_DELAY = 0
 MAX_RETRY = 3
 # name of proxy csv file
 PROXY_LIST = "proxies.csv"
+# output path
+FILES_STORE = "/output"

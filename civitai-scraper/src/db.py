@@ -23,8 +23,7 @@ class DB:
             CREATE TABLE IF NOT EXISTS app (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 current_page INTEGER NOT NULL,
-                page_size INTEGER NOT NULL,
-                done INTEGER NOT NULL
+                page_size INTEGER NOT NULL
             );
             CREATE TABLE IF NOT EXISTS image (
                 image_id INTEGER UNIQUE,
@@ -35,15 +34,13 @@ class DB:
             """
         )
 
-    def start_job(
-        self, current_page: int = 1, page_size: int = 100, done: bool = False
-    ) -> None:
+    def start_job(self, current_page: int = 1, page_size: int = 100) -> None:
         self._conn.execute(
             """
             INSERT OR REPLACE INTO app
-            VALUES (1, ?, ?, ?)
+            VALUES (1, ?, ?)
             """,
-            (current_page, page_size, int(done)),
+            (current_page, page_size),
         )
 
         self._conn.commit()
@@ -66,17 +63,6 @@ class DB:
             WHERE id = 1
             """,
             (page,),
-        )
-
-        self._conn.commit()
-
-    def update_job_status(self, done: int) -> None:
-        self._conn.execute(
-            """
-            UPDATE app
-            SET done = 1
-            WHERE id = 1
-            """
         )
 
         self._conn.commit()
@@ -117,24 +103,14 @@ class DB:
 
             yield row
 
-    def update_image_status(self, image_id: int, done: bool) -> None:
+    def update_image_status(self, image_id: int) -> None:
         self._conn.execute(
             """
             UPDATE image
-            SET done = ?
+            SET done = 1
             WHERE image_id = ?
             """,
-            (int(done), image_id),
+            (image_id,),
         )
 
         self._conn.commit()
-
-    # def check_if_exist_image_id(self, image_id: int) -> bool:
-    #     curr = self._conn.execute(
-    #         '''
-    #         SELECT image_id FROM image
-    #         WHERE image_id = ?
-    #         ''', (image_id,)
-    #     )
-    #
-    #     return bool(curr.fetchone())

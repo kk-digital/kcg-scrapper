@@ -30,7 +30,7 @@ class Client:
         retry=tenacity.retry_if_exception_type((requests.HTTPError, requests.Timeout)),
         stop=tenacity.stop_after_attempt(settings.MAX_RETRY),
     )
-    def make_request(self, url: str, params: dict) -> requests.Response:
+    def make_request(self, url: str, params: dict = None) -> requests.Response:
         proxy = next(self._proxy_list)
         print(f"Using proxy: {proxy['http']}")
         response = self._session.get(url, params=params, proxies=proxy)
