@@ -30,7 +30,8 @@ class DownloadStage(BaseStage):
         self.__session: Optional[Session] = None
 
     def __init_output_dir(self, make_dirs: bool = False) -> None:
-        dir_path = path.join(settings.OUTPUT_FOlDER, "jobs", self._job["query"])
+        query = self._job["query"].replace(" ", "-")
+        dir_path = path.join(settings.OUTPUT_FOlDER, "jobs", query)
         self.__output_path = dir_path
         self.__images_path = path.join(dir_path, "images")
         self.__html_path = path.join(dir_path, "html")
@@ -174,9 +175,8 @@ class DownloadStage(BaseStage):
 
         for file in os.listdir(self.__images_path):
             if create_new_zip:
-                new_zip_name = zip_name.format(
-                    self._job["query"], str(zip_count).zfill(6)
-                )
+                query = self._job["query"].replace(" ", "-")
+                new_zip_name = zip_name.format(query, str(zip_count).zfill(6))
                 zip_path = path.join(self.__output_path, new_zip_name)
                 zipf = zipfile.ZipFile(file=zip_path, mode="w")
                 create_new_zip = False

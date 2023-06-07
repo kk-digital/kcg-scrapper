@@ -24,7 +24,7 @@ DOWNLOAD_VIDEOS = False
 OUTPUT_FOLDER = r"output"
 
 # set the database to use
-JOBS_DB_NAME = "small-apps-db.json"
+JOBS_DB_NAME = "apps-db.json"
 
 # proxy list path
 ROTATING_PROXY_LIST_PATH = "proxies.csv"
@@ -44,12 +44,15 @@ ROTATING_PROXY_LIST_PATH = "proxies.csv"
 #     'overwrite': False
 # }}
 
-
+# output conf
 OUTPUT_FOLDER = Path(OUTPUT_FOLDER).expanduser()
 FILES_STORE = path.join(OUTPUT_FOLDER, "apps")
 WARC_STORE = path.join(OUTPUT_FOLDER, "warc-files")
 # creating files folder
 os.makedirs(WARC_STORE, exist_ok=True)
+
+# proxy conf
+ROTATING_PROXY_PAGE_RETRY_TIMES = 0
 
 # set config file location of warcio in env variable
 os.environ["SCRAPY_WARCIO_SETTINGS"] = "warcio-settings.yml"
@@ -80,7 +83,7 @@ ROBOTSTXT_OBEY = True
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 2
+DOWNLOAD_DELAY = 0.5
 # The download delay setting will honor only one of:
 # CONCURRENT_REQUESTS_PER_DOMAIN = 16
 # CONCURRENT_REQUESTS_PER_IP = 16
@@ -155,7 +158,7 @@ AUTOTHROTTLE_ENABLED = True
 # The initial download delay
 AUTOTHROTTLE_START_DELAY = 2
 # The maximum download delay to be set in case of high latencies
-# AUTOTHROTTLE_MAX_DELAY = 60
+AUTOTHROTTLE_MAX_DELAY = 2
 # The average number of requests Scrapy should be sending in parallel to
 # each remote server
 # AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
