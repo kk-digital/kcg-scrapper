@@ -1,5 +1,5 @@
 import csv
-import itertools
+import random
 from typing import Iterable
 
 import requests
@@ -10,11 +10,11 @@ import settings
 
 class Client:
     def __init__(self) -> None:
-        self._proxy_list = iter(self._get_proxy_list())
+        self._proxy_list = self._get_proxy_list()
         self._session = requests.Session()
 
     @staticmethod
-    def _get_proxy_list() -> Iterable:
+    def _get_proxy_list() -> list:
         with open(settings.PROXY_LIST, "r", newline="") as fp:
             csv_reader = csv.reader(fp)
             proxy_list = [row[0] for row in csv_reader]
@@ -24,14 +24,17 @@ class Client:
             for proxy in proxy_list
         ]
 
-        return itertools.cycle(proxy_list)
+        return proxy_list
+
+    def _get_random_proxy(self) -> dict:
+        return random.choice(self._proxy_list)
 
     @tenacity.retry(
         retry=tenacity.retry_if_exception_type((requests.HTTPError, requests.Timeout)),
         stop=tenacity.stop_after_attempt(settings.MAX_RETRY),
     )
     def make_request(self, url: str, params: dict = None) -> requests.Response:
-        proxy = next(self._proxy_list)
+        proxy = self._get_random_proxy()
         print(f"Using proxy: {proxy['http']}")
         response = self._session.get(url, params=params, proxies=proxy)
         response.raise_for_status()
