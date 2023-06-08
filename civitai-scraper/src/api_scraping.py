@@ -4,6 +4,8 @@ import sqlite3
 import time
 from typing import Optional
 
+import tenacity
+
 import settings
 from src.client import Client
 from src.db import DB
@@ -41,6 +43,7 @@ class Scraper:
             # sleep between requests
             time.sleep(settings.DOWNLOAD_DELAY)
 
+    @tenacity.retry(wait=tenacity.wait_fixed(settings.RETRY_DELAY))
     def start_scraping(self) -> None:
         job = self._db.get_job()
         if not job:
