@@ -1,6 +1,5 @@
 import csv
 import random
-from typing import Iterable
 
 import requests
 import tenacity
@@ -13,8 +12,7 @@ class Client:
         self._proxy_list = self._get_proxy_list()
         self._session = requests.Session()
 
-    @staticmethod
-    def _get_proxy_list() -> list:
+    def _get_proxy_list(self) -> list:
         with open(settings.PROXY_LIST, "r", newline="") as fp:
             csv_reader = csv.reader(fp)
             proxy_list = [row[0] for row in csv_reader]
