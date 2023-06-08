@@ -55,6 +55,8 @@ class Scraper:
         try:
             self._make_requests()
             self._image_downloader.start_download()
+        except:
+            raise
         finally:
             self._db.update_job_current_page(self._current_page)
             self._db.close()
