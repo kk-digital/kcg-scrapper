@@ -1,5 +1,6 @@
 import csv
 import random
+from typing import Optional
 
 import requests
 import tenacity
@@ -12,7 +13,11 @@ class Client:
         self._proxy_list = self._get_proxy_list()
         self._session = requests.Session()
 
-    def _get_proxy_list(self) -> list:
+    def _get_proxy_list(self) -> Optional[list]:
+        if not settings.PROXY_LIST:
+            print("Not using proxies.")
+            return
+
         with open(settings.PROXY_LIST, "r", newline="") as fp:
             csv_reader = csv.reader(fp)
             proxy_list = [row[0] for row in csv_reader]
@@ -32,8 +37,10 @@ class Client:
         stop=tenacity.stop_after_attempt(settings.MAX_RETRY),
     )
     def make_request(self, url: str, params: dict = None) -> requests.Response:
-        proxy = self._get_random_proxy()
-        print(f"Using proxy: {proxy['http']}")
+        proxy = None
+        if settings.PROXY_LIST:
+            proxy = self._get_random_proxy()
+            print(f"Using proxy: {proxy['http']}")
         response = self._session.get(url, params=params, proxies=proxy)
         response.raise_for_status()
 
