@@ -17,11 +17,9 @@ class Scraper:
         self._db = DB()
         self.api_url = "https://civitai.com/api/v1/images"
         self._client = Client()
+        self._image_downloader = ImageDownloader(self._client, self._db)
         self._job: Optional[sqlite3.Row] = None
         self._current_page: Optional[int] = None
-        # init output folder
-        os.makedirs(settings.FILES_STORE, exist_ok=True)
-        self._image_downloader = ImageDownloader(self._client, self._db)
 
     def _make_requests(self) -> None:
         while True:
