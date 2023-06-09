@@ -43,7 +43,6 @@ class Scraper:
             # sleep between requests
             time.sleep(settings.DOWNLOAD_DELAY)
 
-    @tenacity.retry(wait=tenacity.wait_fixed(settings.RETRY_DELAY))
     def start_scraping(self) -> None:
         job = self._db.get_job()
         if not job:
@@ -53,8 +52,10 @@ class Scraper:
         self._current_page = self._job["current_page"]
 
         try:
-            self._make_requests()
-            self._image_downloader.start_download()
+            for attempt in tenacity.Retrying(wait=tenacity.wait_fixed(settings.RETRY_DELAY)):
+                with attempt:
+                    self._make_requests()
+                    self._image_downloader.start_download()
         except:
             raise
         finally:
