@@ -36,7 +36,7 @@ class Command:
         print("Done.")
 
     def compress_output(self) -> None:
-        print('Compressing, please wait.')
+        print("Compressing, please wait.")
         # first convert jsonl to json
         jsonl_path = path.join(settings.FILES_STORE, "data.jsonl")
         json_list = []
@@ -53,7 +53,7 @@ class Command:
         zip_count = 1
         zip_file = None
         file_list = os.listdir(settings.FILES_STORE)
-        file_list.remove('data.json')
+        file_list.remove("data.json")
         for filename in file_list:
             if not zip_file:
                 zip_count_str = str(zip_count).zfill(6)
@@ -74,10 +74,10 @@ class Command:
         if zip_file:
             zip_file.close()
         # compress json and parts in single zip
-        zip_file_path = path.join(settings.FILES_STORE, 'output.zip')
-        final_zip_file = zipfile.ZipFile(zip_file_path, 'w')
+        zip_file_path = path.join(settings.FILES_STORE, "output.zip")
+        final_zip_file = zipfile.ZipFile(zip_file_path, "w")
         file_list = os.listdir(settings.FILES_STORE)
-        file_list.remove('output.zip')
+        file_list.remove("output.zip")
         for filename in file_list:
             path_to_file = path.join(settings.FILES_STORE, filename)
             final_zip_file.write(path_to_file, arcname=filename)
@@ -85,8 +85,7 @@ class Command:
 
         zip_file.close()
 
-
-        print('Done.')
+        print("Done.")
 
 
 fire.Fire(Command)

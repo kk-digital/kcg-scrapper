@@ -50,7 +50,9 @@ class Scraper:
         self._current_page = self._job["current_page"]
 
         try:
-            for attempt in tenacity.Retrying(wait=tenacity.wait_fixed(settings.RETRY_DELAY)):
+            for attempt in tenacity.Retrying(
+                wait=tenacity.wait_fixed(settings.RETRY_DELAY)
+            ):
                 with attempt:
                     self._make_requests()
                     self._image_downloader.start_download()

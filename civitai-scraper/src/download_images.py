@@ -20,7 +20,7 @@ class ImageDownloader:
         # init output folder and jsonl file
         os.makedirs(settings.FILES_STORE, exist_ok=True)
         json_location = path.join(settings.FILES_STORE, "data.jsonl")
-        self._json_fp = jsonlines.open(json_location, 'a')
+        self._json_fp = jsonlines.open(json_location, "a")
 
     def close(self) -> None:
         self._json_fp.close()
