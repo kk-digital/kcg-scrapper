@@ -10,3 +10,5 @@ RETRY_DELAY = 30
 PROXY_LIST = "proxies.csv"
 # output path
 FILES_STORE = "/output"
+# max size for zip files
+MAX_ARCHIVE_SIZE = 500 * 1024 * 1024 # 500MB

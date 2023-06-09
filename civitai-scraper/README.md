@@ -51,3 +51,14 @@ python command.py delete-output
 ⚠️ Delete db and output folder.
 
 ---
+
+`compress-output`
+
+```sh
+python command.py compress-output
+```
+
+Compress output folder into a single zip file. Run only once scraping is done.
+
+---
+
