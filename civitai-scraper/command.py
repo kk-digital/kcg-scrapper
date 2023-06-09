@@ -41,7 +41,7 @@ class Command:
         jsonl_path = path.join(settings.FILES_STORE, "data.jsonl")
         json_list = []
         with jsonlines.open(jsonl_path, "r") as fp:
-            for item in fp.read():
+            for item in fp:
                 json_list.append(item)
         os.remove(jsonl_path)
 
@@ -83,7 +83,7 @@ class Command:
             final_zip_file.write(path_to_file, arcname=filename)
             os.remove(path_to_file)
 
-        zip_file.close()
+        final_zip_file.close()
 
         print("Done.")
 
