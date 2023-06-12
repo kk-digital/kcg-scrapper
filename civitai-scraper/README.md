@@ -9,7 +9,9 @@ The project consists of two stages:
 
 Images and output in general are saved by default to `/output` in the container, mount there to persist output.
 
-Change output location and other settings in `settings.py`. Each entry is documented.
+Proxy use is disabled by default. Enable it by specifying proxy list csv file location in settings.
+
+Change above and more settings in `settings.py`. Each entry is documented.
 
 ### Installation
 
@@ -51,3 +53,14 @@ python command.py delete-output
 ⚠️ Delete db and output folder.
 
 ---
+
+`compress-output`
+
+```sh
+python command.py compress-output
+```
+
+Compress output folder into a single zip file. Run only once scraping is done.
+
+---
+

@@ -1,4 +1,5 @@
 import json
+import os
 import urllib.parse
 from os import path
 
@@ -16,14 +17,15 @@ class ImageDownloader:
     def __init__(self, client: Client, db: DB) -> None:
         self._client = client
         self._db = db
+        # init output folder and jsonl file
+        os.makedirs(settings.FILES_STORE, exist_ok=True)
         json_location = path.join(settings.FILES_STORE, "data.jsonl")
         self._json_fp = jsonlines.open(json_location, "a")
 
     def close(self) -> None:
         self._json_fp.close()
 
-    @staticmethod
-    def _save_image(response: requests.Response, image_id: int) -> str:
+    def _save_image(self, response: requests.Response, image_id: int) -> str:
         url_path = urllib.parse.urlparse(response.url).path
         original_basename = PurePosixPath(url_path).name
         ext = path.splitext(original_basename)[1]

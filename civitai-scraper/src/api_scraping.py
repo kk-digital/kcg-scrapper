@@ -4,6 +4,8 @@ import sqlite3
 import time
 from typing import Optional
 
+import tenacity
+
 import settings
 from src.client import Client
 from src.db import DB
@@ -15,11 +17,9 @@ class Scraper:
         self._db = DB()
         self.api_url = "https://civitai.com/api/v1/images"
         self._client = Client()
+        self._image_downloader = ImageDownloader(self._client, self._db)
         self._job: Optional[sqlite3.Row] = None
         self._current_page: Optional[int] = None
-        # init output folder
-        os.makedirs(settings.FILES_STORE, exist_ok=True)
-        self._image_downloader = ImageDownloader(self._client, self._db)
 
     def _make_requests(self) -> None:
         while True:
@@ -50,8 +50,14 @@ class Scraper:
         self._current_page = self._job["current_page"]
 
         try:
-            self._make_requests()
-            self._image_downloader.start_download()
+            for attempt in tenacity.Retrying(
+                wait=tenacity.wait_fixed(settings.RETRY_DELAY)
+            ):
+                with attempt:
+                    self._make_requests()
+                    self._image_downloader.start_download()
+        except:
+            raise
         finally:
             self._db.update_job_current_page(self._current_page)
             self._db.close()
