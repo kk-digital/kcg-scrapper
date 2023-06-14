@@ -18,10 +18,14 @@ class Scraper:
         self.api_url = "https://civitai.com/api/v1/images"
         self._client = Client()
         self._image_downloader = ImageDownloader(self._client, self._db)
+        self.last_page_found: bool = False
         self._job: Optional[sqlite3.Row] = None
         self._current_page: Optional[int] = None
 
     def _make_requests(self) -> None:
+        if self.last_page_found:
+            return
+
         while True:
             params = {"limit": self._job["page_size"], "page": self._current_page}
             print(f"Scraping page n {params['page']}")
@@ -35,6 +39,7 @@ class Scraper:
 
             is_last_page = self._current_page == response["metadata"]["totalPages"]
             if is_last_page:
+                self.last_page_found = True
                 break
 
             self._current_page += 1
