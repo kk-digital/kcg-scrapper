@@ -40,7 +40,9 @@ class Client:
         proxy = None
         if settings.PROXY_LIST:
             proxy = self._get_random_proxy()
-            print(f"Using proxy: {proxy['http']}")
+            print(f"Using proxy: {proxy['http']}.")
+
+        print(f"Getting url: {url}.")
         response = self._session.get(url, params=params, proxies=proxy)
         response.raise_for_status()
 
