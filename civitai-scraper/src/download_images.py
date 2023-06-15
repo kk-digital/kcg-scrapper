@@ -47,7 +47,11 @@ class ImageDownloader:
             image_url = image_data["url"]
             image_id = image_data["id"]
             print(f"Downloading image id {image_id}.")
-            response = self._client.make_request(image_url)
+            try:
+                response = self._client.make_request(image_url)
+            # ignoring bc there is images that timeouts forever
+            except requests.Timeout:
+                continue
             filename = self._save_image(response, image_id)
             self._add_json_entry(filename, image_data)
             self._db.update_image_status(image_id)
