@@ -35,6 +35,7 @@ class Client:
     @tenacity.retry(
         retry=tenacity.retry_if_exception_type((requests.HTTPError, requests.Timeout)),
         stop=tenacity.stop_after_attempt(settings.MAX_RETRY),
+        reraise=True
     )
     def make_request(self, url: str, params: dict = None) -> requests.Response:
         proxy = None
