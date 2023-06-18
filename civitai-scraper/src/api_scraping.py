@@ -1,5 +1,5 @@
 import json
-import os
+import logging
 import sqlite3
 import time
 from typing import Optional
@@ -10,6 +10,9 @@ import settings
 from src.client import Client
 from src.db import DB
 from src.download_images import ImageDownloader
+
+logging.basicConfig()
+logger = logging.getLogger()
 
 
 class Scraper:
@@ -56,7 +59,10 @@ class Scraper:
 
         try:
             for attempt in tenacity.Retrying(
-                wait=tenacity.wait_fixed(settings.RETRY_DELAY)
+                wait=tenacity.wait_fixed(settings.RETRY_DELAY),
+                before_sleep=tenacity.before_sleep_log(
+                    logger, logging.ERROR, exc_info=True
+                ),
             ):
                 with attempt:
                     self._make_requests()
