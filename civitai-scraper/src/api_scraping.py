@@ -1,5 +1,5 @@
 import json
-import os
+import logging
 import sqlite3
 import time
 from typing import Optional
@@ -11,6 +11,9 @@ from src.client import Client
 from src.db import DB
 from src.download_images import ImageDownloader
 
+logging.basicConfig()
+logger = logging.getLogger()
+
 
 class Scraper:
     def __init__(self) -> None:
@@ -18,10 +21,14 @@ class Scraper:
         self.api_url = "https://civitai.com/api/v1/images"
         self._client = Client()
         self._image_downloader = ImageDownloader(self._client, self._db)
+        self.last_page_found: bool = False
         self._job: Optional[sqlite3.Row] = None
         self._current_page: Optional[int] = None
 
     def _make_requests(self) -> None:
+        if self.last_page_found:
+            return
+
         while True:
             params = {"limit": self._job["page_size"], "page": self._current_page}
             print(f"Scraping page n {params['page']}")
@@ -35,6 +42,7 @@ class Scraper:
 
             is_last_page = self._current_page == response["metadata"]["totalPages"]
             if is_last_page:
+                self.last_page_found = True
                 break
 
             self._current_page += 1
@@ -51,7 +59,10 @@ class Scraper:
 
         try:
             for attempt in tenacity.Retrying(
-                wait=tenacity.wait_fixed(settings.RETRY_DELAY)
+                wait=tenacity.wait_fixed(settings.RETRY_DELAY),
+                before_sleep=tenacity.before_sleep_log(
+                    logger, logging.ERROR, exc_info=True
+                ),
             ):
                 with attempt:
                     self._make_requests()
