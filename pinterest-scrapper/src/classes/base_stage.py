@@ -70,6 +70,7 @@ class BaseStage:
 
         self._driver.set_window_size(1280, 1024)
         self._driver.set_page_load_timeout(settings.TIMEOUT)
+        self._driver.set_script_timeout(30)
         self._wait = WebDriverWait(self._driver, settings.TIMEOUT)
         logger.debug("Driver set up.")
 
