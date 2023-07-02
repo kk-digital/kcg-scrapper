@@ -9,7 +9,7 @@ import settings
 
 def configure() -> None:
     # formats
-    log_format = "%(asctime)s - %(threadName)s - %(levelname)s - %(name)s - %(funcName)s - %(message)s"
+    log_format = "%(asctime)s - %(levelname)s - %(name)s - %(funcName)s - %(message)s"
     date_format = "%m-%d %H:%M:%S"
     # folder creation
     log_path = path.join(settings.OUTPUT_FOLDER, "logs")
