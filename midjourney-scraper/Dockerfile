@@ -2,6 +2,11 @@ FROM python:3.11.3
 
 RUN apt update && apt upgrade -y
 
+ENV PYTHON_ENV production
+ENV OUTPUT_FOLDER /output
+ENV DS_EMAIL
+ENV DS_PASSWORD
+
 WORKDIR /app
 
 COPY requirements.txt .
