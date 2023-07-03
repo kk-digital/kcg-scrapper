@@ -2,7 +2,7 @@ import logging
 import os
 from typing import List
 
-from playwright.sync_api import sync_playwright, BrowserContext, Page, Browser
+from playwright.sync_api import sync_playwright, BrowserContext, Page, Browser, Request
 
 import settings
 
@@ -11,6 +11,7 @@ class BrowserScraper:
     def __init__(self) -> None:
         self.logger = logging.getLogger(f"scraper.{__name__}")
         self.url = "https://www.midjourney.com"
+        self._target_endpoint = "/api/app/recent-jobs/"
 
     def _init_context(self, browser: Browser) -> BrowserContext:
         context = browser.new_context(base_url=self.url)
@@ -35,13 +36,26 @@ class BrowserScraper:
         page.wait_for_url("/app*")
         self.logger.debug("Logged in.")
 
-    def _get_generations(self, page: Page) -> List[dict]:
-        # generations = set()
-        # page.goto(
-        #     self.url_with_scheme + '/api/app/recent-jobs/?amount=45&dedupe=true&jobStatus=completed&jobType=upscale&orderBy=new&')
-        # body_content = page.locator('body').text_content()
-        # print(len(json.loads(body_content)))
-        pass
+    def _request_handler(self, request: Request) -> None:
+        if not self._target_endpoint in request.url:
+            return
+
+        data = request.response().json()
+        self.logger.debug(f"Got {len(data)} new generations.")
+        # todo logic to push data to db
+
+    def _scroll_generations(self, page: Page) -> None:
+        self.logger.info("Starting scrolling stage...")
+        document_element = page.evaluate_handle("document.documentElement")
+        get_scroll_height = lambda: document_element.get_property(
+            "scrollHeight"
+        ).json_value()
+        last_scroll_height = get_scroll_height()
+
+        for _ in range(settings.SCROLL_TIMES):
+            page.evaluate(f"window.scrollTo(0, {last_scroll_height})")
+            page.wait_for_timeout(settings.SCROLL_DELAY)
+            last_scroll_height = get_scroll_height()
 
     def _log_out(self, page: Page) -> None:
         page.get_by_role("button", name="Account").click()
@@ -57,7 +71,9 @@ class BrowserScraper:
             try:
                 page = context.new_page()
                 self._log_in(page)
-                self._get_generations(page)
+                page.on("requestfinished", self._request_handler)
+                page.goto("/app/feed/?sort=new")
+                self._scroll_generations(page)
                 self._log_out(page)
                 self.logger.info("End of operations.")
             finally:

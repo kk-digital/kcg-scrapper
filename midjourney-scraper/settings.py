@@ -7,3 +7,5 @@ OUTPUT_FOLDER = os.environ["OUTPUT_FOLDER"]
 LOGGING_LEVEL = logging.INFO if is_production else logging.DEBUG
 HEADED = not is_production
 ACTIONS_DELAY = 100  # milliseconds
+SCROLL_DELAY = 5000  # ms
+SCROLL_TIMES = 30
