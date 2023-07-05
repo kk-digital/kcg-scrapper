@@ -1,2 +1,2 @@
 from .base import Base
-from .generation import Generation
+from .generation import Generation, GenerationUrl
