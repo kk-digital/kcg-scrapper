@@ -1,15 +1,21 @@
+import json
 import logging
 import os
-from typing import List
 
 from playwright.sync_api import sync_playwright, BrowserContext, Page, Browser, Request
+from sqlalchemy import select
+
+from src.db import engine as db_engine
 
 import settings
+from src.db.model import Generation, GenerationUrl
 
 
 class BrowserScraper:
     def __init__(self) -> None:
-        self.logger = logging.getLogger(f"scraper.{__name__}")
+        engine = db_engine.get_engine()
+        self._session = db_engine.get_session(engine)
+        self._logger = logging.getLogger(f"scraper.{__name__}")
         self.url = "https://www.midjourney.com"
         self._target_endpoint = "/api/app/recent-jobs/"
 
@@ -18,7 +24,7 @@ class BrowserScraper:
         context.add_init_script(
             "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
         )
-        self.logger.debug("Browser context configured.")
+        self._logger.debug("Browser context configured.")
 
         return context
 
@@ -34,18 +40,37 @@ class BrowserScraper:
         page.get_by_role("button", name="Log In").click()
         page.get_by_role("button", name="Authorize").click()
         page.wait_for_url("/app*")
-        self.logger.debug("Logged in.")
+        self._logger.debug("Logged in.")
 
     def _request_handler(self, request: Request) -> None:
         if not self._target_endpoint in request.url:
             return
 
         data = request.response().json()
-        self.logger.debug(f"Got {len(data)} new generations.")
-        # todo logic to push data to db
+        self._logger.debug(f"Got {len(data)} new generations.")
+        for generation in data:
+            # first check for duplicate generation
+            generation_id = generation["id"]
+            stmt = select(Generation).filter_by(generation_id=generation_id)
+            found = self._session.scalar(stmt)
+            if found:
+                continue
+
+            json_data = json.dumps(generation)
+            generation_urls = [
+                GenerationUrl(value=url) for url in generation["image_paths"]
+            ]
+            new_generation = Generation(
+                generation_id=generation_id,
+                generation_urls=generation_urls,
+                data=json_data,
+            )
+            self._session.add(new_generation)
+
+        self._session.commit()
 
     def _scroll_generations(self, page: Page) -> None:
-        self.logger.info("Starting scrolling stage...")
+        self._logger.info("Starting scrolling stage...")
         document_element = page.evaluate_handle("document.documentElement")
         get_scroll_height = lambda: document_element.get_property(
             "scrollHeight"
@@ -61,10 +86,10 @@ class BrowserScraper:
         page.get_by_role("button", name="Account").click()
         page.get_by_role("menuitem", name="Sign Out").click()
         page.wait_for_url("/home*")
-        self.logger.debug("Logged out.")
+        self._logger.debug("Logged out.")
 
     def start_scraping(self) -> None:
-        self.logger.info("Starting browser.")
+        self._logger.info("Starting browser.")
         with sync_playwright() as playwright:
             browser = playwright.firefox.launch(headless=not settings.HEADED)
             context = self._init_context(browser)
@@ -75,8 +100,8 @@ class BrowserScraper:
                 page.goto("/app/feed/?sort=new")
                 self._scroll_generations(page)
                 self._log_out(page)
-                self.logger.info("End of operations.")
+                self._logger.info("End of operations.")
             finally:
                 context.close()
                 browser.close()
-                self.logger.debug("Browser and context closed.")
+                self._logger.debug("Browser and context closed.")
