@@ -64,6 +64,7 @@ class BrowserScraper:
                 generation_id=generation_id,
                 generation_urls=generation_urls,
                 data=json_data,
+                status="pending",
             )
             self._session.add(new_generation)
 
