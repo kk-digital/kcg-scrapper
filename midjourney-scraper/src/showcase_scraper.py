@@ -13,13 +13,12 @@ from src.db.model import Generation, GenerationUrl
 
 
 class ShowcaseScraper:
-    def __init__(self, browser_scraper: BrowserScraper) -> None:
+    def __init__(self, page: Page) -> None:
         engine = db_engine.get_engine()
         self._session = db_engine.get_session(engine)
         self._logger = logging.getLogger(f"scraper.{__name__}")
-        self._url = "https://www.midjourney.com"
         self._target_endpoint = "/api/app/recent-jobs/"
-        self._browser_scraper = browser_scraper
+        self._page = page
 
     def _log_in(self, page: Page) -> None:
         page.goto("/")
@@ -76,19 +75,16 @@ class ShowcaseScraper:
             page.wait_for_timeout(settings.SCROLL_DELAY)
             last_scroll_height = get_scroll_height()
 
-    def _log_out(self, page: Page) -> None:
+    def start_scraping(self) -> None:
+        self._logger.info("Starting showcase scraper.")
+        self._log_in(self._page)
+        self._page.on("requestfinished", self._request_handler)
+        self._page.goto("/app/feed/?sort=new")
+        self._logger.info("End of operations.")
+        self._scroll_generations(self._page)
+
+    def log_out(self, page: Page) -> None:
         page.get_by_role("button", name="Account").click()
         page.get_by_role("menuitem", name="Sign Out").click()
         page.wait_for_url("/home*")
         self._logger.debug("Logged out.")
-
-    def start_scraping(self) -> None:
-        self._logger.info("Starting showcase scraper.")
-        self._browser_scraper.init_context(base_url=self._url)
-        page = self._browser_scraper.get_page()
-        self._log_in(page)
-        page.on("requestfinished", self._request_handler)
-        page.goto("/app/feed/?sort=new")
-        self._logger.info("End of operations.")
-        self._scroll_generations(page)
-        self._log_out(page)
