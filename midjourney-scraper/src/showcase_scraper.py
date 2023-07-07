@@ -84,6 +84,7 @@ class ShowcaseScraper:
         self._scroll_generations(self._page)
 
     def log_out(self, page: Page) -> None:
+        page.goto("/")
         page.get_by_role("button", name="Account").click()
         page.get_by_role("menuitem", name="Sign Out").click()
         page.wait_for_url("/home*")
