@@ -1,6 +1,7 @@
 import logging
 
 from src.browser_scraper import BrowserScraper
+from src.showcase_scraper import ShowcaseScraper
 
 
 class Scraper:
@@ -9,4 +10,9 @@ class Scraper:
 
     def start_scraping(self) -> None:
         self._logger.info("Starting scraper.")
-        BrowserScraper().start_scraping()
+        browser_scraper = BrowserScraper()
+        browser_scraper.start_scraping()
+        try:
+            ShowcaseScraper(browser_scraper).start_scraping()
+        finally:
+            browser_scraper.close()
