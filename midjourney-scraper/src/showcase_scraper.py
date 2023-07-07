@@ -17,7 +17,7 @@ class ShowcaseScraper:
         engine = db_engine.get_engine()
         self._session = db_engine.get_session(engine)
         self._logger = logging.getLogger(f"scraper.{__name__}")
-        self.url = "https://www.midjourney.com"
+        self._url = "https://www.midjourney.com"
         self._target_endpoint = "/api/app/recent-jobs/"
         self._browser_scraper = browser_scraper
 
@@ -84,7 +84,7 @@ class ShowcaseScraper:
 
     def start_scraping(self) -> None:
         self._logger.info("Starting showcase scraper.")
-        self._browser_scraper.init_context(base_url=self.url)
+        self._browser_scraper.init_context(base_url=self._url)
         page = self._browser_scraper.get_page()
         self._log_in(page)
         page.on("requestfinished", self._request_handler)
