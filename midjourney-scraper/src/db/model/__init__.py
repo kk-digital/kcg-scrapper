@@ -1,2 +1,2 @@
-from .base import Base
-from .generation import Generation, GenerationUrl
+from src.db.model.base import Base
+from src.db.model.generation import Generation, GenerationUrl
