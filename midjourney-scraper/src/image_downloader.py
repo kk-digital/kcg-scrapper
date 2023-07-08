@@ -13,6 +13,8 @@ from src.db import engine as db_engine
 from src.db.model import Generation
 from urllib.parse import urlparse
 
+from src.exceptions import PlaywrightHTTTPError
+
 
 class ImageDownloader:
     def __init__(self, page: Page) -> None:
@@ -32,7 +34,7 @@ class ImageDownloader:
         response = response_info.value
         code = response.status
         if code != 200:
-            print("errorrrrr non 200 response")  # todo solve this
+            raise PlaywrightHTTTPError(f"Got non 200 status code loading {url}.")
 
         return response
 
@@ -57,12 +59,15 @@ class ImageDownloader:
                 self._page.wait_for_timeout(self._download_delay)
             generation.data = json.dumps(json_entry)
             generation.status = "completed"
-            self._logger.debug(f"Image downloaded, generation id: {generation_id}")
-        except:  # todo retryerror tenacity
-            # todo only mark as failed if http related error
+            self._logger.info(f"Image downloaded, generation id: {generation_id}")
+        except PlaywrightHTTTPError:
             generation.status = "failed"
             self._logger.warning(
-                f"Failed download of image, generation id: {generation_id}"
+                f"Got non 200 status code at download of image, generation id: {generation_id}"
+            )
+        except:
+            self._logger.error(
+                f"Got unexpected error at download of image, generation id: {generation_id}"
             )
             raise
         finally:
