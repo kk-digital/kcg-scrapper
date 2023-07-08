@@ -6,11 +6,12 @@ from pathlib import PurePosixPath
 
 from playwright.sync_api import Page, Response
 from sqlalchemy import select
+from tenacity import stop_after_attempt, wait_fixed, Retrying
 
 import settings
 from src.db import engine as db_engine
 
-from src.db.model import Generation
+from src.db.model import Generation, GenerationUrl
 from urllib.parse import urlparse
 
 from src.exceptions import PlaywrightHTTTPError
@@ -23,11 +24,11 @@ class ImageDownloader:
         self._logger = logging.getLogger(f"scraper.{__name__}")
         self._page = page
         self._download_delay = settings.DOWNLOAD_DELAY
+        self._max_retry = settings.MAX_RETRY
         # init images folder
         self._images_folder = path.join(settings.OUTPUT_FOLDER, "images")
         os.makedirs(self._images_folder, exist_ok=True)
 
-    # todo implement retry
     def _make_request(self, url: str) -> Response:
         with self._page.expect_response(url) as response_info:
             self._page.goto(url)
@@ -43,20 +44,29 @@ class ImageDownloader:
         with open(image_path, "wb") as fp:
             fp.write(response.body())
 
-    def _download_images(self, generation: Generation) -> None:
+    def _download_image(self, generation_url: GenerationUrl, filenames: list) -> None:
+        url = generation_url.value
+        response = self._make_request(url)
+        url_path = urlparse(url).path
+        filename = PurePosixPath(url_path).name
+        filename = f"{generation_url.generation.generation_id}-{filename}"
+        self._save_image(response, filename)
+        filenames.append(filename)
+        self._page.wait_for_timeout(self._download_delay)
+
+    def _process_generation(self, generation: Generation) -> None:
         generation_id = generation.generation_id
         data = json.loads(generation.data)
-        json_entry = dict(generation_id=generation_id, data=data, image_names=list())
+        json_entry = dict(generation_id=generation_id, data=data, filenames=list())
         try:
             for generation_url in generation.generation_urls:
-                url = generation_url.value
-                response = self._make_request(url)
-                url_path = urlparse(url).path
-                filename = PurePosixPath(url_path).name
-                filename = f"{generation.id}-{filename}"
-                self._save_image(response, filename)
-                json_entry["image_names"].append(filename)
-                self._page.wait_for_timeout(self._download_delay)
+                retryer = Retrying(
+                    reraise=True,
+                    stop=stop_after_attempt(self._max_retry),
+                    wait=wait_fixed(self._download_delay),
+                )
+                retryer(self._download_image, generation_url, json_entry["filenames"])
+
             generation.data = json.dumps(json_entry)
             generation.status = "completed"
             self._logger.info(f"Image downloaded, generation id: {generation_id}")
@@ -77,5 +87,5 @@ class ImageDownloader:
         self._logger.info("Starting image downloader.")
         select_stmt = select(Generation).filter_by(status="pending")
         cursor = self._session.scalars(select_stmt)
-        for row in cursor:
-            self._download_images(row)
+        for generation in cursor:
+            self._process_generation(generation)

@@ -1,4 +1,4 @@
 playwright~=1.35
 colorlog~=6.7
-requests~=2.31
 SQLAlchemy~=2.0
+tenacity~=8.2
