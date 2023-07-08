@@ -2,10 +2,9 @@ import json
 import logging
 import os
 
-from playwright.sync_api import sync_playwright, BrowserContext, Page, Browser, Request
+from playwright.sync_api import Page, Request
 from sqlalchemy import select
 
-from src.browser_scraper import BrowserScraper
 from src.db import engine as db_engine
 
 import settings
@@ -34,6 +33,26 @@ class ShowcaseScraper:
         page.wait_for_url("/app*")
         self._logger.debug("Logged in.")
 
+    def _insert_generation(self, generation: dict):
+        # first check for duplicate generation
+        generation_id = generation["id"]
+        stmt = select(Generation).filter_by(generation_id=generation_id)
+        found = self._session.scalar(stmt)
+        if found:
+            return
+
+        json_data = json.dumps(generation)
+        generation_urls = [
+            GenerationUrl(value=url) for url in generation["image_paths"]
+        ]
+        new_generation = Generation(
+            generation_id=generation_id,
+            generation_urls=generation_urls,
+            data=json_data,
+            status="pending",
+        )
+        self._session.add(new_generation)
+
     def _request_handler(self, request: Request) -> None:
         if not self._target_endpoint in request.url:
             return
@@ -41,24 +60,7 @@ class ShowcaseScraper:
         data = request.response().json()
         self._logger.debug(f"Got {len(data)} new generations.")
         for generation in data:
-            # first check for duplicate generation
-            generation_id = generation["id"]
-            stmt = select(Generation).filter_by(generation_id=generation_id)
-            found = self._session.scalar(stmt)
-            if found:
-                continue
-
-            json_data = json.dumps(generation)
-            generation_urls = [
-                GenerationUrl(value=url) for url in generation["image_paths"]
-            ]
-            new_generation = Generation(
-                generation_id=generation_id,
-                generation_urls=generation_urls,
-                data=json_data,
-                status="pending",
-            )
-            self._session.add(new_generation)
+            self._insert_generation(generation)
 
         self._session.commit()
 
