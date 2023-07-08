@@ -12,3 +12,5 @@ SCROLL_DELAY = 4000  # ms
 DOWNLOAD_DELAY = 4000  # ms
 SCROLL_TIMES = 30
 MAX_RETRY = 3
+USER_AGENT_BROWSERS = ["chrome", "firefox", "opera", "safari"]
+VIEWPORT_SIZES = [(1536, 864), (1440, 900), (1366, 768), (1920, 1080)]

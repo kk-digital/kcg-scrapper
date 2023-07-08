@@ -1,4 +1,5 @@
 import logging
+import random
 from typing import Optional
 
 from playwright.sync_api import (
@@ -6,11 +7,11 @@ from playwright.sync_api import (
     BrowserContext,
     Page,
     Browser,
-    Request,
     Playwright,
 )
 
 import settings
+from fake_useragent import FakeUserAgent
 
 
 class BrowserScraper:
@@ -20,6 +21,8 @@ class BrowserScraper:
         self._playwright: Optional[Playwright] = None
         self._browser: Optional[Browser] = None
         self._context: Optional[BrowserContext] = None
+        self._ua_browsers = settings.USER_AGENT_BROWSERS
+        self._viewport_sizes = settings.VIEWPORT_SIZES
 
     def start_scraping(self) -> None:
         self._logger.info("Starting browser.")
@@ -27,7 +30,13 @@ class BrowserScraper:
         self._browser = self._playwright.firefox.launch(headless=self._headless)
 
     def init_context(self, base_url: Optional[str]) -> None:
-        self._context = self._browser.new_context(base_url=base_url)
+        ua = FakeUserAgent(browsers=self._ua_browsers).random
+        width, height = random.choice(self._viewport_sizes)
+        viewport = {"width": width, "height": height}
+
+        self._context = self._browser.new_context(
+            base_url=base_url, user_agent=ua, viewport=viewport
+        )
         self._context.add_init_script(
             "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
         )
