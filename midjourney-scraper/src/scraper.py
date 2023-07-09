@@ -32,7 +32,7 @@ class Scraper:
             showcase_scraper.start_scraping()
             # start download stage
             ImageDownloader(page).start_scraping()
-
-            showcase_scraper.log_out(page)
+            # todo check why not working on container
+            # showcase_scraper.log_out(page)
         finally:
             browser_scraper.close()
