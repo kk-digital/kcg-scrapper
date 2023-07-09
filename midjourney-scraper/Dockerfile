@@ -4,6 +4,8 @@ RUN apt update && apt upgrade -y
 
 ENV PYTHON_ENV production
 ENV OUTPUT_FOLDER /output
+ENV LOGGING_LEVEL INFO
+ENV HEADED false
 ENV DS_EMAIL ""
 ENV DS_PASSWORD ""
 ENV PROXY_LIST ""

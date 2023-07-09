@@ -89,3 +89,4 @@ class ImageDownloader:
         cursor = self._session.scalars(select_stmt)
         for generation in cursor:
             self._process_generation(generation)
+        self._logger.info("End of image download stage.")

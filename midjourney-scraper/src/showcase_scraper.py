@@ -58,7 +58,7 @@ class ShowcaseScraper:
             return
 
         data = request.response().json()
-        self._logger.debug(f"Got {len(data)} new generations.")
+        self._logger.info(f"Got {len(data)} new generations.")
         for generation in data:
             self._insert_generation(generation)
 
@@ -82,8 +82,8 @@ class ShowcaseScraper:
         self._log_in(self._page)
         self._page.on("requestfinished", self._request_handler)
         self._page.goto("/app/feed/?sort=new")
-        self._logger.info("End of operations.")
         self._scroll_generations(self._page)
+        self._logger.info("End of showcase stage.")
 
     def log_out(self, page: Page) -> None:
         page.goto("/")

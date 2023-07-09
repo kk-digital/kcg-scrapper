@@ -34,5 +34,6 @@ class Scraper:
             ImageDownloader(page).start_scraping()
             # todo check why not working on container
             # showcase_scraper.log_out(page)
+            self._logger.info("End of operations.")
         finally:
             browser_scraper.close()
