@@ -48,7 +48,7 @@ class BrowserScraper:
         ua = random.choice(self._ua_list)["ua"]
         width, height = random.choice(self._viewport_sizes)
         viewport = {"width": width, "height": height}
-        proxy = self._proxy_list_path and random.choice(self._proxy_list)
+        proxy = random.choice(self._proxy_list) if self._proxy_list_path else None
         self._logger.info(
             f"Configuration: UA: {ua}, viewport: {viewport}, proxy: {proxy}."
         )
