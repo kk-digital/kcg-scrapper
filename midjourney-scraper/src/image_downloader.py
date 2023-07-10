@@ -79,7 +79,12 @@ class ImageDownloader:
             self._logger.warning(
                 f"Got non 200 status code at download of image, generation id: {generation_id}"
             )
-        except:
+        except Exception as e:
+            # if response body is larger than 10mb an implicit playwright error occurs
+            if "was evicted" in e.args[0]:
+                generation.status = "failed"
+                return
+
             self._logger.error(
                 f"Got unexpected error at download of image, generation id: {generation_id}"
             )
