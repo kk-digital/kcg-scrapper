@@ -5,8 +5,9 @@ from os import path
 from pathlib import PurePosixPath
 
 from playwright.sync_api import Page, Response
+from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 from sqlalchemy import select
-from tenacity import stop_after_attempt, wait_fixed, Retrying
+from tenacity import stop_after_attempt, wait_fixed, Retrying, retry_if_exception_type
 
 import settings
 from src.db import engine as db_engine
@@ -64,6 +65,9 @@ class ImageDownloader:
                     reraise=True,
                     stop=stop_after_attempt(self._max_retry),
                     wait=wait_fixed(self._download_delay),
+                    retry=retry_if_exception_type(
+                        (PlaywrightHTTTPError, PlaywrightTimeoutError)
+                    ),
                 )
                 retryer(self._download_image, generation_url, json_entry["filenames"])
 
