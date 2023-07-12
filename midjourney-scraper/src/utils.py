@@ -19,7 +19,8 @@ class Utils:
         self._logger = logging.getLogger(f"scraper.{__name__}")
         self._output_folder = settings.OUTPUT_FOLDER
         self._images_folder = settings.IMAGES_FOLDER
-        self._json_path = path.join(self._images_folder, "images-data.json")
+        self._json_path = path.join(self._output_folder, "images-data.json")
+        self._zip_path = path.join(self._output_folder, "compressed-output")
         self._max_archive_size = settings.MAX_ARCHIVE_SIZE
 
     def export_json_data(self) -> None:
@@ -51,32 +52,31 @@ class Utils:
         self._session.commit()
         print(f"Exported {num_exports} exports.")
 
-    # def compress_output(self) -> None:
-    #     print('Starting compression.')
-    #     json_db_exists = path.isfile(self._json_path)
-    #     if not json_db_exists:
-    #         print('Could not found json db.')
-    #         return
-    #
-    #     zip_name = 'compressed-output'
-    #     zip_path = path.join(self._output_folder, zip_name)
-    #
-    #     # first make a single archive
-    #     shutil.make_archive(base_name=zip_path, format='zip', root_dir=self._images_folder)
-    #
-    #     # split into chunks of max size
-    #     with open(zip_path + '.zip', 'rb') as fp:
-    #         content = fp.read(self._max_archive_size)
-    #         file_count = 0
-    #         while content:
-    #             file_count_str = str(file_count).zfill(6)
-    #             zip_file = zipfile.ZipFile(file=f'{zip_path}-{file_count_str}.zip', mode='w')
-    #             zip_file.writestr(zinfo_or_arcname=zip_name + '.zip', data=content)
-    #             zip_file.close()
-    #
-    #             content = fp.read(self._max_archive_size)
-    #             file_count += 1
-    #
-    #     shutil.rmtree(self._images_folder)
-    #     os.remove(zip_path + '.zip')
-    #     print('Finished compression.')
+    def compress_output(self) -> None:
+        print("Starting compression.")
+
+        zip_count = 0
+        file_list = os.listdir(self._images_folder)
+
+        zip_name = None
+        zip_file = None
+        for filename in file_list:
+            if zip_file is None:
+                zip_count_str = str(zip_count).zfill(6)
+                zip_name = f"{self._zip_path}-{zip_count_str}.zip"
+                zip_file = zipfile.ZipFile(zip_name, mode="w")
+
+            file_path = path.join(self._images_folder, filename)
+            zip_file.write(file_path, arcname=filename)
+
+            exceeds = path.getsize(zip_name) >= self._max_archive_size
+            if exceeds:
+                zip_file.close()
+                zip_file = None
+                zip_count += 1
+
+        if zip_file:
+            zip_file.close()
+
+        shutil.rmtree(self._images_folder)
+        print("Finished compression.")

@@ -26,8 +26,8 @@ class Command:
     def export_json_data(self) -> None:
         self._utils.export_json_data()
 
-    # def compress_output(self) -> None:
-    #     self._utils.compress_output()
+    def compress_output(self) -> None:
+        self._utils.compress_output()
 
 
 if __name__ == "__main__":
