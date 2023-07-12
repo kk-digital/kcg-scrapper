@@ -27,7 +27,7 @@ class ImageDownloader:
         self._download_delay = settings.DOWNLOAD_DELAY
         self._max_retry = settings.MAX_RETRY
         # init images folder
-        self._images_folder = path.join(settings.OUTPUT_FOLDER, "images")
+        self._images_folder = settings.IMAGES_FOLDER
         os.makedirs(self._images_folder, exist_ok=True)
 
     def _make_request(self, url: str) -> Response:

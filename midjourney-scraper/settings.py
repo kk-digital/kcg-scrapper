@@ -1,6 +1,8 @@
 import os
+from os import path
 
 OUTPUT_FOLDER = os.environ["OUTPUT_FOLDER"]
+IMAGES_FOLDER = path.join(OUTPUT_FOLDER, "images")
 SQLITE_NAME = "midjourney.sqlite"
 LOGGING_LEVEL = os.environ["LOGGING_LEVEL"]
 HEADED = True if os.environ["HEADED"] == "true" else False
