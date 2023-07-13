@@ -15,6 +15,7 @@ class Generation(Base):
         back_populates="generation", cascade="all, delete-orphan"
     )
     data: Mapped[str]
+    status: Mapped[str]  # pending (default), completed or failed
 
 
 class GenerationUrl(Base):

@@ -3,7 +3,7 @@ from os import path
 from sqlalchemy import create_engine, Engine
 from sqlalchemy.orm import Session
 
-from src.db.model.base import Base
+from src.db.model import Base
 
 import settings
 
