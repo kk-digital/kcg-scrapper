@@ -83,6 +83,7 @@ class ShowcaseScraper:
         self._page.on("requestfinished", self._request_handler)
         self._page.goto("/app/feed/?sort=new")
         self._page.get_by_role("button", name="Grids").click()
+        self._page.wait_for_timeout(3000)  # let ui respond
         self._scroll_generations(self._page)
         self._logger.info("End of showcase stage.")
 
