@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from typing import Optional
 
 from playwright.sync_api import Page, Request
 from sqlalchemy import select
@@ -53,13 +54,20 @@ class ShowcaseScraper:
         )
         self._session.add(new_generation)
 
-    def _request_handler(self, request: Request) -> None:
+    def _request_handler(self, request: Request, prompt_filter: Optional[str]) -> None:
         if not self._target_endpoint in request.url:
             return
 
         data = request.response().json()
         self._logger.info(f"Got {len(data)} new generations.")
         for generation in data:
+            if generation["prompt"] is None:
+                continue
+            if prompt_filter:
+                passed_filter = prompt_filter.lower() in generation["prompt"].lower()
+                if not passed_filter:
+                    continue
+
             self._insert_generation(generation)
 
         self._session.commit()
@@ -77,10 +85,13 @@ class ShowcaseScraper:
             page.wait_for_timeout(settings.SCROLL_DELAY)
             last_scroll_height = get_scroll_height()
 
-    def start_scraping(self) -> None:
+    def start_scraping(self, prompt_filter: Optional[str]) -> None:
         self._logger.info("Starting showcase scraper.")
         self._log_in(self._page)
-        self._page.on("requestfinished", self._request_handler)
+        self._page.on(
+            "requestfinished",
+            lambda request: self._request_handler(request, prompt_filter),
+        )
         self._page.goto("/app/feed/?sort=new")
         self._page.get_by_role("button", name="Grids").click()
         self._page.wait_for_timeout(3000)  # let ui respond

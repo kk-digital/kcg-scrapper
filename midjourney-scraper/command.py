@@ -1,5 +1,6 @@
 import logging
 import os
+from typing import Optional
 
 import fire
 
@@ -19,9 +20,9 @@ class Command:
         Scraper.init_config()
         self._utils = Utils()
 
-    def start_scraping(self) -> None:
+    def start_scraping(self, prompt_filter: str | None = None) -> None:
         scraper = Scraper()
-        scraper.start_scraping()
+        scraper.start_scraping(prompt_filter)
 
     def export_json_data(self) -> None:
         self._utils.export_json_data()

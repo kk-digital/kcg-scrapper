@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from src import logging_
 from src.browser_scraper import BrowserScraper
@@ -19,7 +20,7 @@ class Scraper:
         engine = db_engine.get_engine()
         db_engine.emit_ddl(engine)
 
-    def start_scraping(self) -> None:
+    def start_scraping(self, prompt_filter: Optional[str]) -> None:
         self._logger.info("Starting scraper.")
         browser_scraper = BrowserScraper()
         try:
@@ -29,7 +30,7 @@ class Scraper:
             page = browser_scraper.get_page()
             # start showcase stage
             showcase_scraper = ShowcaseScraper(page)
-            showcase_scraper.start_scraping()
+            showcase_scraper.start_scraping(prompt_filter)
             # start download stage
             ImageDownloader(page).start_scraping()
             # todo check why not working on container

@@ -65,6 +65,10 @@ Change other settings in `settings.py`.
 python command.py start-scraping
 ```
 
+#### Parameters:
+
+- `prompt-filter` optional string - only scrape generations where filter is in prompt 
+
 ---
 
 `export-json-data`
