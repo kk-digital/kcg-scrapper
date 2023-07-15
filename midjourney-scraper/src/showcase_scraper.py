@@ -1,9 +1,10 @@
 import json
 import logging
 import os
+from os import path
 from typing import Optional
 
-from playwright.sync_api import Page, Request
+from playwright.sync_api import Page, Request, BrowserContext
 from sqlalchemy import select
 
 from src.db import engine as db_engine
@@ -19,19 +20,28 @@ class ShowcaseScraper:
         self._logger = logging.getLogger(f"scraper.{__name__}")
         self._target_endpoint = "/api/app/recent-jobs/"
         self._page = page
+        self._storage_state_path = settings.STORAGE_STATE_PATH
 
-    def _log_in(self, page: Page) -> None:
-        page.goto("/")
-        page.get_by_role("button", name="Sign In").first.click()
-        page.get_by_label("EMAIL OR PHONE NUMBER").type(
-            os.environ["DS_EMAIL"], delay=settings.ACTIONS_DELAY
-        )
-        page.get_by_label("PASSWORD").type(
-            os.environ["DS_PASSWORD"], delay=settings.ACTIONS_DELAY
-        )
-        page.get_by_role("button", name="Log In").click()
-        page.get_by_role("button", name="Authorize").click()
-        page.wait_for_url("/app*")
+    def _log_in(
+        self, page: Page, use_storage_state: bool, browser_context: BrowserContext
+    ) -> None:
+        storage_state_exists = path.isfile(self._storage_state_path)
+        execute_login = not use_storage_state or not storage_state_exists
+        if execute_login:
+            page.get_by_role("button", name="Sign In").first.click()
+            page.get_by_label("EMAIL OR PHONE NUMBER").type(
+                os.environ["DS_EMAIL"], delay=settings.ACTIONS_DELAY
+            )
+            page.get_by_label("PASSWORD").type(
+                os.environ["DS_PASSWORD"], delay=settings.ACTIONS_DELAY
+            )
+            page.get_by_role("button", name="Log In").click()
+            page.get_by_role("button", name="Authorize").click()
+            page.wait_for_url("/app*")
+
+        # save or renew storage state
+        if use_storage_state:
+            browser_context.storage_state(path=self._storage_state_path)
         self._logger.debug("Logged in.")
 
     def _insert_generation(self, generation: dict):
@@ -85,9 +95,19 @@ class ShowcaseScraper:
             page.wait_for_timeout(settings.SCROLL_DELAY)
             last_scroll_height = get_scroll_height()
 
-    def start_scraping(self, prompt_filter: Optional[str]) -> None:
+    def start_scraping(
+        self,
+        prompt_filter: Optional[str],
+        use_storage_state: bool,
+        browser_context: BrowserContext,
+    ) -> None:
         self._logger.info("Starting showcase scraper.")
-        self._log_in(self._page)
+        self._page.goto("/")
+        self._log_in(
+            self._page,
+            use_storage_state=use_storage_state,
+            browser_context=browser_context,
+        )
         self._page.on(
             "requestfinished",
             lambda request: self._request_handler(request, prompt_filter),

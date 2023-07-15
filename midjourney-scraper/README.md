@@ -68,6 +68,7 @@ python command.py start-scraping
 #### Parameters:
 
 - `prompt-filter` optional string - only scrape generations where filter is in prompt 
+- `use-storage-stage` optional boolean - save and reuse authentication state
 
 ---
 
