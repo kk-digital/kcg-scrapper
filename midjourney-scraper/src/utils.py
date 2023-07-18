@@ -1,7 +1,7 @@
+import itertools
 import json
 import logging
 import os
-import shutil
 import zipfile
 from os import path
 from typing import Optional
@@ -60,7 +60,10 @@ class Utils:
         print("Starting compression.")
 
         zip_count = 0
-        file_list = os.listdir(self._images_folder)
+        with open(self._json_path, "r", encoding="utf-8") as fp:
+            json_data = json.load(fp)
+        file_list = [entry["filenames"] for entry in json_data]
+        file_list = list(itertools.chain.from_iterable(file_list))
 
         zip_name = None
         zip_file = None
@@ -82,5 +85,8 @@ class Utils:
         if zip_file:
             zip_file.close()
 
-        shutil.rmtree(self._images_folder)
+        for filename in file_list:
+            file_path = path.join(self._images_folder, filename)
+            os.remove(file_path)
+
         print("Finished compression.")

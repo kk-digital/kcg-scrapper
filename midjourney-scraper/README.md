@@ -94,6 +94,6 @@ Exports to json file the data from images scraped till now, placed in output fol
 python command.py compress-output
 ```
 
-Compress images folder into zips of size `MAX_ARCHIVE_SIZE`.
+Compress images into zips of size `MAX_ARCHIVE_SIZE`. Only files exported to json are compressed.
 
 ---
