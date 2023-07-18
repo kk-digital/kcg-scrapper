@@ -44,7 +44,7 @@ class ShowcaseScraper:
             browser_context.storage_state(path=self._storage_state_path)
         self._logger.debug("Logged in.")
 
-    def _insert_generation(self, generation: dict):
+    def _insert_generation(self, generation: dict, prompt_filter: Optional[str]):
         # first check for duplicate generation
         generation_id = generation["id"]
         stmt = select(Generation).filter_by(generation_id=generation_id)
@@ -61,6 +61,7 @@ class ShowcaseScraper:
             generation_urls=generation_urls,
             data=json_data,
             status="pending",
+            prompt_filter=prompt_filter,
         )
         self._session.add(new_generation)
 
@@ -78,7 +79,7 @@ class ShowcaseScraper:
                 if not passed_filter:
                     continue
 
-            self._insert_generation(generation)
+            self._insert_generation(generation, prompt_filter=prompt_filter)
 
         self._session.commit()
 
