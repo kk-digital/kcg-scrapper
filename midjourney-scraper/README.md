@@ -81,6 +81,11 @@ python command.py export-json-data
 
 Exports to json file the data from images scraped till now, placed in output folder.
 
+#### Parameters:
+
+- `prompt-filter` optional string - if provided, only export to json generations whose prompt filter match with the one
+  given at scraping time. Else exports all generations in completed status.
+
 ---
 
 `compress-output`

@@ -27,8 +27,8 @@ class Command:
             prompt_filter=prompt_filter, use_storage_state=use_storage_state
         )
 
-    def export_json_data(self) -> None:
-        self._utils.export_json_data()
+    def export_json_data(self, prompt_filter: str | None = None) -> None:
+        self._utils.export_json_data(prompt_filter)
 
     def compress_output(self) -> None:
         self._utils.compress_output()

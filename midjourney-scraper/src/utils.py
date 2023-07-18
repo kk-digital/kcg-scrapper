@@ -4,6 +4,7 @@ import os
 import shutil
 import zipfile
 from os import path
+from typing import Optional
 
 from sqlalchemy import select
 
@@ -23,7 +24,7 @@ class Utils:
         self._zip_path = path.join(self._output_folder, "compressed-output")
         self._max_archive_size = settings.MAX_ARCHIVE_SIZE
 
-    def export_json_data(self) -> None:
+    def export_json_data(self, prompt_filter: Optional[str]) -> None:
         self._logger.info("Starting exports.")
         print(
             'This action overrides the json db already present if any. Type "yes" to continue.'
@@ -33,6 +34,9 @@ class Utils:
             return
 
         select_stmt = select(Generation).filter_by(status="completed")
+        if prompt_filter:
+            select_stmt = select_stmt.filter_by(prompt_filter=prompt_filter)
+
         cursor = self._session.scalars(select_stmt)
         num_exports = 0
         exports_list = list()
