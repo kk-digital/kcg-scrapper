@@ -74,12 +74,19 @@ class ShowcaseScraper:
         for generation in data:
             if generation["prompt"] is None:
                 continue
+
+            final_prompt_filter = None
             if prompt_filter:
-                passed_filter = prompt_filter.lower() in generation["prompt"].lower()
-                if not passed_filter:
+                filters = [f.strip() for f in prompt_filter.split(",") if f.strip()]
+                match_filters = [
+                    f.lower() in generation["prompt"].lower() for f in filters
+                ]
+                if any(match_filters):
+                    final_prompt_filter = filters[match_filters.index(True)]
+                else:
                     continue
 
-            self._insert_generation(generation, prompt_filter=prompt_filter)
+            self._insert_generation(generation, prompt_filter=final_prompt_filter)
 
         self._session.commit()
 
