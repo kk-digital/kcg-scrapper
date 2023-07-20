@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship, Session
@@ -16,6 +16,7 @@ class Generation(Base):
     )
     data: Mapped[str]
     status: Mapped[str]  # pending (default), completed or failed
+    prompt_filter: Mapped[Optional[str]]
 
 
 class GenerationUrl(Base):

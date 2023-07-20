@@ -1,9 +1,10 @@
+import itertools
 import json
 import logging
 import os
-import shutil
 import zipfile
 from os import path
+from typing import Optional
 
 from sqlalchemy import select
 
@@ -23,7 +24,7 @@ class Utils:
         self._zip_path = path.join(self._output_folder, "compressed-output")
         self._max_archive_size = settings.MAX_ARCHIVE_SIZE
 
-    def export_json_data(self) -> None:
+    def export_json_data(self, prompt_filter: Optional[str]) -> None:
         self._logger.info("Starting exports.")
         print(
             'This action overrides the json db already present if any. Type "yes" to continue.'
@@ -33,6 +34,9 @@ class Utils:
             return
 
         select_stmt = select(Generation).filter_by(status="completed")
+        if prompt_filter:
+            select_stmt = select_stmt.filter_by(prompt_filter=prompt_filter)
+
         cursor = self._session.scalars(select_stmt)
         num_exports = 0
         exports_list = list()
@@ -56,7 +60,10 @@ class Utils:
         print("Starting compression.")
 
         zip_count = 0
-        file_list = os.listdir(self._images_folder)
+        with open(self._json_path, "r", encoding="utf-8") as fp:
+            json_data = json.load(fp)
+        file_list = [entry["filenames"] for entry in json_data]
+        file_list = list(itertools.chain.from_iterable(file_list))
 
         zip_name = None
         zip_file = None
@@ -78,5 +85,8 @@ class Utils:
         if zip_file:
             zip_file.close()
 
-        shutil.rmtree(self._images_folder)
+        for filename in file_list:
+            file_path = path.join(self._images_folder, filename)
+            os.remove(file_path)
+
         print("Finished compression.")

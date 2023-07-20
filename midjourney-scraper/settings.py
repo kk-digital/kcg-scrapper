@@ -14,3 +14,4 @@ MAX_RETRY = 3
 VIEWPORT_SIZES = [(1536, 864), (1440, 900), (1366, 768), (1920, 1080)]
 PROXY_LIST = os.getenv("PROXY_LIST", None)  # csv file path
 MAX_ARCHIVE_SIZE = 524288000  # 500MB in bytes
+STORAGE_STATE_PATH = "/tmp/storage-state.json"

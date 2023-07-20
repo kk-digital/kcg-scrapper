@@ -14,8 +14,8 @@ Stops after number of scrolls desired is reached, and starts download stage, the
 1. query db for images in download stage and proceeds with downloading
 2. once all images are download, the scraper terminates. Repeat, or if happy with the amount scraped then run:
 
-   1. `export-json-data`
-   2. `compress-output`
+    1. `export-json-data`
+    2. `compress-output`
 
 Output is saved by default to `/output` in the container, mount there to persist output.
 
@@ -42,7 +42,7 @@ Change other settings in `settings.py`.
 * `DS_PASSWORD` required - password to log in
 * `PROXY_LIST` optional - name of the csv file with proxy list
 
-   In development, create a .env file to set these variables.
+  In development, create a .env file to set these variables.
 
     ```sh
     docker run -dt -e DS_EMAIL=youremail@service.com -e DS_PASSWORD=secretpassword --name midjourney midjourney
@@ -65,6 +65,12 @@ Change other settings in `settings.py`.
 python command.py start-scraping
 ```
 
+#### Parameters:
+
+- `prompt-filter` optional string - single filter or sequence of filters comma separated. Only scrape generations where
+  filter is in prompt. Example: `--prompt-filter='pixel art, white background'`
+- `use-storage-stage` optional boolean - save and reuse authentication state
+
 ---
 
 `export-json-data`
@@ -75,6 +81,11 @@ python command.py export-json-data
 
 Exports to json file the data from images scraped till now, placed in output folder.
 
+#### Parameters:
+
+- `prompt-filter` optional string - if provided, only export to json generations whose prompt filter match with the one
+  given at scraping time. Else exports all generations in completed status.
+
 ---
 
 `compress-output`
@@ -83,6 +94,6 @@ Exports to json file the data from images scraped till now, placed in output fol
 python command.py compress-output
 ```
 
-Compress images folder into zips of size `MAX_ARCHIVE_SIZE`. 
+Compress images into zips of size `MAX_ARCHIVE_SIZE`. Only files exported to json are compressed.
 
 ---
