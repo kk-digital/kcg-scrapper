@@ -85,6 +85,8 @@ Exports to json file the data from images scraped till now, placed in output fol
 
 - `prompt-filter` optional string - if provided, only export to json generations whose prompt filter match with the one
   given at scraping time. Else exports all generations in completed status.
+- `test-export` default false - if option enabled, generations in db are not marked as exported, so can be exported
+  again.
 
 ---
 
@@ -95,5 +97,9 @@ python command.py compress-output
 ```
 
 Compress images into zips of size `MAX_ARCHIVE_SIZE`. Only files exported to json are compressed.
+
+#### Parameters:
+
+- `test-export` default false - if option enabled, original images are not deleted, so can be exported again.
 
 ---
