@@ -27,11 +27,13 @@ class Command:
             prompt_filter=prompt_filter, use_storage_state=use_storage_state
         )
 
-    def export_json_data(self, prompt_filter: str | None = None) -> None:
-        self._utils.export_json_data(prompt_filter)
+    def export_json_data(
+        self, prompt_filter: str | None = None, test_export: bool = False
+    ) -> None:
+        self._utils.export_json_data(prompt_filter, test_export)
 
-    def compress_output(self) -> None:
-        self._utils.compress_output()
+    def compress_output(self, test_export: bool = False) -> None:
+        self._utils.compress_output(test_export)
 
 
 if __name__ == "__main__":

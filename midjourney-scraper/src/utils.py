@@ -24,7 +24,7 @@ class Utils:
         self._zip_path = path.join(self._output_folder, "compressed-output")
         self._max_archive_size = settings.MAX_ARCHIVE_SIZE
 
-    def export_json_data(self, prompt_filter: Optional[str]) -> None:
+    def export_json_data(self, prompt_filter: Optional[str], test_export: bool) -> None:
         self._logger.info("Starting exports.")
         print(
             'This action overrides the json db already present if any. Type "yes" to continue.'
@@ -43,7 +43,8 @@ class Utils:
 
         for generation in cursor:
             exports_list.append(json.loads(generation.data))
-            generation.status = "exported"
+            if not test_export:
+                generation.status = "exported"
             num_exports += 1
 
         if not num_exports:
@@ -56,7 +57,7 @@ class Utils:
         self._session.commit()
         print(f"Exported {num_exports} exports.")
 
-    def compress_output(self) -> None:
+    def compress_output(self, test_export: bool) -> None:
         print("Starting compression.")
 
         zip_count = 0
@@ -85,8 +86,9 @@ class Utils:
         if zip_file:
             zip_file.close()
 
-        for filename in file_list:
-            file_path = path.join(self._images_folder, filename)
-            os.remove(file_path)
+        if not test_export:
+            for filename in file_list:
+                file_path = path.join(self._images_folder, filename)
+                os.remove(file_path)
 
         print("Finished compression.")
