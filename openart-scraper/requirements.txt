@@ -1,4 +1,5 @@
 Scrapy~=2.9
 pillow~=10.0
-colorlog~=6.7.0
-scrapy-fake-useragent~=1.4.4
+colorlog~=6.7
+scrapy-fake-useragent~=1.4
+scrapy-rotating-proxies~=0.6
