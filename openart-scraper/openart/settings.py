@@ -1,4 +1,5 @@
 import copy
+from pathlib import Path
 
 from colorlog import ColoredFormatter
 import scrapy.utils.log
@@ -10,6 +11,9 @@ NEWSPIDER_MODULE = "openart.spiders"
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
+
+OUTPUT_FOLDER = "output"
+MAX_ARCHIVE_SIZE = 52428800  # bytes
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 # CONCURRENT_REQUESTS = 32
@@ -74,7 +78,7 @@ ITEM_PIPELINES = {
     "scrapy.pipelines.images.ImagesPipeline": 1,
 }
 
-IMAGES_STORE = "output"
+IMAGES_STORE = Path(OUTPUT_FOLDER, "images")
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
