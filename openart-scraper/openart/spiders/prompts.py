@@ -23,4 +23,8 @@ class PromptsSpider(Spider):
         if cursor:
             yield response.follow(self.url.format(self.query, cursor))
 
-        yield from data["items"]
+        for item in data["items"]:
+            if not item["image_url"] in item.setdefault("image_urls", []):
+                item["image_urls"].append(item["image_url"])
+
+            yield item
