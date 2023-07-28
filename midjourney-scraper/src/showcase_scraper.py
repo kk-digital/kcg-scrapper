@@ -83,8 +83,6 @@ class ShowcaseScraper:
                 ]
                 if any(match_filters):
                     final_prompt_filter = filters[match_filters.index(True)]
-                else:
-                    continue
 
             self._insert_generation(generation, prompt_filter=final_prompt_filter)
 
