@@ -83,7 +83,7 @@ Exports to json file the data from images scraped till now, placed in output fol
 #### Parameters:
 
 - `prompt-filter` optional string - if provided, only export to json generations whose prompt filter match with the one
-  given at scraping time. Else exports all generations in completed status.
+  given at scraping time. Else exports all generations whose filter is null.
 - `test-export` default false - if option enabled, generations in db are not marked as exported, so can be exported
   again.
 

@@ -33,9 +33,13 @@ class Utils:
         if answer != "yes":
             return
 
-        select_stmt = select(Generation).filter_by(status="completed")
+        select_stmt = select(Generation)
         if prompt_filter:
-            select_stmt = select_stmt.filter_by(prompt_filter=prompt_filter)
+            select_stmt = select_stmt.filter_by(
+                status="completed", prompt_filter=prompt_filter
+            )
+        else:
+            select_stmt = select_stmt.filter_by(prompt_filter=None)
 
         cursor = self._session.scalars(select_stmt)
         num_exports = 0
