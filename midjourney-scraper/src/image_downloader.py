@@ -3,6 +3,7 @@ import logging
 import os
 from os import path
 from pathlib import PurePosixPath
+from typing import Optional
 
 from playwright.sync_api import Page, Response
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
@@ -92,9 +93,11 @@ class ImageDownloader:
         finally:
             self._session.commit()
 
-    def start_scraping(self) -> None:
+    def start_scraping(self, prompt_filter: Optional[str]) -> None:
         self._logger.info("Starting image downloader.")
         select_stmt = select(Generation).filter_by(status="pending")
+        if prompt_filter:
+            select_stmt = select_stmt.where(Generation.prompt_filter != None)
         cursor = self._session.scalars(select_stmt)
         for generation in cursor:
             self._process_generation(generation)

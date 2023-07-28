@@ -67,8 +67,7 @@ python command.py start-scraping
 
 #### Parameters:
 
-- `prompt-filter` optional string - single filter or sequence of filters comma separated. Only scrape generations where
-  filter is in prompt. Example: `--prompt-filter='pixel art, white background'`
+- `prompt-filter` optional string - single filter or sequence of filters comma separated. If provided, matching generations are marked so you can specifically export them. Moreover, non-matching are not downloaded. Example: `--prompt-filter='pixel art, white background'`
 - `use-storage-stage` optional boolean - save and reuse authentication state
 
 ---
