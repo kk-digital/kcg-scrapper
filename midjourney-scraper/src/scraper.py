@@ -41,7 +41,7 @@ class Scraper:
                 browser_context=context,
             )
             # start download stage
-            ImageDownloader(page).start_scraping()
+            ImageDownloader(page).start_scraping(prompt_filter)
             # todo check why not working on container
             # showcase_scraper.log_out(page)
             self._logger.info("End of operations.")
