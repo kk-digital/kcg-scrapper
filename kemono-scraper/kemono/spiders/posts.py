@@ -13,11 +13,6 @@ class PostsSpider(Spider):
 
     # noinspection PyMethodOverriding
     def parse(self, response: TextResponse):
-        if self.count > 0:
-            return
-
-        self.count += 1
-
         yield from response.follow_all(
             css=".post-card--preview a", callback=self.parse_post
         )
