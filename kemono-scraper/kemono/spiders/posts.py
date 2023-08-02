@@ -17,7 +17,7 @@ class PostsSpider(Spider):
             css=".post-card--preview a", callback=self.parse_post
         )
 
-        next_page = response.css("#paginator-top .next").get()
+        next_page = response.css("#paginator-top .next::attr(href)").get()
         if next_page:
             yield response.follow(next_page)
 
