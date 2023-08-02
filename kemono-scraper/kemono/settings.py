@@ -47,6 +47,8 @@ DOWNLOADER_MIDDLEWARES = {
     "scrapy.downloadermiddlewares.retry.RetryMiddleware": None,
     "scrapy_fake_useragent.middleware.RandomUserAgentMiddleware": 500,
     "scrapy_fake_useragent.middleware.RetryUserAgentMiddleware": 550,
+    "rotating_proxies.middlewares.RotatingProxyMiddleware": 610,
+    "rotating_proxies.middlewares.BanDetectionMiddleware": 620,
 }
 
 FAKEUSERAGENT_PROVIDERS = [
@@ -56,6 +58,8 @@ FAKEUSERAGENT_PROVIDERS = [
     "scrapy_fake_useragent.providers.FixedUserAgentProvider",  # fall back to USER_AGENT value
 ]
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+
+ROTATING_PROXY_LIST_PATH = "proxy-list.txt"
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
