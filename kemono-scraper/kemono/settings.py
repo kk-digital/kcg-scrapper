@@ -1,17 +1,12 @@
-# Scrapy settings for kemono project
-#
-# For simplicity, this file contains only settings considered important or
-# commonly used. You can find more settings consulting the documentation:
-#
-#     https://docs.scrapy.org/en/latest/topics/settings.html
-#     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-#     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
+from os import path
+from pathlib import Path
 
 BOT_NAME = "kemono"
 
 SPIDER_MODULES = ["kemono.spiders"]
 NEWSPIDER_MODULE = "kemono.spiders"
 
+OUTPUT_FOLDER = "output"
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = "kemono (+http://www.yourdomain.com)"
@@ -25,7 +20,7 @@ ROBOTSTXT_OBEY = True
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-# DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 2
 # The download delay setting will honor only one of:
 # CONCURRENT_REQUESTS_PER_DOMAIN = 16
 # CONCURRENT_REQUESTS_PER_IP = 16
@@ -62,9 +57,13 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-# ITEM_PIPELINES = {
-#    "kemono.pipelines.KemonoPipeline": 300,
-# }
+ITEM_PIPELINES = {
+    "scrapy.pipelines.images.ImagesPipeline": 1,
+}
+
+IMAGES_STORE = path.join(OUTPUT_FOLDER, "images")
+FILES_STORE = path.join(OUTPUT_FOLDER, "files")
+Path(FILES_STORE).mkdir(parents=True, exist_ok=True)
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
