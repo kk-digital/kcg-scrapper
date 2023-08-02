@@ -1,5 +1,8 @@
 from os import path
 from pathlib import Path
+import copy
+from colorlog import ColoredFormatter
+import scrapy.utils.log
 
 BOT_NAME = "kemono"
 
@@ -102,3 +105,31 @@ AUTOTHROTTLE_DEBUG = True
 REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
+
+color_formatter = ColoredFormatter(
+    (
+        "%(log_color)s%(levelname)-5s%(reset)s "
+        "%(yellow)s[%(asctime)s]%(reset)s"
+        "%(white)s %(name)s %(funcName)s %(bold_purple)s:%(lineno)d%(reset)s "
+        "%(log_color)s%(message)s%(reset)s"
+    ),
+    datefmt="%y-%m-%d %H:%M:%S",
+    log_colors={
+        "DEBUG": "blue",
+        "INFO": "bold_cyan",
+        "WARNING": "red",
+        "ERROR": "bg_bold_red",
+        "CRITICAL": "red,bg_white",
+    },
+)
+
+_get_handler = copy.copy(scrapy.utils.log._get_handler)
+
+
+def _get_handler_custom(*args, **kwargs):
+    handler = _get_handler(*args, **kwargs)
+    handler.setFormatter(color_formatter)
+    return handler
+
+
+scrapy.utils.log._get_handler = _get_handler_custom
