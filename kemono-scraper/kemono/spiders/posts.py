@@ -26,12 +26,14 @@ class PostsSpider(Spider):
         html_path = Path(self.settings["FILES_STORE"], html_name)
         html_path.write_bytes(response.body)
 
-        images = [
-            "https:" + src
-            if src.startswith("//")
-            else "https://c4.kemono.party/data" + src
-            for src in response.css("#page img::attr(src)").getall()
-        ]
+        images = []
+        for src in response.css("#page img::attr(src)").getall():
+            if src.startswith("https://"):
+                images.append(src)
+            elif src.startswith("//"):
+                images.append("https:" + src)
+            else:
+                images.append("https://c4.kemono.party/data" + src)
 
         yield dict(
             url=response.url,
