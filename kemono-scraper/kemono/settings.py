@@ -77,6 +77,7 @@ ITEM_PIPELINES = {
 }
 
 IMAGES_STORE = path.join(OUTPUT_FOLDER, "images")
+MEDIA_ALLOW_REDIRECTS = True
 FILES_STORE = path.join(OUTPUT_FOLDER, "files")
 Path(FILES_STORE).mkdir(parents=True, exist_ok=True)
 

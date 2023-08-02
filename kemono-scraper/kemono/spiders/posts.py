@@ -27,7 +27,10 @@ class PostsSpider(Spider):
         html_path.write_bytes(response.body)
 
         images = [
-            "https:" + src for src in response.css("#page img::attr(src)").getall()
+            "https:" + src
+            if src.startswith("//")
+            else "https://c4.kemono.party/data" + src
+            for src in response.css("#page img::attr(src)").getall()
         ]
 
         yield dict(
