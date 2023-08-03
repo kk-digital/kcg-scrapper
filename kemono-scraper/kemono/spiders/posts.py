@@ -28,6 +28,7 @@ class PostsSpider(Spider):
 
         images = []
         for src in response.css("#page img::attr(src)").getall():
+            src = src.strip().lower()
             if src.startswith("https://"):
                 images.append(src)
             elif src.startswith("//"):
