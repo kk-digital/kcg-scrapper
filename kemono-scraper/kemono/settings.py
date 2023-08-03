@@ -10,6 +10,7 @@ SPIDER_MODULES = ["kemono.spiders"]
 NEWSPIDER_MODULE = "kemono.spiders"
 
 OUTPUT_FOLDER = "output"
+MAX_ARCHIVE_SIZE = 524288000  # bytes
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
