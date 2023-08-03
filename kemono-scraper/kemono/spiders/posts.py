@@ -9,7 +9,6 @@ class PostsSpider(Spider):
     name = "posts"
     allowed_domains = ["kemono.party"]
     start_urls = ["https://www.kemono.party/posts?o=0"]
-    count = 0
 
     # noinspection PyMethodOverriding
     def parse(self, response: TextResponse):
