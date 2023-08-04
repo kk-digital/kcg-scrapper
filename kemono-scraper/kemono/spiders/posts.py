@@ -18,7 +18,7 @@ class PostsSpider(Spider):
 
         next_page = response.css("#paginator-top .next::attr(href)").get()
         if next_page:
-            yield response.follow(next_page)
+            yield response.follow(next_page, dont_filter=True)
 
     def parse_post(self, response: TextResponse):
         html_name = hashlib.sha1(response.url.encode()).hexdigest() + ".html"
