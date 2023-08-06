@@ -96,3 +96,9 @@ class Utils:
                 os.remove(file_path)
 
         print("Finished compression.")
+
+    def read_filters(self, filters_path: str) -> list[str]:
+        with open(filters_path, "r", encoding="utf-8") as fp:
+            filters = [line.strip() for line in fp]
+
+        return filters

@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Optional, List
 
 from src import logging_
 from src.browser_scraper import BrowserScraper
@@ -21,7 +21,7 @@ class Scraper:
         db_engine.emit_ddl(engine)
 
     def start_scraping(
-        self, prompt_filter: Optional[str], use_storage_state: bool
+        self, prompt_filters: Optional[List[str]], use_storage_state: bool
     ) -> None:
         self._logger.info("Starting scraper.")
         browser_scraper = BrowserScraper()
@@ -36,12 +36,12 @@ class Scraper:
             # start showcase stage
             showcase_scraper = ShowcaseScraper(page)
             showcase_scraper.start_scraping(
-                prompt_filter=prompt_filter,
+                prompt_filters=prompt_filters,
                 use_storage_state=use_storage_state,
                 browser_context=context,
             )
             # start download stage
-            ImageDownloader(page).start_scraping(prompt_filter)
+            ImageDownloader(page).start_scraping(prompt_filters)
             # todo check why not working on container
             # showcase_scraper.log_out(page)
             self._logger.info("End of operations.")
