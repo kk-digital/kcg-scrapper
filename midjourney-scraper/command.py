@@ -22,7 +22,9 @@ class Command:
     def start_scraping(
         self, prompt_filter_list: str | None = None, use_storage_state: bool = False
     ) -> None:
-        prompt_filters = self._utils.read_filters(prompt_filter_list)
+        prompt_filters = None
+        if prompt_filter_list:
+            prompt_filters = self._utils.read_filters(prompt_filter_list)
 
         scraper = Scraper()
         scraper.start_scraping(
