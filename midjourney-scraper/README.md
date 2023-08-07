@@ -67,9 +67,9 @@ python command.py start-scraping
 
 #### Parameters:
 
-- `prompt-filters` optional string - path to file containing filters, one per line. If provided, matching
+- `prompt-filter-list` optional string - path to file containing filters, one per line. If provided, matching
   generations are marked, so you can specifically export them. Moreover, non-matching are not downloaded.
-  Example: `--prompt-filters='filters.txt'`
+  Example: `--prompt-filter-list='filters.txt'`
 - `use-storage-stage` optional boolean - save and reuse authentication state
 
 ---
