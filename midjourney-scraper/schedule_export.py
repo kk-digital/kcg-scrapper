@@ -1,11 +1,11 @@
 import os
 import shutil
-import sys
 from pathlib import Path
 from datetime import date
 import time
 
 import schedule
+from fire import Fire
 from sqlalchemy.orm import Session
 from sqlalchemy import select, func
 
@@ -20,11 +20,10 @@ from src.db import engine as db_engine
 from src.db.model import Generation
 
 utils = Utils()
-filters_path = sys.argv[1]
 engine = db_engine.get_engine()
 
 
-def job():
+def job(filters_path: str):
     weekly_folder = Path(settings.OUTPUT_FOLDER, f"output-{date.today().isoformat()}")
     weekly_folder.mkdir()
 
@@ -60,8 +59,16 @@ def job():
         shutil.rmtree(filter_weekly_folder)
 
 
-schedule.every().friday.do(job)
+def main(filter_path: str, run_now: bool = False):
+    if run_now:
+        job(filter_path)
 
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+    schedule.every().friday.do(job, filter_path)
+
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+
+if __name__ == "__main__":
+    Fire(main)
