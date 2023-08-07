@@ -6,6 +6,8 @@ from datetime import date
 import time
 
 import schedule
+from sqlalchemy.orm import Session
+from sqlalchemy import select, func
 
 if os.getenv("PYTHON_ENV", "development") == "development":
     from dotenv import load_dotenv
@@ -14,9 +16,12 @@ if os.getenv("PYTHON_ENV", "development") == "development":
 
 import settings
 from src.utils import Utils
+from src.db import engine as db_engine
+from src.db.model import Generation
 
 utils = Utils()
 filters_path = sys.argv[1]
+engine = db_engine.get_engine()
 
 
 def job():
@@ -25,6 +30,14 @@ def job():
 
     prompt_filters = utils.read_filters(filters_path)
     for prompt_filter in prompt_filters:
+        with Session(engine) as session:
+            select_stmt = select(func.count(Generation.id)).filter_by(
+                prompt_filter=prompt_filter, status="completed"
+            )
+            count = session.execute(select_stmt).scalar()
+            if not count:
+                continue
+
         utils.export_json_data(prompt_filter=prompt_filter, test_export=False)
         utils.compress_output(test_export=False)
 
