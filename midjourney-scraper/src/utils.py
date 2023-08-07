@@ -20,8 +20,8 @@ class Utils:
         self._logger = logging.getLogger(f"scraper.{__name__}")
         self._output_folder = settings.OUTPUT_FOLDER
         self._images_folder = settings.IMAGES_FOLDER
-        self._json_path = path.join(self._output_folder, "images-data.json")
-        self._zip_path = path.join(self._output_folder, "compressed-output")
+        self._json_path = settings.EXPORT_JSON_PATH
+        self._zip_path = settings.ARCHIVE_PATH
         self._max_archive_size = settings.MAX_ARCHIVE_SIZE
 
     def export_json_data(self, prompt_filter: Optional[str], test_export: bool) -> None:
