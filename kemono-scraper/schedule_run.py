@@ -36,7 +36,7 @@ def compress_output_every_friday(settings, jsonl_path):
     shutil.rmtree(weekly_folder)
 
 
-def main(jsonl_path: str, run_now: bool = False):
+def main(jsonl_path: str, job_dir: str | None = None, run_now: bool = False):
     settings = get_project_settings()
     settings["FEEDS"] = {
         jsonl_path: {
@@ -44,6 +44,7 @@ def main(jsonl_path: str, run_now: bool = False):
             "overwrite": False,
         }
     }
+    settings["JOBDIR"] = job_dir if job_dir else ""
 
     if run_now:
         compress_output_every_friday(settings, jsonl_path)
