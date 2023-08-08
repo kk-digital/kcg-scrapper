@@ -25,7 +25,7 @@ def compress_output(jsonl_path: str) -> None:
 
     # preparing variables used in the archiving process
     zip_count = 0
-    zip_name_template = "openart-output-{}.zip"
+    zip_name_template = "kemono-output-{}.zip"
     zip_path = None
     zip_fp = None
 
