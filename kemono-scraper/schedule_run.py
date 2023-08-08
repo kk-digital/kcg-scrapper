@@ -3,29 +3,21 @@ from pathlib import Path
 
 import schedule
 import time
+
+from fire import Fire
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
-import sys
 from command import Command
 from datetime import date
 
-jsonl_path = Path(sys.argv[1])
-settings = get_project_settings()
-settings["FEEDS"] = {
-    jsonl_path: {
-        "format": "jsonlines",
-        "overwrite": False,
-    }
-}
 
-
-def daily_run():
+def daily_run(settings):
     process = CrawlerProcess(settings)
     process.crawl("posts")
     process.start()
 
 
-def compress_output_every_friday():
+def compress_output_every_friday(settings, jsonl_path):
     Command().compress_output(str(jsonl_path))
 
     weekly_folder = Path(
@@ -34,18 +26,35 @@ def compress_output_every_friday():
     weekly_folder.mkdir()
 
     shutil.move(jsonl_path, weekly_folder)
-    shutil.move(settings["FILES_STORE"], weekly_folder)
-    shutil.move(settings["IMAGES_STORE"], weekly_folder)
+
+    for zipfile in Path(settings["OUTPUT_FOLDER"]).glob("*.zip"):
+        shutil.move(zipfile, weekly_folder)
 
     shutil.make_archive(
         base_name=str(weekly_folder), format="zip", root_dir=weekly_folder
     )
-    weekly_folder.unlink()
+    shutil.rmtree(weekly_folder)
 
 
-schedule.every().day.at("12:00").do(daily_run)
-schedule.every().friday.do(compress_output_every_friday)
+def main(jsonl_path: str, run_now: bool = False):
+    settings = get_project_settings()
+    settings["FEEDS"] = {
+        jsonl_path: {
+            "format": "jsonlines",
+            "overwrite": False,
+        }
+    }
 
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+    if run_now:
+        compress_output_every_friday(settings, jsonl_path)
+
+    schedule.every().day.at("12:00").do(daily_run, settings)
+    schedule.every().friday.do(compress_output_every_friday, settings, jsonl_path)
+
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+
+if __name__ == "__main__":
+    Fire(main)
