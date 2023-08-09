@@ -24,14 +24,18 @@ class Utils:
         self._zip_path = settings.ARCHIVE_PATH
         self._max_archive_size = settings.MAX_ARCHIVE_SIZE
 
-    def export_json_data(self, prompt_filter: Optional[str], test_export: bool) -> None:
+    def export_json_data(
+        self, prompt_filter: Optional[str], test_export: bool, confirmation: bool = True
+    ) -> None:
         self._logger.info("Starting exports.")
-        print(
-            'This action overrides the json db already present if any. Type "yes" to continue.'
-        )
-        answer = input(">> ")
-        if answer != "yes":
-            return
+
+        if confirmation:
+            print(
+                'This action overrides the json db already present if any. Type "yes" to continue.'
+            )
+            answer = input(">> ")
+            if answer != "yes":
+                return
 
         select_stmt = select(Generation)
         if prompt_filter:

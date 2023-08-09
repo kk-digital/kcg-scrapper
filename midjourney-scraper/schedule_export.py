@@ -37,7 +37,9 @@ def job(filters_path: str):
             if not count:
                 continue
 
-        utils.export_json_data(prompt_filter=prompt_filter, test_export=False)
+        utils.export_json_data(
+            prompt_filter=prompt_filter, test_export=False, confirmation=False
+        )
         utils.compress_output(test_export=False)
 
         filter_weekly_folder = Path(
