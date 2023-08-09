@@ -52,7 +52,7 @@ class Utils:
         for generation in cursor:
             exports_list.append(json.loads(generation.data))
             if not test_export:
-                generation.status = "exported"
+                self._session.delete(generation)
             num_exports += 1
 
         if not num_exports:
