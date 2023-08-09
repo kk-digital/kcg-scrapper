@@ -43,7 +43,8 @@ def job(filters_path: str):
         utils.compress_output(test_export=False)
 
         filter_weekly_folder = Path(
-            settings.OUTPUT_FOLDER, f"{prompt_filter}-{date.today().isoformat()}"
+            settings.OUTPUT_FOLDER,
+            f"{prompt_filter.strip().replace(' ', '-')}-{date.today().isoformat()}",
         )
         filter_weekly_folder.mkdir()
 
