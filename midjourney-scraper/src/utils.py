@@ -20,18 +20,22 @@ class Utils:
         self._logger = logging.getLogger(f"scraper.{__name__}")
         self._output_folder = settings.OUTPUT_FOLDER
         self._images_folder = settings.IMAGES_FOLDER
-        self._json_path = path.join(self._output_folder, "images-data.json")
-        self._zip_path = path.join(self._output_folder, "compressed-output")
+        self._json_path = settings.EXPORT_JSON_PATH
+        self._zip_path = settings.ARCHIVE_PATH
         self._max_archive_size = settings.MAX_ARCHIVE_SIZE
 
-    def export_json_data(self, prompt_filter: Optional[str], test_export: bool) -> None:
+    def export_json_data(
+        self, prompt_filter: Optional[str], test_export: bool, confirmation: bool = True
+    ) -> None:
         self._logger.info("Starting exports.")
-        print(
-            'This action overrides the json db already present if any. Type "yes" to continue.'
-        )
-        answer = input(">> ")
-        if answer != "yes":
-            return
+
+        if confirmation:
+            print(
+                'This action overrides the json db already present if any. Type "yes" to continue.'
+            )
+            answer = input(">> ")
+            if answer != "yes":
+                return
 
         select_stmt = select(Generation)
         if prompt_filter:
@@ -48,7 +52,7 @@ class Utils:
         for generation in cursor:
             exports_list.append(json.loads(generation.data))
             if not test_export:
-                generation.status = "exported"
+                self._session.delete(generation)
             num_exports += 1
 
         if not num_exports:
@@ -96,3 +100,9 @@ class Utils:
                 os.remove(file_path)
 
         print("Finished compression.")
+
+    def read_filters(self, filters_path: str) -> list[str]:
+        with open(filters_path, "r", encoding="utf-8") as fp:
+            filters = [line.strip() for line in fp]
+
+        return filters

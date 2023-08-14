@@ -2,7 +2,7 @@ import json
 import logging
 import os
 from os import path
-from typing import Optional
+from typing import Optional, List
 
 from playwright.sync_api import Page, Request, BrowserContext
 from sqlalchemy import select
@@ -65,7 +65,9 @@ class ShowcaseScraper:
         )
         self._session.add(new_generation)
 
-    def _request_handler(self, request: Request, prompt_filter: Optional[str]) -> None:
+    def _request_handler(
+        self, request: Request, prompt_filters: Optional[List[str]]
+    ) -> None:
         if not self._target_endpoint in request.url:
             return
 
@@ -76,13 +78,14 @@ class ShowcaseScraper:
                 continue
 
             final_prompt_filter = None
-            if prompt_filter:
-                filters = [f.strip() for f in prompt_filter.split(",") if f.strip()]
+            if prompt_filters:
                 match_filters = [
-                    f.lower() in generation["prompt"].lower() for f in filters
+                    f.lower() in generation["prompt"].lower() for f in prompt_filters
                 ]
                 if any(match_filters):
-                    final_prompt_filter = filters[match_filters.index(True)]
+                    final_prompt_filter = prompt_filters[match_filters.index(True)]
+                else:
+                    continue
 
             self._insert_generation(generation, prompt_filter=final_prompt_filter)
 
@@ -103,7 +106,7 @@ class ShowcaseScraper:
 
     def start_scraping(
         self,
-        prompt_filter: Optional[str],
+        prompt_filters: Optional[List[str]],
         use_storage_state: bool,
         browser_context: BrowserContext,
     ) -> None:
@@ -116,7 +119,7 @@ class ShowcaseScraper:
         )
         self._page.on(
             "requestfinished",
-            lambda request: self._request_handler(request, prompt_filter),
+            lambda request: self._request_handler(request, prompt_filters),
         )
         self._page.goto("/app/feed/?sort=new")
         self._page.get_by_role("button", name="Grids").click()

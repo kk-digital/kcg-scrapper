@@ -67,7 +67,9 @@ python command.py start-scraping
 
 #### Parameters:
 
-- `prompt-filter` optional string - single filter or sequence of filters comma separated. If provided, matching generations are marked so you can specifically export them. Moreover, non-matching are not downloaded. Example: `--prompt-filter='pixel art, white background'`
+- `prompt-filter-list` optional string - path to file containing filters, one per line. If provided, matching
+  generations are marked, so you can specifically export them. Non-matching are not saved.
+  Example: `--prompt-filter-list='filters.txt'`
 - `use-storage-stage` optional boolean - save and reuse authentication state
 
 ---
@@ -82,7 +84,7 @@ Exports to json file the data from images scraped till now, placed in output fol
 
 #### Parameters:
 
-- `prompt-filter` optional string - if provided, only export to json generations whose prompt filter match with the one
+- `prompt-filter` optional string - if provided, only export to json generations whose prompt filter matched with the one
   given at scraping time. Else exports all generations whose filter is null.
 - `test-export` default false - if option enabled, generations in db are not marked as exported, so can be exported
   again.

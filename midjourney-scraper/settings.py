@@ -3,6 +3,8 @@ from os import path
 
 OUTPUT_FOLDER = os.environ["OUTPUT_FOLDER"]
 IMAGES_FOLDER = path.join(OUTPUT_FOLDER, "images")
+EXPORT_JSON_PATH = path.join(OUTPUT_FOLDER, "data.json")
+ARCHIVE_PATH = path.join(OUTPUT_FOLDER, "compressed-output")
 SQLITE_NAME = "midjourney.sqlite"
 LOGGING_LEVEL = os.environ["LOGGING_LEVEL"]
 HEADED = True if os.environ["HEADED"] == "true" else False
