@@ -6,11 +6,10 @@ import zipfile
 from os import path
 from typing import Optional
 
-from sqlalchemy import select
-
 import settings
-from src.db.model import Generation
+from sqlalchemy import select
 from src.db import engine as db_engine
+from src.db.model import Generation
 
 
 class Utils:
@@ -97,7 +96,10 @@ class Utils:
         if not test_export:
             for filename in file_list:
                 file_path = path.join(self._images_folder, filename)
-                os.remove(file_path)
+                try:
+                    os.remove(file_path)
+                except FileNotFoundError:
+                    pass
 
         print("Finished compression.")
 
