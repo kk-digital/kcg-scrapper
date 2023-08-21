@@ -1,20 +1,19 @@
 import shutil
+import time
+from datetime import date
 from pathlib import Path
 
 import schedule
-import time
-
+from command import Command
 from fire import Fire
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
-from command import Command
-from datetime import date
 
 
 def daily_run(settings):
     process = CrawlerProcess(settings)
     process.crawl("posts")
-    process.start()
+    process.start(stop_after_crawl=False)
 
 
 def compress_output_every_friday(settings, jsonl_path):
