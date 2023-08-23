@@ -109,6 +109,7 @@ class ShowcaseScraper:
         prompt_filters: Optional[List[str]],
         use_storage_state: bool,
         browser_context: BrowserContext,
+        disable_showcase_scrolling: bool,
     ) -> None:
         self._logger.info("Starting showcase scraper.")
         self._page.goto("/")
@@ -117,6 +118,10 @@ class ShowcaseScraper:
             use_storage_state=use_storage_state,
             browser_context=browser_context,
         )
+        if disable_showcase_scrolling:
+            self._logger.info("Skipping showcase scrolling stage.")
+            return
+
         self._page.on(
             "requestfinished",
             lambda request: self._request_handler(request, prompt_filters),
