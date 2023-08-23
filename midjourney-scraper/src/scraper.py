@@ -21,7 +21,10 @@ class Scraper:
         db_engine.emit_ddl(engine)
 
     def start_scraping(
-        self, prompt_filters: Optional[List[str]], use_storage_state: bool
+        self,
+        prompt_filters: Optional[List[str]],
+        use_storage_state: bool,
+        disable_showcase_scrolling: bool,
     ) -> None:
         self._logger.info("Starting scraper.")
         browser_scraper = BrowserScraper()
@@ -39,6 +42,7 @@ class Scraper:
                 prompt_filters=prompt_filters,
                 use_storage_state=use_storage_state,
                 browser_context=context,
+                disable_showcase_scrolling=disable_showcase_scrolling,
             )
             # start download stage
             ImageDownloader(page).start_scraping(prompt_filters)

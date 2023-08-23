@@ -20,7 +20,10 @@ class Command:
         self._utils = Utils()
 
     def start_scraping(
-        self, prompt_filter_list: str | None = None, use_storage_state: bool = False
+        self,
+        prompt_filter_list: str | None = None,
+        use_storage_state: bool = False,
+        disable_showcase_scrolling: bool = False,
     ) -> None:
         prompt_filters = None
         if prompt_filter_list:
@@ -28,7 +31,9 @@ class Command:
 
         scraper = Scraper()
         scraper.start_scraping(
-            prompt_filters=prompt_filters, use_storage_state=use_storage_state
+            prompt_filters=prompt_filters,
+            use_storage_state=use_storage_state,
+            disable_showcase_scrolling=disable_showcase_scrolling,
         )
 
     def export_json_data(
