@@ -9,15 +9,25 @@ class PostsSpider(Spider):
     name = "posts"
     allowed_domains = ["kemono.party"]
     start_urls = ["https://www.kemono.party/posts?o=0"]
+    page_counter = 0
+    post_counter = 0
+    posts_parsed = 0
 
     # noinspection PyMethodOverriding
     def parse(self, response: TextResponse):
-        yield from response.follow_all(
-            css=".post-card--preview a", callback=self.parse_post
-        )
+        posts = response.css(".post-card--preview a")
+        self.post_counter += len(posts)
+        self.logger.info(f"Total posts found: {self.post_counter}")
+        self.crawler.stats.set_value("post_counter", self.post_counter)
+
+        yield from response.follow_all(urls=posts, callback=self.parse_post)
 
         next_page = response.css("#paginator-top .next::attr(href)").get()
         if next_page:
+            self.logger.info(
+                f"Total pages followed: {self.page_counter}. Next page: {next_page}"
+            )
+            self.page_counter += 1
             yield response.follow(next_page, dont_filter=True)
 
     def parse_post(self, response: TextResponse):
@@ -40,3 +50,6 @@ class PostsSpider(Spider):
             html_file=html_path.name,
             image_urls=images,
         )
+
+        self.posts_parsed += 1
+        self.logger.info(f"Total posts parsed: {self.posts_parsed}")
