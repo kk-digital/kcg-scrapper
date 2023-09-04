@@ -65,6 +65,7 @@ FAKEUSERAGENT_PROVIDERS = [
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
 
 ROTATING_PROXY_LIST_PATH = "proxy-list.txt"
+ROTATING_PROXY_PAGE_RETRY_TIMES = 0
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
