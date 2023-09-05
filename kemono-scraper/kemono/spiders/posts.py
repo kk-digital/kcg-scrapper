@@ -18,7 +18,6 @@ class PostsSpider(Spider):
         posts = response.css(".post-card--preview a")
         self.post_counter += len(posts)
         self.logger.info(f"Total posts found: {self.post_counter}")
-        self.crawler.stats.set_value("post_counter", self.post_counter)
 
         yield from response.follow_all(urls=posts, callback=self.parse_post)
 
