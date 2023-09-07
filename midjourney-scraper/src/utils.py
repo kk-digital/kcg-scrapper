@@ -15,7 +15,7 @@ from src.db.model import Generation
 class Utils:
     def __init__(self) -> None:
         engine = db_engine.get_engine()
-        self._session = db_engine.get_session(engine)
+        self._session = db_engine.get_new_session(engine)
         self._logger = logging.getLogger(f"scraper.{__name__}")
         self._output_folder = settings.OUTPUT_FOLDER
         self._images_folder = settings.IMAGES_FOLDER

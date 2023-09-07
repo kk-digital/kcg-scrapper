@@ -27,12 +27,16 @@ def emit_ddl(engine: Engine) -> None:
     Base.metadata.create_all(engine)
 
 
+def get_new_session(engine: Engine) -> Session:
+    return Session(engine)
+
+
 def get_session(engine: Engine) -> Session:
     global _session
 
     if isinstance(_session, Session):
         return _session
 
-    _session = Session(engine)
+    _session = get_new_session(engine)
 
     return _session
