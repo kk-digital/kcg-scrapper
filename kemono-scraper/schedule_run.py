@@ -49,7 +49,7 @@ def main(jsonl_path: str, job_dir: str | None = None, run_now: bool = False):
         compress_output_every_friday(settings, jsonl_path)
 
     schedule.every().day.at("12:00").do(daily_run, settings)
-    schedule.every().friday.do(compress_output_every_friday, settings, jsonl_path)
+    schedule.every().saturday.do(compress_output_every_friday, settings, jsonl_path)
 
     while True:
         schedule.run_pending()
