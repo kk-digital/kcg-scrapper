@@ -66,7 +66,7 @@ def main(filters_path: str, run_now: bool = False):
     if run_now:
         job(filters_path)
 
-    schedule.every().friday.do(job, filters_path)
+    schedule.every().saturday.do(job, filters_path)
 
     while True:
         schedule.run_pending()
