@@ -3,6 +3,7 @@ import shutil
 from pathlib import Path
 from datetime import date
 import time
+from threading import Thread
 
 import schedule
 from fire import Fire
@@ -62,11 +63,16 @@ def job(filters_path: str):
         shutil.rmtree(filter_weekly_folder)
 
 
+def run_threaded(job_func):
+    job_thread = Thread(target=job_func)
+    job_thread.start()
+
+
 def main(filters_path: str, run_now: bool = False):
     if run_now:
         job(filters_path)
 
-    schedule.every().saturday.do(job, filters_path)
+    schedule.every().saturday.do(run_threaded, lambda: job(filters_path))
 
     while True:
         schedule.run_pending()

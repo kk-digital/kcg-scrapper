@@ -2,6 +2,7 @@ import shutil
 import time
 from datetime import date
 from pathlib import Path
+from threading import Thread
 
 import schedule
 from command import Command
@@ -35,6 +36,11 @@ def compress_output_every_friday(settings, jsonl_path):
     shutil.rmtree(weekly_folder)
 
 
+def run_threaded(job_func):
+    job_thread = Thread(target=job_func)
+    job_thread.start()
+
+
 def main(jsonl_path: str, job_dir: str | None = None, run_now: bool = False):
     settings = get_project_settings()
     settings["FEEDS"] = {
@@ -48,8 +54,10 @@ def main(jsonl_path: str, job_dir: str | None = None, run_now: bool = False):
     if run_now:
         compress_output_every_friday(settings, jsonl_path)
 
-    schedule.every().day.at("12:00").do(daily_run, settings)
-    schedule.every().saturday.do(compress_output_every_friday, settings, jsonl_path)
+    schedule.every().day.at("12:00").do(run_threaded, lambda: daily_run(settings))
+    schedule.every().saturday.do(
+        run_threaded, lambda: compress_output_every_friday(settings, jsonl_path)
+    )
 
     while True:
         schedule.run_pending()
