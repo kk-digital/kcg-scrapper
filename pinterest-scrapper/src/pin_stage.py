@@ -50,6 +50,8 @@ class PinStage(ScrollStage):
             # catch type error in case try to access non-existing attr on bs4 tag
             except TypeError:
                 continue
+            except KeyError:  # some pins have no href
+                continue
 
     def _scrape(self) -> None:
         pin_urls = set()
