@@ -6,6 +6,24 @@
 #     https://docs.scrapy.org/en/latest/topics/settings.html
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
+import os
+
+# loading .env file
+if os.getenv("PYTHON_ENV", "development") == "development":
+    from dotenv import load_dotenv
+
+    load_dotenv()
+
+LOGIN_EMAIL = os.environ["WAYNEMADSENDREPORT_EMAIL"]
+LOGIN_PASSWORD = os.environ["WAYNEMADSENDREPORT_PASSWORD"]
+
+# logging config
+LOG_LEVEL = "INFO"
+LOG_FILE = "waynemadsen_scraper.log"
+LOG_FILE_APPEND = False
+
+# scrapeops monitoring
+SCRAPEOPS_API_KEY = os.environ["SCRAPEOPS_KEY"]
 
 BOT_NAME = "waynemadsen_scraper"
 
@@ -52,13 +70,15 @@ CONCURRENT_REQUESTS_PER_DOMAIN = 4
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
     "waynemadsen_scraper.middlewares.CheckSession": 50,
+    "scrapeops_scrapy.middleware.retry.RetryMiddleware": 550,
+    "scrapy.downloadermiddlewares.retry.RetryMiddleware": None,
 }
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
-# EXTENSIONS = {
-#    "scrapy.extensions.telnet.TelnetConsole": None,
-# }
+EXTENSIONS = {
+    "scrapeops_scrapy.extension.ScrapeOpsMonitor": 500,
+}
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
