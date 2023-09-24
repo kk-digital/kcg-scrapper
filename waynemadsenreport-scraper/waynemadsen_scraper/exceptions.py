@@ -1,0 +1,2 @@
+class SessionExpired(Exception):
+    pass
