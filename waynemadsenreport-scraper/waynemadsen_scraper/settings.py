@@ -7,6 +7,7 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 import os
+from os import path
 
 # loading .env file
 if os.getenv("PYTHON_ENV", "development") == "development":
@@ -21,6 +22,22 @@ LOGIN_PASSWORD = os.environ["WAYNEMADSENDREPORT_PASSWORD"]
 LOG_LEVEL = "INFO"
 LOG_FILE = "waynemadsen_scraper.log"
 LOG_FILE_APPEND = False
+
+# output config
+OUTPUT_DIR = "output"
+HTML_OUTPUT_DIR = path.join(OUTPUT_DIR, "html")
+FILES_STORE = path.join(OUTPUT_DIR, "files")
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+os.makedirs(HTML_OUTPUT_DIR, exist_ok=True)
+
+FEEDS = {
+    path.join(OUTPUT_DIR, "items.csv"): {
+        "format": "csv",
+        "encoding": "utf8",
+        "store_empty": False,
+        "overwrite": True,
+    }
+}
 
 # scrapeops monitoring
 SCRAPEOPS_API_KEY = os.environ["SCRAPEOPS_KEY"]
@@ -82,9 +99,7 @@ EXTENSIONS = {
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-# ITEM_PIPELINES = {
-#    "waynemadsen_scraper.pipelines.WaynemadsenScraperPipeline": 300,
-# }
+ITEM_PIPELINES = {"scrapy.pipelines.files.FilesPipeline": 50}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
