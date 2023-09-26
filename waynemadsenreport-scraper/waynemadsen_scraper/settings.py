@@ -26,7 +26,7 @@ LOG_FILE_APPEND = False
 # output config
 OUTPUT_DIR = "output"
 HTML_OUTPUT_DIR = path.join(OUTPUT_DIR, "html")
-FILES_STORE = path.join(OUTPUT_DIR, "files")
+IMAGES_STORE = path.join(OUTPUT_DIR, "files")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 os.makedirs(HTML_OUTPUT_DIR, exist_ok=True)
 
@@ -96,7 +96,7 @@ DOWNLOADER_MIDDLEWARES = {
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-ITEM_PIPELINES = {"scrapy.pipelines.files.FilesPipeline": 50}
+ITEM_PIPELINES = {"scrapy.pipelines.images.ImagesPipeline": 100}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

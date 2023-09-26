@@ -63,12 +63,12 @@ class WaynemadsenreportFollowAllPagesSpider(CrawlSpider):
         with open(filename, "wb") as fp:
             fp.write(response.body)
 
-        file_urls = response.css("img::attr(src)").getall()
-        file_urls = set([response.urljoin(url) for url in file_urls])
+        image_urls = response.css("img::attr(src)").getall()
+        image_urls = set([response.urljoin(url) for url in image_urls])
 
         return dict(
             url=response.url,
             title=response.css("h2#main-title::text").get(),
             html_filename=filename,
-            file_urls=file_urls,
+            image_urls=image_urls,
         )
