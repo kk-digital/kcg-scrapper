@@ -87,15 +87,12 @@ CONCURRENT_REQUESTS_PER_DOMAIN = 4
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
     "waynemadsen_scraper.middlewares.CheckSession": 50,
-    "scrapeops_scrapy.middleware.retry.RetryMiddleware": 550,
-    "scrapy.downloadermiddlewares.retry.RetryMiddleware": None,
 }
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
-EXTENSIONS = {
-    "scrapeops_scrapy.extension.ScrapeOpsMonitor": 500,
-}
+# EXTENSIONS = {
+# }
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
