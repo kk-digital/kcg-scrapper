@@ -14,7 +14,7 @@ class CheckSession:
             return response
 
         if request.meta.get("login_request"):
-            if "Exclusive Content" in response.text:
+            if not response.css("#loginform").get():
                 self.performing_login = False
                 request.meta["pending_requests"] = self.pending_requests
                 self.pending_requests = []
@@ -26,7 +26,7 @@ class CheckSession:
         if "This page is available to members only" in response.text:
             if self.performing_login:
                 self.pending_requests.append(request)
-                raise IgnoreRequest()
+                raise IgnoreRequest("Waiting for login to complete.")
 
             self.performing_login = True
             raise SessionExpired("Need to renew session.")

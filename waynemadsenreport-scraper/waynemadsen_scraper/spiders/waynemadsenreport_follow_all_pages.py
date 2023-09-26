@@ -1,6 +1,7 @@
 import hashlib
 from os import path
 
+from scrapy.exceptions import IgnoreRequest
 from scrapy.http import TextResponse, FormRequest, Request
 from scrapy.linkextractors.lxmlhtml import LxmlLinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
@@ -28,21 +29,32 @@ class WaynemadsenreportFollowAllPagesSpider(CrawlSpider):
     )
 
     def errback(self, failure: Failure):
+        if failure.check(IgnoreRequest):
+            return None
+
         if failure.check(SessionExpired):
-            return self.start_requests()
+            return self.get_login_request()
 
         raise failure
 
-    def start_requests(self):
-        yield FormRequest(
+    def after_login(self, response: TextResponse):
+        return response.meta["pending_requests"]
+
+    def get_login_request(self):
+        return FormRequest(
             url="https://www.waynemadsenreport.com/?action=login",
             formdata={
                 "username": self.settings["LOGIN_EMAIL"],
                 "password": self.settings["LOGIN_PASSWORD"],
             },
             meta={"login_request": True},
+            callback=self.after_login,
+            priority=9999,
+            dont_filter=True,
         )
 
+    def start_requests(self):
+        yield self.get_login_request()
         yield Request(url="https://www.waynemadsenreport.com/sitemap")
 
     def parse(self, response: TextResponse):
@@ -52,7 +64,7 @@ class WaynemadsenreportFollowAllPagesSpider(CrawlSpider):
             fp.write(response.body)
 
         file_urls = response.css("img::attr(src)").getall()
-        file_urls = [response.urljoin(url) for url in file_urls]
+        file_urls = set([response.urljoin(url) for url in file_urls])
 
         return dict(
             url=response.url,
