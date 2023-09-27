@@ -87,7 +87,12 @@ CONCURRENT_REQUESTS_PER_DOMAIN = 4
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
     "waynemadsen_scraper.middlewares.CheckSession": 50,
+    "rotating_proxies.middlewares.RotatingProxyMiddleware": 610,
+    "rotating_proxies.middlewares.BanDetectionMiddleware": 620,
 }
+
+ROTATING_PROXY_LIST_PATH = "proxies.txt"
+ROTATING_PROXY_PAGE_RETRY_TIMES = 1
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
