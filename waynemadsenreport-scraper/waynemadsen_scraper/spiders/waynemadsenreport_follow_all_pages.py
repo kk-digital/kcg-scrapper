@@ -38,7 +38,9 @@ class WaynemadsenreportFollowAllPagesSpider(CrawlSpider):
         raise failure
 
     def after_login(self, response: TextResponse):
-        return response.meta["pending_requests"]
+        for request in response.meta["pending_requests"]:
+            request.dont_filter = True
+            yield request
 
     def get_login_request(self):
         return FormRequest(
