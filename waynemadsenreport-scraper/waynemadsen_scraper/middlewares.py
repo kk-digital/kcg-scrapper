@@ -1,5 +1,7 @@
+import logging
+
 from scrapy import Spider
-from scrapy.exceptions import CloseSpider, IgnoreRequest
+from scrapy.exceptions import IgnoreRequest
 from scrapy.http import Response, TextResponse, Request
 
 from waynemadsen_scraper.exceptions import SessionExpired
@@ -8,6 +10,7 @@ from waynemadsen_scraper.exceptions import SessionExpired
 class CheckSession:
     performing_login = True
     pending_requests = []
+    logger = logging.getLogger(__name__)
 
     def process_response(self, request: Request, response: Response, spider: Spider):
         if not isinstance(response, TextResponse):
@@ -24,6 +27,7 @@ class CheckSession:
 
                 return response
 
+            self.logger.info("Retrying login.")
             return request
 
         if "This page is available to members only" in response.text:
