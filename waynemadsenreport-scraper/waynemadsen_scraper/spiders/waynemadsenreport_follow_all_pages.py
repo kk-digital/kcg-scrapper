@@ -28,16 +28,26 @@ class WaynemadsenreportFollowAllPagesSpider(CrawlSpider):
         ),
     )
 
+    login_count = 0
+    page_count = 0
+
     def errback(self, failure: Failure):
         if failure.check(IgnoreRequest):
             return None
 
         if failure.check(SessionExpired):
+            self.logger.info("Session expired, logging in again.")
             return self.get_login_request()
 
         raise failure
 
     def after_login(self, response: TextResponse):
+        self.login_count += 1
+        self.logger.info(f"Logged in successfully. Total login: {self.login_count}")
+        self.logger.info(
+            f"Resuming pending requests. Total: {len(response.meta['pending_requests'])}"
+        )
+
         for request in response.meta["pending_requests"]:
             request.dont_filter = True
             yield request
@@ -60,6 +70,9 @@ class WaynemadsenreportFollowAllPagesSpider(CrawlSpider):
         yield Request(url="https://www.waynemadsenreport.com/sitemap")
 
     def parse(self, response: TextResponse):
+        self.page_count += 1
+        self.logger.info(f"Parsing page {self.page_count}: {response.url}")
+
         filename = hashlib.sha1(response.url.encode()).hexdigest() + ".html"
         filename = path.join(self.settings["HTML_OUTPUT_DIR"], filename)
         with open(filename, "wb") as fp:
