@@ -25,10 +25,10 @@ LOG_FILE_APPEND = False
 
 # output config
 OUTPUT_DIR = "output"
-HTML_OUTPUT_DIR = path.join(OUTPUT_DIR, "html")
+PAGES_OUTPUT_DIR = path.join(OUTPUT_DIR, "pages")
 IMAGES_STORE = path.join(OUTPUT_DIR, "files")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
-os.makedirs(HTML_OUTPUT_DIR, exist_ok=True)
+os.makedirs(PAGES_OUTPUT_DIR, exist_ok=True)
 
 FEEDS = {
     path.join(OUTPUT_DIR, "items.csv"): {
