@@ -84,6 +84,7 @@ class WaynemadsenreportFollowAllPagesSpider(CrawlSpider):
             callback=self.after_login,
             priority=9999,
             dont_filter=True,
+            errback=self.errback,
         )
 
     def start_requests(self):

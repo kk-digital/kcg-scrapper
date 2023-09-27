@@ -5,6 +5,7 @@ from scrapy.exceptions import IgnoreRequest
 from scrapy.http import Response, TextResponse, Request
 
 from waynemadsen_scraper.exceptions import SessionExpired
+import time
 
 
 class CheckSession:
@@ -28,7 +29,8 @@ class CheckSession:
                 return response
 
             self.logger.info("Retrying login.")
-            return request
+            time.sleep(10)
+            raise SessionExpired("Need to renew session.")
 
         if "This page is available to members only" in response.text:
             if self.performing_login:
