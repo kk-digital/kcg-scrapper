@@ -97,12 +97,12 @@ class WaynemadsenreportFollowAllPagesSpider(CrawlSpider):
         if isinstance(response, TextResponse):
             filename = hashlib.sha1(response.url.encode()).hexdigest() + ".html"
             image_urls = response.css("img::attr(src)").getall()
-            image_urls = set([response.urljoin(url) for url in image_urls])
+            image_urls = list(set([response.urljoin(url) for url in image_urls]))
             title = response.css("h2#main-title::text").get()
             is_html = True
         else:
             filename = PurePosixPath(urllib.parse.urlparse(response.url).path).name
-            image_urls = None
+            image_urls = []
             title = None
             is_html = False
 
