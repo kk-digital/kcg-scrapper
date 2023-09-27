@@ -31,6 +31,25 @@ class WaynemadsenreportFollowAllPagesSpider(CrawlSpider):
     login_count = 0
     page_count = 0
 
+    def __init__(self, *args, email, password, html_output_dir, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.email = email
+        self.password = password
+        self.html_output_dir = html_output_dir
+
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        spider = super().from_crawler(
+            crawler,
+            *args,
+            email=crawler.settings["LOGIN_EMAIL"],
+            password=crawler.settings["LOGIN_PASSWORD"],
+            html_output_dir=crawler.settings["HTML_OUTPUT_DIR"],
+            **kwargs,
+        )
+
+        return spider
+
     def errback(self, failure: Failure):
         if failure.check(IgnoreRequest):
             return None
@@ -56,8 +75,8 @@ class WaynemadsenreportFollowAllPagesSpider(CrawlSpider):
         return FormRequest(
             url="https://www.waynemadsenreport.com/?action=login",
             formdata={
-                "username": self.settings["LOGIN_EMAIL"],
-                "password": self.settings["LOGIN_PASSWORD"],
+                "username": self.email,
+                "password": self.password,
             },
             meta={"login_request": True},
             callback=self.after_login,
@@ -74,7 +93,7 @@ class WaynemadsenreportFollowAllPagesSpider(CrawlSpider):
         self.logger.info(f"Parsing page {self.page_count}: {response.url}")
 
         filename = hashlib.sha1(response.url.encode()).hexdigest() + ".html"
-        filename = path.join(self.settings["HTML_OUTPUT_DIR"], filename)
+        filename = path.join(self.html_output_dir, filename)
         with open(filename, "wb") as fp:
             fp.write(response.body)
 
