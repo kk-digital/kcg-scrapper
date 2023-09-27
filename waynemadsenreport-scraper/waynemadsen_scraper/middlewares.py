@@ -14,14 +14,17 @@ class CheckSession:
             return response
 
         if request.meta.get("login_request"):
-            if not response.css("#loginform").get():
+            if (
+                response.css("#loginform").get() is None
+                or "Exclusive Content" in response.text
+            ):
                 self.performing_login = False
                 request.meta["pending_requests"] = self.pending_requests
                 self.pending_requests = []
 
                 return response
 
-            raise CloseSpider("Login failed")
+            return request
 
         if "This page is available to members only" in response.text:
             if self.performing_login:
