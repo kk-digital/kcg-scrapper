@@ -6,18 +6,43 @@
 #     https://docs.scrapy.org/en/latest/topics/settings.html
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
+from pathlib import Path
 
 BOT_NAME = "scraper"
 
 SPIDER_MODULES = ["scraper.spiders"]
 NEWSPIDER_MODULE = "scraper.spiders"
 
-
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-# USER_AGENT = "scraper (+http://www.yourdomain.com)"
+# disable user agent so browser default
+USER_AGENT = None
+
+SCROLL_TIMES = 10
+SCROLL_DELAY = 2000  # ms
+
+OUTPUT_DIR = Path("output")
+STORAGE_STATE_FILE = OUTPUT_DIR / "storage.json"
+GENERATIONS_DATA_DIR = OUTPUT_DIR / "generations_data"
+GENERATIONS_DATA_DIR.mkdir(exist_ok=True)
+OUTPUT_DIR.mkdir(exist_ok=True)
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False
+
+PLAYWRIGHT_BROWSER_TYPE = "firefox"
+
+PLAYWRIGHT_LAUNCH_OPTIONS = {
+    "headless": True,
+}
+
+# empty but don't remove
+PLAYWRIGHT_CONTEXTS = {
+    "default": {},
+}
+
+if STORAGE_STATE_FILE.exists():
+    PLAYWRIGHT_CONTEXTS["default"]["storage_state"] = str(STORAGE_STATE_FILE)
+
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 # CONCURRENT_REQUESTS = 32
