@@ -36,6 +36,7 @@ class LeonardoShowcaseSpider(scrapy.Spider):
         page: Page = response.meta["playwright_page"]
         async with page.context.expect_page() as new_page_info:
             await page.get_by_label("Launch App").click()
+            self.logger.debug("Got to App page")
 
         new_page: Page = await new_page_info.value
         await ShowcaseView(new_page, self.settings).start_view()
