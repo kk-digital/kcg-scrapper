@@ -33,11 +33,11 @@ class LeonardoShowcaseSpider(scrapy.Spider):
         )
 
     async def parse(self, response):
-        page = response.meta["playwright_page"]
+        page: Page = response.meta["playwright_page"]
         async with page.context.expect_page() as new_page_info:
             await page.get_by_label("Launch App").click()
 
         new_page: Page = await new_page_info.value
         await ShowcaseView(new_page, self.settings).start_view()
 
-        page.close()
+        await page.close()
