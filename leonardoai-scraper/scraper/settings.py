@@ -80,9 +80,26 @@ DOWNLOAD_HANDLERS = {
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-# DOWNLOADER_MIDDLEWARES = {
-#    "scraper.middlewares.ScraperDownloaderMiddleware": 543,
-# }
+DOWNLOADER_MIDDLEWARES = {
+    "scrapy.downloadermiddlewares.useragent.UserAgentMiddleware": None,
+    "scrapy.downloadermiddlewares.retry.RetryMiddleware": None,
+    "scrapy_fake_useragent.middleware.RandomUserAgentMiddleware": 500,
+    "scrapy_fake_useragent.middleware.RetryUserAgentMiddleware": 550,
+    "rotating_proxies.middlewares.RotatingProxyMiddleware": 610,
+    "rotating_proxies.middlewares.BanDetectionMiddleware": 620,
+}
+
+FAKEUSERAGENT_PROVIDERS = [
+    "scrapy_fake_useragent.providers.FakeUserAgentProvider",  # this is the first provider we'll try
+    "scrapy_fake_useragent.providers.FakerProvider",
+    # if FakeUserAgentProvider fails, we'll use faker to generate a user-agent string for us
+    "scrapy_fake_useragent.providers.FixedUserAgentProvider",  # fall back to USER_AGENT value
+]
+# disable user agent so browser uses default
+USER_AGENT = None
+
+ROTATING_PROXY_LIST_PATH = "proxies.txt"
+ROTATING_PROXY_PAGE_RETRY_TIMES = 0
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html

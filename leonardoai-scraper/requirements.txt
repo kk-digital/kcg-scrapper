@@ -1,2 +1,4 @@
 scrapy-playwright==0.0.32
 pillow==10.1.0
+scrapy-rotating-proxies==0.6.2
+scrapy-fake-useragent==1.4.4
