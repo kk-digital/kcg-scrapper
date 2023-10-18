@@ -22,9 +22,9 @@ SCROLL_DELAY = 2000  # ms
 
 OUTPUT_DIR = Path("output")
 STORAGE_STATE_FILE = OUTPUT_DIR / "storage.json"
-GENERATIONS_DATA_DIR = OUTPUT_DIR / "generations_data"
+# GENERATIONS_DATA_DIR = OUTPUT_DIR / "generations_data"
 IMAGES_STORE = OUTPUT_DIR / "images"
-GENERATIONS_DATA_DIR.mkdir(exist_ok=True)
+# GENERATIONS_DATA_DIR.mkdir(exist_ok=True)
 OUTPUT_DIR.mkdir(exist_ok=True)
 
 # Obey robots.txt rules

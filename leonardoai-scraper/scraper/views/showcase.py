@@ -9,7 +9,7 @@ class ShowcaseView:
         self._page = page
         self._scroll_times = settings["SCROLL_TIMES"]
         self._scroll_delay = settings["SCROLL_DELAY"]
-        self._generations_data_dir = settings["GENERATIONS_DATA_DIR"]
+        # self._generations_data_dir = settings["GENERATIONS_DATA_DIR"]
         self._generations = []
         self._logger = logging.getLogger(__name__)
 
