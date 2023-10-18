@@ -1,31 +1,28 @@
-import json
 import logging
 
 from playwright.async_api import Page, JSHandle, Request
 from scrapy.settings import Settings
-import time
-import math
 
 
 class ShowcaseView:
     def __init__(self, page: Page, settings: Settings):
         self._page = page
-        self.base_url = "https://app.leonardo.ai"
         self._scroll_times = settings["SCROLL_TIMES"]
         self._scroll_delay = settings["SCROLL_DELAY"]
-        self.generations_data_dir = settings["GENERATIONS_DATA_DIR"]
-        self.data_to_inset = []
+        self._generations_data_dir = settings["GENERATIONS_DATA_DIR"]
+        self._generations = []
         self._logger = logging.getLogger(__name__)
 
-    def _insert_generations(self):
-        filename = (
-            self.generations_data_dir / f"generations-{math.trunc(time.time())}.json"
-        )
-        with open(filename, "w", encoding="utf-8") as fp:
-            json.dump(self.data_to_inset, fp)
-        self._logger.info(
-            f"Inserted {len(self.data_to_inset)} generations to {filename}"
-        )
+    # now return generations to export
+    # def _insert_generations(self):
+    #     filename = (
+    #         self.generations_data_dir / f"generations-{math.trunc(time.time())}.json"
+    #     )
+    #     with open(filename, "w", encoding="utf-8") as fp:
+    #         json.dump(self.data_to_inset, fp)
+    #     self._logger.info(
+    #         f"Inserted {len(self.data_to_inset)} generations to {filename}"
+    #     )
 
     async def _start_scrolling(self):
         self._logger.debug("Start scrolling")
@@ -56,7 +53,7 @@ class ShowcaseView:
         response = await request.response()
         data = await response.json()
         data = data["data"]["generated_images"]
-        self.data_to_inset.extend(data)
+        self._generations.extend(data)
         self._logger.debug(f"Got {len(data)} generations")
 
     async def start_view(self):
@@ -74,5 +71,6 @@ class ShowcaseView:
         await self._start_scrolling()
         # give time to intercept all requests
         await self._page.wait_for_timeout(3000)
-        self._insert_generations()
+        # self._insert_generations()
         self._logger.debug("Finished showcase view")
+        return self._generations

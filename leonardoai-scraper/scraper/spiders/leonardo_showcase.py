@@ -32,6 +32,12 @@ class LeonardoShowcaseSpider(scrapy.Spider):
             errback=self.errback_close_page,
         )
 
+    def populate_image_urls(self, generations: list[dict]) -> list[dict]:
+        for gen in generations:
+            gen["image_urls"] = [gen["url"]]
+
+        return generations
+
     async def parse(self, response):
         page: Page = response.meta["playwright_page"]
         async with page.context.expect_page() as new_page_info:
@@ -39,7 +45,7 @@ class LeonardoShowcaseSpider(scrapy.Spider):
             self.logger.debug("Got to App page")
 
         new_page: Page = await new_page_info.value
-        await ShowcaseView(new_page, self.settings).start_view()
-
+        generations = await ShowcaseView(new_page, self.settings).start_view()
         await page.close()
-        self.logger.info("Closing page and spider")
+
+        return self.populate_image_urls(generations)

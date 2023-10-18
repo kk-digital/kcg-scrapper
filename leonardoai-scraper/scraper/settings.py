@@ -23,6 +23,7 @@ SCROLL_DELAY = 2000  # ms
 OUTPUT_DIR = Path("output")
 STORAGE_STATE_FILE = OUTPUT_DIR / "storage.json"
 GENERATIONS_DATA_DIR = OUTPUT_DIR / "generations_data"
+IMAGES_STORE = OUTPUT_DIR / "images"
 GENERATIONS_DATA_DIR.mkdir(exist_ok=True)
 OUTPUT_DIR.mkdir(exist_ok=True)
 
@@ -43,14 +44,13 @@ PLAYWRIGHT_CONTEXTS = {
 if STORAGE_STATE_FILE.exists():
     PLAYWRIGHT_CONTEXTS["default"]["storage_state"] = str(STORAGE_STATE_FILE)
 
-
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 # CONCURRENT_REQUESTS = 32
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-# DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 2
 # The download delay setting will honor only one of:
 # CONCURRENT_REQUESTS_PER_DOMAIN = 16
 # CONCURRENT_REQUESTS_PER_IP = 16
@@ -92,9 +92,7 @@ DOWNLOAD_HANDLERS = {
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-# ITEM_PIPELINES = {
-#    "scraper.pipelines.ScraperPipeline": 300,
-# }
+ITEM_PIPELINES = {"scrapy.pipelines.images.ImagesPipeline": 1}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
