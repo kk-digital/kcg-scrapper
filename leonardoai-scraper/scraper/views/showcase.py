@@ -60,6 +60,7 @@ class ShowcaseView:
         await self._page.wait_for_load_state()
         await self._page.locator("a").filter(has_text="Community Feed").click()
         await self._page.wait_for_load_state()
+        await self._page.wait_for_url("**/community-feed")
         # start intercepting requests
         self._page.on("requestfinished", self._request_handler)
 
