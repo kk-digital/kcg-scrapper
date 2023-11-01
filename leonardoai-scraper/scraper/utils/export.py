@@ -19,7 +19,9 @@ def _process_generation(
     image_basename = generation["images"][0]["path"] = PurePosixPath(
         generation["images"][0]["path"]
     ).name
-    shutil.copy2(images_folder / image_basename, output_dir / "images" / image_basename)
+    shutil.copyfile(
+        images_folder / image_basename, output_dir / "images" / image_basename
+    )
 
     return generation
 
