@@ -26,9 +26,9 @@ def _process_generation(
     return generation
 
 
-def _delete_images(generations: list, images_folder: Path):
-    for generation in generations:
-        image_path = images_folder / generation["images"][0]["path"]
+def _delete_images(images: list, images_folder: Path):
+    for image in images:
+        image_path = images_folder / image
         image_path.unlink()
 
 
@@ -37,30 +37,37 @@ def run(output_dir: str, jsonl_file: str, images_folder: str):
     images_folder = Path(images_folder)
     output_dir = Path(output_dir)
     new_output_dir = _init_export_folder(output_dir)
-
-    generations = []
-
-    with jsonl_file.open("r", encoding="utf-8") as fp:
-        for line in fp:
-            generation = json.loads(line)
-            if (
-                not generation["images"]
-                or generation["images"][0]["status"] != "downloaded"
-            ):
-                continue
-
-            generation = _process_generation(generation, images_folder, new_output_dir)
-            generations.append(generation)
-
     generations_file = new_output_dir / "generations.json"
-    generations_file.write_text(json.dumps(generations, indent=2, sort_keys=True))
-    _delete_images(generations, images_folder)
+
+    unique_ids = set()
+    images_to_delete = []
+
+    with jsonl_file.open("r", encoding="utf-8") as sfp:
+        with generations_file.open("w", encoding="utf-8") as dfp:
+            for line in sfp:
+                generation = json.loads(line)
+
+                no_image = not generation["images"]
+                not_unique_id = generation["id"] in unique_ids
+                if no_image or not_unique_id:
+                    continue
+                not_downloaded = generation["images"][0]["status"] != "downloaded"
+                if not_downloaded:
+                    continue
+
+                generation = _process_generation(
+                    generation, images_folder, new_output_dir
+                )
+                unique_ids.add(generation["id"])
+                dfp.write(json.dumps(generation) + "\n")
+                images_to_delete.append(generation["images"][0]["path"])
 
     shutil.make_archive(
         base_name=str(output_dir / new_output_dir.name),
         format="zip",
         root_dir=new_output_dir,
     )
+    _delete_images(images_to_delete, images_folder)
     shutil.rmtree(new_output_dir)
     jsonl_file.unlink()
 
