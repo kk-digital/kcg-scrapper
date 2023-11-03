@@ -37,7 +37,7 @@ def run(output_dir: str, jsonl_file: str, images_folder: str):
     images_folder = Path(images_folder)
     output_dir = Path(output_dir)
     new_output_dir = _init_export_folder(output_dir)
-    generations_file = new_output_dir / "generations.json"
+    generations_file = new_output_dir / "generations.jsonl"
 
     unique_ids = set()
     images_to_delete = []
