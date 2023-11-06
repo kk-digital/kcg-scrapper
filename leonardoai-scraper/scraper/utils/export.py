@@ -29,7 +29,7 @@ def _process_generation(
 def _delete_images(images: list, images_folder: Path):
     for image in images:
         image_path = images_folder / image
-        image_path.unlink()
+        image_path.unlink(missing_ok=True)
 
 
 def run(output_dir: str, jsonl_file: str, images_folder: str):
