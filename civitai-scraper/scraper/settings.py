@@ -16,7 +16,6 @@ NEWSPIDER_MODULE = "scraper.spiders"
 OUTPUT_DIR = Path("output")
 IMAGES_STORE = OUTPUT_DIR / "images"
 
-
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = "scraper (+http://www.yourdomain.com)"
 
@@ -54,9 +53,12 @@ ROBOTSTXT_OBEY = False
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-# DOWNLOADER_MIDDLEWARES = {
-#    "scraper.middlewares.ScraperDownloaderMiddleware": 543,
-# }
+DOWNLOADER_MIDDLEWARES = {
+    "rotating_proxies.middlewares.RotatingProxyMiddleware": 610,
+    "rotating_proxies.middlewares.BanDetectionMiddleware": 620,
+}
+
+ROTATING_PROXY_LIST_PATH = "proxies.txt"
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
