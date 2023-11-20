@@ -13,14 +13,31 @@ BOT_NAME = "scraper"
 SPIDER_MODULES = ["scraper.spiders"]
 NEWSPIDER_MODULE = "scraper.spiders"
 
+# output settings
 OUTPUT_DIR = Path("output")
 IMAGES_STORE = OUTPUT_DIR / "images"
 
+FEEDS = {
+    OUTPUT_DIR.joinpath("data.jsonl"): {
+        "format": "jsonlines",
+        "encoding": "utf-8",
+        "store_empty": False,
+        "overwrite": True,
+    }
+}
+
+
+# logging settings
+LOG_LEVEL = "INFO"
+
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-# USER_AGENT = "scraper (+http://www.yourdomain.com)"
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
+
+DOWNLOAD_WARNSIZE = 0
+DOWNLOAD_MAXSIZE = 2097152
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 # CONCURRENT_REQUESTS = 32
@@ -28,7 +45,7 @@ ROBOTSTXT_OBEY = False
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-# DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 2
 # The download delay setting will honor only one of:
 # CONCURRENT_REQUESTS_PER_DOMAIN = 16
 # CONCURRENT_REQUESTS_PER_IP = 16
