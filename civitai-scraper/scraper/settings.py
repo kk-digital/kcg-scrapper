@@ -87,6 +87,7 @@ ROTATING_PROXY_LIST_PATH = "proxies.txt"
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     "scrapy.pipelines.images.ImagesPipeline": 1,
+    "scraper.pipelines.CheckImagesPipeline": 10,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

@@ -1,13 +1,10 @@
-# Define your item pipelines here
-#
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting
-# See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
+from scrapy.exceptions import DropItem
 
 
-# useful for handling different item types with a single interface
-from itemadapter import ItemAdapter
+class CheckImagesPipeline:
+    def process_item(self, item: dict, spider):
+        images = item.get("images", None)
+        if images is None or not images:
+            raise DropItem("Item contains no images")
 
-
-class ScraperPipeline:
-    def process_item(self, item, spider):
         return item
