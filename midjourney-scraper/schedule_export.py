@@ -62,11 +62,13 @@ def job(filters_path: str):
         shutil.rmtree(filter_weekly_folder)
 
 
-def main(filters_path: str, run_now: bool = False):
+def main(filters_path: str, run_now: bool = False, exit_on_finish: bool = False):
     if run_now:
         job(filters_path)
+        if exit_on_finish:
+            return
 
-    schedule.every().friday.do(job, filters_path)
+    schedule.every().saturday.do(job, filters_path)
 
     while True:
         schedule.run_pending()

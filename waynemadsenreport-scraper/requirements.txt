@@ -1,0 +1,5 @@
+Scrapy==2.11.0
+python-dotenv==1.0.0
+scrapeops-scrapy==0.5.3
+pillow==10.0.1
+scrapy-rotating-proxies==0.6.2

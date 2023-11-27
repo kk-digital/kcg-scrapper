@@ -1,21 +1,67 @@
-from os import path
+# Scrapy settings for scraper project
+#
+# For simplicity, this file contains only settings considered important or
+# commonly used. You can find more settings consulting the documentation:
+#
+#     https://docs.scrapy.org/en/latest/topics/settings.html
+#     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
+#     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 from pathlib import Path
 
-BOT_NAME = "kemono"
+BOT_NAME = "scraper"
 
-SPIDER_MODULES = ["kemono.spiders"]
-NEWSPIDER_MODULE = "kemono.spiders"
+SPIDER_MODULES = ["scraper.spiders"]
+NEWSPIDER_MODULE = "scraper.spiders"
 
-OUTPUT_FOLDER = "output"
-MAX_ARCHIVE_SIZE = 524288000  # bytes
+# Crawl responsibly by identifying yourself (and your website) on the user-agent
+# disable user agent so browser default
+USER_AGENT = None
+
+SCROLL_TIMES = 10
+SCROLL_DELAY = 2000  # ms
+
+OUTPUT_DIR = Path("output")
+STORAGE_STATE_FILE = OUTPUT_DIR / "storage.json"
+# GENERATIONS_DATA_DIR = OUTPUT_DIR / "generations_data"
+IMAGES_STORE = OUTPUT_DIR / "images"
+# GENERATIONS_DATA_DIR.mkdir(exist_ok=True)
+OUTPUT_DIR.mkdir(exist_ok=True)
+
+# logging
+
+LOG_LEVEL = "INFO"
+LOG_FILE = OUTPUT_DIR / "scrapy.log"
+LOG_FILE_APPEND = False
+
+# feeds
+
+FEEDS = {
+    OUTPUT_DIR
+    / "generations.jsonl": {
+        "format": "jsonlines",
+        "encoding": "utf-8",
+        "store_empty": False,
+        "overwrite": False,
+    }
+}
+
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False
 
-LOG_ENABLED = True
-LOG_FILE = "scrapy.log"
-LOG_FILE_APPEND = False
-LOG_LEVEL = "INFO"
+PLAYWRIGHT_BROWSER_TYPE = "firefox"
+
+PLAYWRIGHT_LAUNCH_OPTIONS = {
+    "headless": True,
+}
+
+# empty but don't remove
+PLAYWRIGHT_CONTEXTS = {
+    "default": {},
+}
+
+if STORAGE_STATE_FILE.exists():
+    PLAYWRIGHT_CONTEXTS["default"]["storage_state"] = str(STORAGE_STATE_FILE)
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 # CONCURRENT_REQUESTS = 32
@@ -40,10 +86,15 @@ DOWNLOAD_DELAY = 2
 #    "Accept-Language": "en",
 # }
 
+DOWNLOAD_HANDLERS = {
+    "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+    "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+}
+
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 # SPIDER_MIDDLEWARES = {
-#    "kemono.middlewares.KemonoSpiderMiddleware": 543,
+#    "scraper.middlewares.ScraperSpiderMiddleware": 543,
 # }
 
 # Enable or disable downloader middlewares
@@ -63,9 +114,10 @@ FAKEUSERAGENT_PROVIDERS = [
     # if FakeUserAgentProvider fails, we'll use faker to generate a user-agent string for us
     "scrapy_fake_useragent.providers.FixedUserAgentProvider",  # fall back to USER_AGENT value
 ]
-USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+# disable user agent so browser uses default
+USER_AGENT = None
 
-ROTATING_PROXY_LIST_PATH = "proxy-list.txt"
+ROTATING_PROXY_LIST_PATH = "proxies.txt"
 ROTATING_PROXY_PAGE_RETRY_TIMES = 0
 
 # Enable or disable extensions
@@ -76,18 +128,11 @@ ROTATING_PROXY_PAGE_RETRY_TIMES = 0
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-ITEM_PIPELINES = {
-    "scrapy.pipelines.images.ImagesPipeline": 1,
-}
-
-IMAGES_STORE = path.join(OUTPUT_FOLDER, "images")
-MEDIA_ALLOW_REDIRECTS = True
-FILES_STORE = path.join(OUTPUT_FOLDER, "files")
-Path(FILES_STORE).mkdir(parents=True, exist_ok=True)
+ITEM_PIPELINES = {"scrapy.pipelines.images.ImagesPipeline": 1}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
-AUTOTHROTTLE_ENABLED = True
+# AUTOTHROTTLE_ENABLED = True
 # The initial download delay
 # AUTOTHROTTLE_START_DELAY = 5
 # The maximum download delay to be set in case of high latencies
@@ -96,7 +141,7 @@ AUTOTHROTTLE_ENABLED = True
 # each remote server
 # AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
 # Enable showing throttling stats for every response received:
-AUTOTHROTTLE_DEBUG = True
+# AUTOTHROTTLE_DEBUG = False
 
 # Enable and configure HTTP caching (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings

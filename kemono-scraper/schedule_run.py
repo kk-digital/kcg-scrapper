@@ -35,7 +35,12 @@ def compress_output_every_friday(settings, jsonl_path):
     shutil.rmtree(weekly_folder)
 
 
-def main(jsonl_path: str, job_dir: str | None = None, run_now: bool = False):
+def main(
+    jsonl_path: str,
+    job_dir: str | None = None,
+    run_now: bool = False,
+    exit_on_finish: bool = False,
+):
     settings = get_project_settings()
     settings["FEEDS"] = {
         jsonl_path: {
@@ -47,9 +52,11 @@ def main(jsonl_path: str, job_dir: str | None = None, run_now: bool = False):
 
     if run_now:
         compress_output_every_friday(settings, jsonl_path)
+        if exit_on_finish:
+            return
 
     schedule.every().day.at("12:00").do(daily_run, settings)
-    schedule.every().friday.do(compress_output_every_friday, settings, jsonl_path)
+    schedule.every().saturday.do(compress_output_every_friday, settings, jsonl_path)
 
     while True:
         schedule.run_pending()

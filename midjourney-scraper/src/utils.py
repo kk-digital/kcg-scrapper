@@ -4,6 +4,7 @@ import logging
 import os
 import zipfile
 from os import path
+from sqlite3 import OperationalError
 from typing import Optional
 
 import settings
@@ -15,7 +16,7 @@ from src.db.model import Generation
 class Utils:
     def __init__(self) -> None:
         engine = db_engine.get_engine()
-        self._session = db_engine.get_session(engine)
+        self._session = db_engine.get_new_session(engine)
         self._logger = logging.getLogger(f"scraper.{__name__}")
         self._output_folder = settings.OUTPUT_FOLDER
         self._images_folder = settings.IMAGES_FOLDER
@@ -44,7 +45,16 @@ class Utils:
         else:
             select_stmt = select_stmt.filter_by(prompt_filter=None)
 
-        cursor = self._session.scalars(select_stmt)
+        while True:
+            try:
+                cursor = self._session.scalars(select_stmt)
+                break
+            except OperationalError as e:
+                if "database is locked" in e.args[0]:
+                    self._logger.warning("Database is locked. Retrying...")
+                    continue
+                raise
+
         num_exports = 0
         exports_list = list()
 

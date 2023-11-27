@@ -98,6 +98,8 @@ class DownloadStage(BaseStage):
         return img_name
 
     def __save_pin_html(self, url: str, pin_uuid: uuid.UUID) -> None:
+        if url.startswith("/"):
+            url = f"https://www.pinterest.com{url}"
         self._driver.get(url)
 
         file_path = path.join(self.__html_path, f"{pin_uuid}.html")
