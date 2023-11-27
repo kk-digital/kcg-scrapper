@@ -13,11 +13,14 @@ class GenerationsSpider(scrapy.Spider):
 
     async def errback(self, failure):
         if failure.check(HttpError) and failure.value.response.status == 503:
+            request: Request = failure.request.copy()
+            request.dont_filter = True
             await asyncio.sleep(60 * 3)
             self.logger.info(
                 f"Retrying main request after 3 mins. Url: {failure.request.url}"
             )
-            yield failure.request.copy()
+
+            yield request
 
     def start_requests(self) -> Iterable[Request]:
         url = "https://civitai.com/api/v1/images"
