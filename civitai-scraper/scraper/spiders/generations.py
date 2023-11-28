@@ -12,7 +12,7 @@ class GenerationsSpider(scrapy.Spider):
     allowed_domains = ["civitai.com"]
 
     async def errback(self, failure):
-        if failure.check(HttpError) and failure.value.response.status == 503:
+        if failure.check(HttpError) and failure.value.response.status >= 500:
             request: Request = failure.request.copy()
             request.dont_filter = True
             await asyncio.sleep(60 * 3)
