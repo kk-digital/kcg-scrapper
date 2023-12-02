@@ -37,15 +37,15 @@ class PinsSpider(scrapy.Spider):
                 "playwright_include_page": True,
                 "playwright_page_init_callback": self.init_page,
             },
-            callback=self.parse,
+            callback=self.extract_board_urls,
             errback=self.errback_close_page,
         )
 
-    async def parse(self, response):
+    async def extract_board_urls(self, response):
         page: Page = response.meta["playwright_page"]
-        await page.wait_for_load_state("networkidle")
+        await page.wait_for_timeout(5000)
 
-        view = BoardGridView(page)
+        view = BoardGridView(page, self.settings)
         await view.start_view()
         board_urls = view.get_board_urls()
         print(board_urls)

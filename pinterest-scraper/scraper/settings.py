@@ -12,6 +12,8 @@ BOT_NAME = "scraper"
 SPIDER_MODULES = ["scraper.spiders"]
 NEWSPIDER_MODULE = "scraper.spiders"
 
+SCROLL_DELAY = 1
+CHECK_BOTTOM_TIMES = 20
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = "scraper (+http://www.yourdomain.com)"
