@@ -12,15 +12,6 @@ class PinsSpider(scrapy.Spider):
     name = "pins"
     allowed_domains = ["www.pinterest.com"]
 
-    async def errback_close_page(self, failure):
-        page = failure.request.meta["playwright_page"]
-        await page.close()
-
-    async def init_page(self, page, request):
-        await page.add_init_script(
-            script="Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
-        )
-
     def start_requests(self) -> Iterable[Request]:
         base_url = "https://www.pinterest.com/search/boards/?q={}&rs=typed"
         query = getattr(self, "query", None)
@@ -40,6 +31,15 @@ class PinsSpider(scrapy.Spider):
             callback=self.extract_board_urls,
             errback=self.errback_close_page,
         )
+
+    async def init_page(self, page, request):
+        await page.add_init_script(
+            script="Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
+        )
+
+    async def errback_close_page(self, failure):
+        page = failure.request.meta["playwright_page"]
+        await page.close()
 
     async def extract_board_urls(self, response):
         page: Page = response.meta["playwright_page"]
