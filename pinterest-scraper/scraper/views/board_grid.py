@@ -12,7 +12,7 @@ class BoardGridView:
         self._scroll_delay = settings["SCROLL_DELAY"]
         self._check_bottom_times = settings["CHECK_BOTTOM_TIMES"]
 
-    async def extract_urls(self):
+    async def _extract_urls(self):
         html = await self._page.content()
         soup = BeautifulSoup(html, "lxml")
 
@@ -24,7 +24,7 @@ class BoardGridView:
             page=self._page,
             scroll_delay=self._scroll_delay,
             check_bottom_times=self._check_bottom_times,
-            do=self.extract_urls,
+            do=self._extract_urls,
         )
 
     def get_board_urls(self):
