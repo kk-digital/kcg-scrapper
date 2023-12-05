@@ -24,11 +24,7 @@ class PinsSpider(scrapy.Spider):
 
         yield Request(
             url=url,
-            meta={
-                "playwright": True,
-                "playwright_include_page": True,
-                "playwright_page_init_callback": self.init_page,
-            },
+            meta=self.get_playwright_request_meta(),
             callback=self.extract_board_urls,
             errback=self.errback_close_page,
         )
@@ -37,6 +33,18 @@ class PinsSpider(scrapy.Spider):
         await page.add_init_script(
             script="Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
         )
+
+    def get_playwright_request_meta(self, context_name: str | None = None):
+        meta = {
+            "playwright": True,
+            "playwright_include_page": True,
+            "playwright_page_init_callback": self.init_page,
+        }
+
+        if context_name is not None:
+            meta["playwright_context"] = context_name
+
+        return meta
 
     async def errback_close_page(self, failure):
         page = failure.request.meta["playwright_page"]
@@ -54,11 +62,7 @@ class PinsSpider(scrapy.Spider):
             yield response.follow(
                 url,
                 callback=self.extract_pin_urls,
-                meta={
-                    "playwright": True,
-                    "playwright_include_page": True,
-                    "playwright_page_init_callback": self.init_page,
-                },
+                meta=self.get_playwright_request_meta(),
                 errback=self.errback_close_page,
             )
 
