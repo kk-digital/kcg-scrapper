@@ -11,6 +11,7 @@ class BoardGridView:
         self._board_urls = set()
         self._scroll_delay = settings["SCROLL_DELAY"]
         self._check_bottom_times = settings["CHECK_BOTTOM_TIMES"]
+        self._short_wait = settings["SHORT_WAIT"]
 
     async def _extract_urls(self):
         html = await self._page.content()
@@ -20,6 +21,7 @@ class BoardGridView:
             self._board_urls.add(board["href"])
 
     async def start_view(self):
+        await self._page.wait_for_timeout(self._short_wait)
         await _utils.scroll_to_bottom_while_do(
             page=self._page,
             scroll_delay=self._scroll_delay,

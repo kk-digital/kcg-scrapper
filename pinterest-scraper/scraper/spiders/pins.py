@@ -44,7 +44,6 @@ class PinsSpider(scrapy.Spider):
 
     async def extract_board_urls(self, response: Response):
         page: Page = response.meta["playwright_page"]
-        await page.wait_for_timeout(5000)  # TODO move to view
 
         view = BoardGridView(page, self.settings)
         await view.start_view()
@@ -65,7 +64,6 @@ class PinsSpider(scrapy.Spider):
 
     async def extract_pin_urls(self, response: Response):
         page: Page = response.meta["playwright_page"]
-        await page.wait_for_timeout(5000)
 
         view = PinGridView(page, self.settings)
         await view.start_view()
