@@ -10,8 +10,7 @@ async def scroll_to_bottom_while_do(
     scroll_delay: int,
     check_bottom_times: int,
     do: Callable,
-    *do_args,
-    **do_kwargs
+    stop_on_more_heading: bool = False,
 ):
     document_element_handle = await page.evaluate_handle("document.documentElement")
     client_height = await (
@@ -21,13 +20,21 @@ async def scroll_to_bottom_while_do(
     bottom_checks = 0
     amount_scrolled = client_height
     get_scrolled_from_api = False
+    more_heading_locator = page.locator("h2.GTB")
 
     while True:
-        do_result = do(*do_args, **do_kwargs)
+        do_result = do()
         if asyncio.iscoroutine(do_result):
             await do_result
 
         await page.mouse.wheel(0, scroll_amount)
+
+        if stop_on_more_heading and await more_heading_locator.is_visible():
+            bounding_box = await more_heading_locator.bounding_box()
+            more_heading_crossed_viewport = bounding_box["y"] - client_height <= 0
+            if more_heading_crossed_viewport:
+                break
+
         if get_scrolled_from_api:
             get_scrolled_from_api = False
             amount_scrolled = await (

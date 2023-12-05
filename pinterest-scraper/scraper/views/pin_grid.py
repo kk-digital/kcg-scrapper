@@ -28,6 +28,7 @@ class PinGridView:
             scroll_delay=self._scroll_delay,
             check_bottom_times=self._check_bottom_times,
             do=self._extract_urls,
+            stop_on_more_heading=True,
         )
 
     def get_pin_urls(self):
