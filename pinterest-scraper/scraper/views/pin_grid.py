@@ -1,5 +1,4 @@
 import re
-import urllib.parse
 from typing import Callable
 
 from bs4 import BeautifulSoup
@@ -30,7 +29,7 @@ class PinGridView:
         html = await self._page.content()
         soup = BeautifulSoup(html, "lxml")
         for pin in soup.find_all("a", href=re.compile(r"\/pin\/\d+\/")):
-            self._pin_urls.add(urllib.parse.urljoin(self._page.url, pin["href"]))
+            self._pin_urls.add(pin["href"])
 
     async def _scrape_sections(self):
         section_selector = ".Uxw"
