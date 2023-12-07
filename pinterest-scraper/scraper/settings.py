@@ -7,6 +7,8 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
+from pathlib import Path
+
 BOT_NAME = "scraper"
 
 SPIDER_MODULES = ["scraper.spiders"]
@@ -15,6 +17,7 @@ NEWSPIDER_MODULE = "scraper.spiders"
 SCROLL_DELAY = 1
 CHECK_BOTTOM_TIMES = 20
 SHORT_WAIT = 3000
+PROXY_LIST_PATH = Path("proxies.csv")
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = "scraper (+http://www.yourdomain.com)"
@@ -111,4 +114,5 @@ PLAYWRIGHT_LAUNCH_OPTIONS = {
     "headless": False,
 }
 
+PLAYWRIGHT_MAX_CONTEXTS = 4
 PLAYWRIGHT_MAX_PAGES_PER_CONTEXT = 4
