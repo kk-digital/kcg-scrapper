@@ -1,17 +1,12 @@
 from bs4 import BeautifulSoup
-from playwright.async_api import Page
-from scrapy.settings import Settings
 
-from scraper.views import _utils
+from scraper.views._base_view import BaseView
 
 
-class BoardGridView:
-    def __init__(self, page: Page, settings: Settings) -> None:
-        self._page = page
+class BoardGridView(BaseView):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self._board_urls = set()
-        self._scroll_delay = settings["SCROLL_DELAY"]
-        self._check_bottom_times = settings["CHECK_BOTTOM_TIMES"]
-        self._short_wait = settings["SHORT_WAIT"]
 
     async def _extract_urls(self):
         html = await self._page.content()
@@ -22,12 +17,7 @@ class BoardGridView:
 
     async def start_view(self):
         await self._page.wait_for_timeout(self._short_wait)
-        await _utils.scroll_to_bottom_while_do(
-            page=self._page,
-            scroll_delay=self._scroll_delay,
-            check_bottom_times=self._check_bottom_times,
-            do=self._extract_urls,
-        )
+        await self._scroll_to_bottom_while_do(self._extract_urls)
 
     def get_board_urls(self):
         return self._board_urls
