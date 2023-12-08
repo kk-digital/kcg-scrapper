@@ -22,6 +22,7 @@ PROXY_LIST_PATH = Path("proxies.txt")
 # output settings
 OUTPUT_FOLDER = Path("output")
 HTML_FILES_FOLDER = OUTPUT_FOLDER / "html"
+IMAGES_STORE = OUTPUT_FOLDER / "images"
 HTML_FILES_FOLDER.mkdir(exist_ok=True)
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
@@ -76,9 +77,7 @@ DOWNLOAD_DELAY = 1
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-# ITEM_PIPELINES = {
-#    "scraper.pipelines.ScraperPipeline": 300,
-# }
+ITEM_PIPELINES = {"scrapy.pipelines.images.ImagesPipeline": 1}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
