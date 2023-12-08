@@ -67,6 +67,7 @@ class PinsSpider(scrapy.Spider):
     async def errback_close_page(self, failure, close_context: bool = False):
         request = failure.request
         self.logger.info(f"There was a problem scraping {request.url}")
+        self.logger.error(repr(failure))
         page = request.meta["playwright_page"]
         await page.close()
         if close_context:
