@@ -14,8 +14,8 @@ BOT_NAME = "scraper"
 SPIDER_MODULES = ["scraper.spiders"]
 NEWSPIDER_MODULE = "scraper.spiders"
 
-SCROLL_DELAY = 0
-CHECK_BOTTOM_TIMES = 20
+SCROLL_DELAY = 0.3
+CHECK_BOTTOM_TIMES = 33
 SHORT_WAIT = 3000
 PROXY_LIST_PATH = Path("proxies.txt")
 
