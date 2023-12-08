@@ -114,7 +114,9 @@ class PinsSpider(scrapy.Spider):
             )
 
     async def parse_pin(self, response: TextResponse):
-        await response.meta["playwright_page"].context.close()
+        page: Page = response.meta["playwright_page"]
+        await page.close()
+        await page.context.close()
 
         pin_html = response.css(".hs0 > .zI7 > .XiG").get()
         image_url = response.css(".PcK .hCL::attr(src)").get()
