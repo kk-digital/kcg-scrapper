@@ -17,7 +17,7 @@ NEWSPIDER_MODULE = "scraper.spiders"
 SCROLL_DELAY = 0
 CHECK_BOTTOM_TIMES = 20
 SHORT_WAIT = 3000
-PROXY_LIST_PATH = Path("proxies.csv")
+PROXY_LIST_PATH = Path("proxies.txt")
 
 # output settings
 OUTPUT_FOLDER = Path("output")
