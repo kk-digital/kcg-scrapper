@@ -65,7 +65,9 @@ class PinsSpider(scrapy.Spider):
         return meta
 
     async def errback_close_page(self, failure, close_context: bool = False):
-        page = failure.request.meta["playwright_page"]
+        request = failure.request
+        self.logger.info(f"There was a problem scraping {request.url}")
+        page = request.meta["playwright_page"]
         await page.close()
         if close_context:
             await page.context.close()
@@ -76,6 +78,7 @@ class PinsSpider(scrapy.Spider):
         view = BoardGridView(page, self.settings)
         await view.start_view()
         board_urls = view.get_board_urls()
+        self.logger.info(f"Found {len(board_urls)} boards for query {self.query}")  # type: ignore
         await page.close()
 
         for url in board_urls:
@@ -95,6 +98,7 @@ class PinsSpider(scrapy.Spider):
         view = PinGridView(page, self.settings)
         await view.start_view()
         pin_urls = view.get_pin_urls()
+        self.logger.info(f"Found {len(pin_urls)} pins for board {response.url}")
         await page.close()
         await page.context.close()
 
@@ -129,5 +133,7 @@ class PinsSpider(scrapy.Spider):
         self.html_files_folder.joinpath(html_filename).write_text(
             pin_html, encoding="utf-8"
         )
+
+        self.logger.info(f"Pin scraped. Url: {response.url}")
 
         yield {"html_filename": html_filename, "image_urls": [image_url]}
