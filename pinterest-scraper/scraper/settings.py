@@ -18,6 +18,7 @@ SCROLL_DELAY = 0.3
 CHECK_BOTTOM_TIMES = 33
 SHORT_WAIT = 3000
 PROXY_LIST_PATH = Path("proxies.txt")
+ROTATING_PROXY_LIST_PATH = str(PROXY_LIST_PATH)
 
 # output settings
 OUTPUT_FOLDER = Path("output")
@@ -65,9 +66,10 @@ DOWNLOAD_DELAY = 1
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-# DOWNLOADER_MIDDLEWARES = {
-#    "scraper.middlewares.ScraperDownloaderMiddleware": 543,
-# }
+DOWNLOADER_MIDDLEWARES = {
+    "rotating_proxies.middlewares.RotatingProxyMiddleware": 610,
+    "rotating_proxies.middlewares.BanDetectionMiddleware": 620,
+}
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html

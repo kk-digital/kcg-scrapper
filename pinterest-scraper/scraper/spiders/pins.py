@@ -47,6 +47,7 @@ class PinsSpider(scrapy.Spider):
             "playwright": True,
             "playwright_include_page": True,
             "playwright_page_init_callback": self.init_page,
+            "proxy": None,
         }
 
         if new_context:
