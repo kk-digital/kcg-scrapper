@@ -14,10 +14,15 @@ BOT_NAME = "scraper"
 SPIDER_MODULES = ["scraper.spiders"]
 NEWSPIDER_MODULE = "scraper.spiders"
 
-SCROLL_DELAY = 1
+SCROLL_DELAY = 0
 CHECK_BOTTOM_TIMES = 20
 SHORT_WAIT = 3000
 PROXY_LIST_PATH = Path("proxies.csv")
+
+# output settings
+OUTPUT_FOLDER = Path("output")
+HTML_FILES_FOLDER = OUTPUT_FOLDER / "html"
+HTML_FILES_FOLDER.mkdir(exist_ok=True)
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = "scraper (+http://www.yourdomain.com)"
@@ -114,5 +119,5 @@ PLAYWRIGHT_LAUNCH_OPTIONS = {
     "headless": False,
 }
 
-PLAYWRIGHT_MAX_CONTEXTS = 4
+PLAYWRIGHT_MAX_CONTEXTS = 8
 PLAYWRIGHT_MAX_PAGES_PER_CONTEXT = 4

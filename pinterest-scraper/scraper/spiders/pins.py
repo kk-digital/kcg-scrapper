@@ -1,10 +1,12 @@
+import hashlib
 import itertools
 import urllib.parse
+from pathlib import Path
 from typing import Iterable
 
 import scrapy
 from playwright.async_api import Page
-from scrapy.http import Request, Response
+from scrapy.http import Request, Response, TextResponse
 
 from scraper import utils
 from scraper.views.board_grid import BoardGridView
@@ -18,6 +20,7 @@ class PinsSpider(scrapy.Spider):
 
     def start_requests(self) -> Iterable[Request]:
         self.proxy_list_cycle = itertools.cycle(utils.load_proxies())
+        self.html_files_folder: Path = self.settings["HTML_FILES_FOLDER"]
 
         base_url = "https://www.pinterest.com/search/boards/?q={}&rs=typed"
         query = getattr(self, "query", None)
@@ -94,4 +97,36 @@ class PinsSpider(scrapy.Spider):
         await page.close()
         await page.context.close()
 
-        print(pin_urls)
+        for url in pin_urls:
+            meta = self.get_playwright_request_meta(new_context=True)
+            yield response.follow(
+                url,
+                callback=self.parse_pin,
+                errback=lambda failure: self.errback_close_page(
+                    failure, close_context=True
+                ),
+                meta=meta,
+            )
+
+    async def parse_pin(self, response: TextResponse):
+        await response.meta["playwright_page"].context.close()
+
+        pin_html = response.css(".hs0 > .zI7 > .XiG").get()
+        image_url = response.css(".PcK .hCL::attr(src)").get()
+        if pin_html is None or image_url is None:
+            return
+
+        image_url_parsed = urllib.parse.urlparse(image_url)
+        image_url_path_parts = image_url_parsed.path.split("/")
+        image_url_path_parts[1] = "originals"
+        image_url_parsed = image_url_parsed._replace(
+            path="/".join(image_url_path_parts)
+        )
+        image_url = urllib.parse.urlunparse(image_url_parsed)
+
+        html_filename = hashlib.sha1(response.url.encode()).hexdigest() + ".html"
+        self.html_files_folder.joinpath(html_filename).write_text(
+            pin_html, encoding="utf-8"
+        )
+
+        yield {"html_filename": html_filename, "image_urls": [image_url]}
