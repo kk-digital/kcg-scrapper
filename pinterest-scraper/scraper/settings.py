@@ -85,6 +85,10 @@ DOWNLOADER_MIDDLEWARES = {
     "rotating_proxies.middlewares.BanDetectionMiddleware": 620,
 }
 
+ROTATING_PROXY_PAGE_RETRY_TIMES = 2
+ROTATING_PROXY_BACKOFF_BASE = 30
+ROTATING_PROXY_BACKOFF_CAP = 60
+
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
 # EXTENSIONS = {
