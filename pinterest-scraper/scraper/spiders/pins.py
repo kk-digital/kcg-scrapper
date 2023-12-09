@@ -64,13 +64,13 @@ class PinsSpider(scrapy.Spider):
 
         return meta
 
-    async def errback_close_page(self, failure, close_context: bool = False):
+    async def errback_close_page(self, failure):
         request = failure.request
         self.logger.info(f"There was a problem scraping {request.url}")
         self.logger.error(repr(failure))
         page = request.meta["playwright_page"]
         await page.close()
-        if close_context:
+        if request.meta["playwright_context"]:
             await page.context.close()
 
     async def extract_board_urls(self, response: Response):
@@ -88,9 +88,7 @@ class PinsSpider(scrapy.Spider):
                 url,
                 meta=meta,
                 callback=self.extract_pin_urls,
-                errback=lambda failure: self.errback_close_page(
-                    failure, close_context=True
-                ),
+                errback=self.errback_close_page,
             )
 
     async def extract_pin_urls(self, response: Response):
@@ -108,9 +106,7 @@ class PinsSpider(scrapy.Spider):
             yield response.follow(
                 url,
                 callback=self.parse_pin,
-                errback=lambda failure: self.errback_close_page(
-                    failure, close_context=True
-                ),
+                errback=self.errback_close_page,
                 meta=meta,
             )
 
