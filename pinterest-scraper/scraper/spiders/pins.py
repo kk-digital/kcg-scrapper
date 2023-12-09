@@ -21,6 +21,7 @@ class PinsSpider(scrapy.Spider):
     def start_requests(self) -> Iterable[Request]:
         self.proxy_list_cycle = itertools.cycle(utils.load_proxies())
         self.html_files_folder: Path = self.settings["HTML_FILES_FOLDER"]
+        self.context_names = set()
 
         base_url = "https://www.pinterest.com/search/boards/?q={}&rs=typed"
         query = getattr(self, "query", None)
@@ -52,7 +53,11 @@ class PinsSpider(scrapy.Spider):
         }
 
         if new_context:
-            meta["playwright_context"] = "pinterest-context-" + str(self.context_count)
+            context_name = "pinterest-context-" + str(self.context_count)
+            if context_name in self.context_names:
+                raise Exception("Duplicated context name")
+            self.context_names.add(context_name)
+            meta["playwright_context"] = context_name
             self.context_count += 1
             proxy = next(self.proxy_list_cycle)
             meta["playwright_context_kwargs"] = {
