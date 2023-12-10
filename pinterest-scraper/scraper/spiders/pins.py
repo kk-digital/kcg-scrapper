@@ -80,7 +80,7 @@ class PinsSpider(scrapy.Spider):
             await page.context.close()
 
     async def extract_board_urls(self, response: Response):
-        self.logger.debug("Scraping boards")
+        self.logger.info("Scraping boards")
         page: Page = response.meta["playwright_page"]
 
         view = BoardGridView(page, self.settings)
@@ -99,7 +99,7 @@ class PinsSpider(scrapy.Spider):
             )
 
     async def extract_pin_urls(self, response: Response):
-        self.logger.debug(f'Scraping pins from board. Url "{response.url}"')
+        self.logger.info(f'Scraping pins from board. Url "{response.url}"')
         page: Page = response.meta["playwright_page"]
 
         view = PinGridView(page, self.settings)
@@ -119,7 +119,7 @@ class PinsSpider(scrapy.Spider):
             )
 
     async def parse_pin(self, response: TextResponse):
-        self.logger.debug(f"Scraping pin. Url {response.url}")
+        self.logger.info(f"Scraping pin. Url {response.url}")
         page: Page = response.meta["playwright_page"]
         await page.close()
         await page.context.close()
