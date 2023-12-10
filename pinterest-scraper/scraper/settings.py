@@ -7,7 +7,6 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-import logging
 from pathlib import Path
 
 BOT_NAME = "scraper"
@@ -45,7 +44,6 @@ ROBOTSTXT_OBEY = False
 
 # logging config
 LOG_LEVEL = "INFO"
-logging.getLogger("asyncio").propagate = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 # CONCURRENT_REQUESTS = 32
