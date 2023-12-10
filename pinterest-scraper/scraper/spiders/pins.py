@@ -83,11 +83,10 @@ class PinsSpider(scrapy.Spider):
         self.logger.info("Scraping boards")
         page: Page = response.meta["playwright_page"]
 
-        view = BoardGridView(page, self.settings)
-        await view.start_view()
+        async with BoardGridView(page, self.settings) as view:
+            await view.start_view()
         board_urls = view.get_board_urls()
         self.logger.info(f"Found {len(board_urls)} boards for query {self.query}")  # type: ignore
-        await page.close()
 
         for url in board_urls:
             meta = self.get_playwright_request_meta(new_context=True)
@@ -102,12 +101,10 @@ class PinsSpider(scrapy.Spider):
         self.logger.info(f'Scraping pins from board. Url "{response.url}"')
         page: Page = response.meta["playwright_page"]
 
-        view = PinGridView(page, self.settings)
-        await view.start_view()
+        async with PinGridView(page, self.settings, close_context=True) as view:
+            await view.start_view()
         pin_urls = view.get_pin_urls()
         self.logger.info(f"Found {len(pin_urls)} pins for board {response.url}")
-        await page.close()
-        await page.context.close()
 
         for url in pin_urls:
             meta = self.get_playwright_request_meta(new_context=True)
