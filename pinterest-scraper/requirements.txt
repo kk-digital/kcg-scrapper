@@ -1,0 +1,5 @@
+scrapy-playwright==0.0.33
+beautifulsoup4==4.12.2
+lxml==4.9.3
+pillow==10.1.0
+scrapy-rotating-proxies==0.6.2
