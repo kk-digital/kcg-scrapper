@@ -17,6 +17,10 @@ class PinsSpider(scrapy.Spider):
     name = "pins"
     allowed_domains = ["www.pinterest.com"]
     context_count = 0
+    board_count = 0
+    pin_count = 0
+    scraped_boards_count = 0
+    scraped_pins_count = 0
 
     def start_requests(self) -> Iterable[Request]:
         self.proxy_list_cycle = itertools.cycle(utils.load_proxies())
@@ -87,6 +91,7 @@ class PinsSpider(scrapy.Spider):
             await view.start_view()
         board_urls = view.get_board_urls()
         self.logger.info(f"Found {len(board_urls)} boards for query {self.query}")  # type: ignore
+        self.board_count = len(board_urls)
 
         for url in board_urls:
             meta = self.get_playwright_request_meta(new_context=True)
@@ -104,7 +109,13 @@ class PinsSpider(scrapy.Spider):
         async with PinGridView(page, self.settings, close_context=True) as view:
             await view.start_view()
         pin_urls = view.get_pin_urls()
+
+        self.scraped_boards_count += 1
+        self.pin_count += len(pin_urls)
         self.logger.info(f"Found {len(pin_urls)} pins for board {response.url}")
+        self.logger.info(
+            f"Boards scraped count={self.scraped_boards_count} out of {self.board_count}"
+        )
 
         for url in pin_urls:
             meta = self.get_playwright_request_meta(new_context=True)
@@ -139,6 +150,10 @@ class PinsSpider(scrapy.Spider):
             pin_html, encoding="utf-8"
         )
 
+        self.scraped_pins_count += 1
         self.logger.info(f"Pin scraped. Url: {response.url}")
+        self.logger.info(
+            f"Pins scraped count={self.scraped_pins_count} out of {self.pin_count}"
+        )
 
         yield {"html_filename": html_filename, "image_urls": [image_url]}
