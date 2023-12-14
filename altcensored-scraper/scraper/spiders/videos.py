@@ -25,7 +25,7 @@ class VideosSpider(scrapy.Spider):
         for anchor in response.css("h3 strong a"):
             yield response.follow(anchor)
 
-        for url in response.css(".pure-u-md-1-4 a+ p a").getall():
+        for url in response.css(".pure-u-md-1-4 a+ p a::attr(href)").getall():
             query_string = urllib.parse.urlsplit(url).query
             if query_string in self.scraped_urls:
                 self.logger.info(f"Skipping url {url}")
