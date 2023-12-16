@@ -14,7 +14,7 @@ class VideosSpider(scrapy.Spider):
 
     def start_requests(self) -> Iterable[Request]:
         self.html_dir: Path = self.settings["HTML_DIR"]
-        scraped_urls = getattr(self, "scraped_urls")
+        scraped_urls = getattr(self, "scraped_urls", None)
         if scraped_urls is not None:
             with open(scraped_urls, "r", encoding="utf-8") as fp:
                 self.scraped_urls = ast.literal_eval(fp.read())
@@ -25,11 +25,13 @@ class VideosSpider(scrapy.Spider):
         for anchor in response.css("h3 strong a"):
             yield response.follow(anchor)
 
+        check_scraped_urls = getattr(self, "scraped_urls", None) is not None
         for url in response.css(".pure-u-md-1-4 a+ p a::attr(href)").getall():
-            query_string = urllib.parse.urlsplit(url).query
-            if query_string in self.scraped_urls:
-                self.logger.info(f"Skipping url {url}")
-                continue
+            if check_scraped_urls:
+                query_string = urllib.parse.urlsplit(url).query
+                if query_string in self.scraped_urls:
+                    self.logger.info(f"Skipping url {url}")
+                    continue
 
             yield response.follow(url, callback=self.parse_video)
 
