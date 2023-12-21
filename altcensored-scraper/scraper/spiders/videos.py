@@ -46,7 +46,7 @@ class VideosSpider(scrapy.Spider):
             "url": response.url,
             "title": response.css("h2::text").get(),
             "category": response.css("p~ br+ a::text").get(),
-            "html_filename": html_filename,
+            "html_filename": f"full/{html_filename}",
             "youtube_video_link": response.css(
                 ".pure-u-md-1-5 .h-box:nth-child(1) a:nth-child(1)::attr(href)"
             ).get(),

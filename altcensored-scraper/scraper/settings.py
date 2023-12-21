@@ -23,9 +23,9 @@ ROBOTSTXT_OBEY = False
 
 # output settings
 OUTPUT_DIR = Path("output")
-HTML_DIR = OUTPUT_DIR / "html"
-FILES_STORE = OUTPUT_DIR / "files"
-IMAGES_STORE = OUTPUT_DIR / "images"
+FILES_STORE = OUTPUT_DIR
+IMAGES_STORE = OUTPUT_DIR
+HTML_DIR = OUTPUT_DIR / "full"
 HTML_DIR.mkdir(exist_ok=True)
 
 # logging settings
