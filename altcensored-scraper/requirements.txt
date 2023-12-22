@@ -2,3 +2,5 @@ lxml==4.9.3
 Pillow==10.1.0
 Scrapy==2.11.0
 scrapy-rotating-proxies==0.6.2
+playwright==1.40.0
+playwright-stealth==1.0.6
