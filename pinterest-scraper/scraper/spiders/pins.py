@@ -164,6 +164,6 @@ class PinsSpider(scrapy.Spider):
             "board_url": board_url,
             "board_title": board_title,
             "pin_url": response.url,
-            "html_filename": html_filename,
+            "html_filename": f"full/{html_filename}",
             "image_urls": [image_url],
         }
