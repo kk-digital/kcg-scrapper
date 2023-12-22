@@ -102,7 +102,7 @@ class PinsSpider(scrapy.Spider):
                 errback=self.errback_close_page,
             )
 
-    async def extract_pin_urls(self, response: Response):
+    async def extract_pin_urls(self, response: TextResponse):
         self.logger.info(f'Scraping pins from board. Url "{response.url}"')
         page: Page = response.meta["playwright_page"]
 
@@ -124,9 +124,13 @@ class PinsSpider(scrapy.Spider):
                 callback=self.parse_pin,
                 errback=self.errback_close_page,
                 meta=meta,
+                cb_kwargs={
+                    "board_url": response.url,
+                    "board_title": response.css(".R-d::text").get(),
+                },
             )
 
-    async def parse_pin(self, response: TextResponse):
+    async def parse_pin(self, response: TextResponse, board_url: str, board_title: str):
         self.logger.info(f"Scraping pin. Url {response.url}")
         page: Page = response.meta["playwright_page"]
         await page.close()
@@ -156,4 +160,10 @@ class PinsSpider(scrapy.Spider):
             f"Pins scraped count={self.scraped_pins_count} out of {self.pin_count}"
         )
 
-        yield {"html_filename": html_filename, "image_urls": [image_url]}
+        yield {
+            "board_url": board_url,
+            "board_title": board_title,
+            "pin_url": response.url,
+            "html_filename": html_filename,
+            "image_urls": [image_url],
+        }
