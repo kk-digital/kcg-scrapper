@@ -1,6 +1,6 @@
 import logging
 
-from playwright.async_api import Page, JSHandle, Request
+from playwright.async_api import JSHandle, Page, Request
 from scrapy.settings import Settings
 
 
@@ -64,7 +64,8 @@ class ShowcaseView:
         # start intercepting requests
         self._page.on("requestfinished", self._request_handler)
 
-        await self._page.get_by_role("button", name="New").click()
+        await self._page.get_by_role("button", name="Trending").click()
+        await self._page.get_by_role("menuitem", name="New").click()
         # let the ui load new category generations
         await self._page.wait_for_timeout(3000)
         self._logger.debug("Got to new generations section")
