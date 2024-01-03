@@ -14,35 +14,21 @@ BOT_NAME = "scraper"
 SPIDER_MODULES = ["scraper.spiders"]
 NEWSPIDER_MODULE = "scraper.spiders"
 
-SCROLL_DELAY = 0.3
-CHECK_BOTTOM_TIMES = 33
-SHORT_WAIT = 3000
-PROXY_LIST_PATH = Path("proxies.txt")
-ROTATING_PROXY_LIST_PATH = str(PROXY_LIST_PATH)
-
-# output settings
-OUTPUT_FOLDER = Path("output")
-IMAGES_STORE = OUTPUT_FOLDER
-HTML_FILES_FOLDER = OUTPUT_FOLDER / "full"
-HTML_FILES_FOLDER.mkdir(exist_ok=True)
-
-FEEDS = {
-    OUTPUT_FOLDER
-    / "data.jsonl": {
-        "format": "jsonlines",
-        "encoding": "utf-8",
-        "store_empty": False,
-        "overwrite": False,
-    }
-}
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.3"
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
 
-# logging config
+# output settings
+OUTPUT_DIR = Path("output")
+FILES_STORE = OUTPUT_DIR
+IMAGES_STORE = OUTPUT_DIR
+HTML_DIR = OUTPUT_DIR / "full"
+HTML_DIR.mkdir(exist_ok=True)
+
+# logging settings
 LOG_LEVEL = "INFO"
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
@@ -51,7 +37,7 @@ LOG_LEVEL = "INFO"
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 1
+DOWNLOAD_DELAY = 0.5
 # The download delay setting will honor only one of:
 # CONCURRENT_REQUESTS_PER_DOMAIN = 16
 # CONCURRENT_REQUESTS_PER_IP = 16
@@ -77,12 +63,11 @@ DOWNLOAD_DELAY = 1
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-    "scrapy.downloadermiddlewares.useragent.UserAgentMiddleware": None,
-    "scraper.middlewares.CustomUserAgentMiddleware": 500,
     "rotating_proxies.middlewares.RotatingProxyMiddleware": 610,
     "rotating_proxies.middlewares.BanDetectionMiddleware": 620,
 }
 
+ROTATING_PROXY_LIST_PATH = "proxies.txt"
 ROTATING_PROXY_PAGE_RETRY_TIMES = 2
 ROTATING_PROXY_BACKOFF_BASE = 30
 ROTATING_PROXY_BACKOFF_CAP = 60
@@ -95,7 +80,12 @@ ROTATING_PROXY_BACKOFF_CAP = 60
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-ITEM_PIPELINES = {"scrapy.pipelines.images.ImagesPipeline": 1}
+ITEM_PIPELINES = {
+    "scrapy.pipelines.files.FilesPipeline": 1,
+    "scrapy.pipelines.images.ImagesPipeline": 2,
+}
+
+MEDIA_ALLOW_REDIRECTS = True
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -122,19 +112,3 @@ ITEM_PIPELINES = {"scrapy.pipelines.images.ImagesPipeline": 1}
 REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
-
-# scrapy-playwright settings
-
-DOWNLOAD_HANDLERS = {
-    "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
-    "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
-}
-
-PLAYWRIGHT_BROWSER_TYPE = "firefox"
-
-PLAYWRIGHT_LAUNCH_OPTIONS = {
-    "headless": False,
-}
-
-PLAYWRIGHT_MAX_CONTEXTS = 8
-PLAYWRIGHT_MAX_PAGES_PER_CONTEXT = 4

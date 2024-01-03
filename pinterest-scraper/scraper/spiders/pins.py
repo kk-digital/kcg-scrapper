@@ -17,6 +17,10 @@ class PinsSpider(scrapy.Spider):
     name = "pins"
     allowed_domains = ["www.pinterest.com"]
     context_count = 0
+    board_count = 0
+    pin_count = 0
+    scraped_boards_count = 0
+    scraped_pins_count = 0
 
     def start_requests(self) -> Iterable[Request]:
         self.proxy_list_cycle = itertools.cycle(utils.load_proxies())
@@ -87,6 +91,7 @@ class PinsSpider(scrapy.Spider):
             await view.start_view()
         board_urls = view.get_board_urls()
         self.logger.info(f"Found {len(board_urls)} boards for query {self.query}")  # type: ignore
+        self.board_count = len(board_urls)
 
         for url in board_urls:
             meta = self.get_playwright_request_meta(new_context=True)
@@ -97,14 +102,20 @@ class PinsSpider(scrapy.Spider):
                 errback=self.errback_close_page,
             )
 
-    async def extract_pin_urls(self, response: Response):
+    async def extract_pin_urls(self, response: TextResponse):
         self.logger.info(f'Scraping pins from board. Url "{response.url}"')
         page: Page = response.meta["playwright_page"]
 
         async with PinGridView(page, self.settings, close_context=True) as view:
             await view.start_view()
         pin_urls = view.get_pin_urls()
+
+        self.scraped_boards_count += 1
+        self.pin_count += len(pin_urls)
         self.logger.info(f"Found {len(pin_urls)} pins for board {response.url}")
+        self.logger.info(
+            f"Boards scraped count={self.scraped_boards_count} out of {self.board_count}"
+        )
 
         for url in pin_urls:
             meta = self.get_playwright_request_meta(new_context=True)
@@ -113,9 +124,13 @@ class PinsSpider(scrapy.Spider):
                 callback=self.parse_pin,
                 errback=self.errback_close_page,
                 meta=meta,
+                cb_kwargs={
+                    "board_url": response.url,
+                    "board_title": response.css(".R-d::text").get(),
+                },
             )
 
-    async def parse_pin(self, response: TextResponse):
+    async def parse_pin(self, response: TextResponse, board_url: str, board_title: str):
         self.logger.info(f"Scraping pin. Url {response.url}")
         page: Page = response.meta["playwright_page"]
         await page.close()
@@ -139,6 +154,16 @@ class PinsSpider(scrapy.Spider):
             pin_html, encoding="utf-8"
         )
 
+        self.scraped_pins_count += 1
         self.logger.info(f"Pin scraped. Url: {response.url}")
+        self.logger.info(
+            f"Pins scraped count={self.scraped_pins_count} out of {self.pin_count}"
+        )
 
-        yield {"html_filename": html_filename, "image_urls": [image_url]}
+        yield {
+            "board_url": board_url,
+            "board_title": board_title,
+            "pin_url": response.url,
+            "html_filename": f"full/{html_filename}",
+            "image_urls": [image_url],
+        }
