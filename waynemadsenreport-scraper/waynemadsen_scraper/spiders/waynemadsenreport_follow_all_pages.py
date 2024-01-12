@@ -20,7 +20,7 @@ class WaynemadsenreportFollowAllPagesSpider(CrawlSpider):
         ),
         Rule(
             LinkExtractor(
-                deny=[r"\/calendar", "#calendar"],
+                deny=[r"\/calendar", "#calendar", r"\/sendfriend"],
                 restrict_css=["#columnswrapper"],
             ),
         ),
