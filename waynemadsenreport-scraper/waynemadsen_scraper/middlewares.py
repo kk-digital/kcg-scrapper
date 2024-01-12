@@ -1,5 +1,4 @@
 import logging
-import time
 
 from scrapy.http import Request, Response, TextResponse
 
@@ -33,7 +32,6 @@ class CheckSession:
             login_request = spider.get_login_request()
             login_request.meta["pending_request"] = request
             self.logger.info("Retrying login.")
-            time.sleep(10)
             return login_request
 
         return response
