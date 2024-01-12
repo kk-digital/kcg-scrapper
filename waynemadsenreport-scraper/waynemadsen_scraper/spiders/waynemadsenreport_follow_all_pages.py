@@ -12,7 +12,11 @@ class WaynemadsenreportFollowAllPagesSpider(CrawlSpider):
     rules = [
         Rule(
             LinkExtractor(
-                allow=[r"\/articles"],
+                allow=[r"\.com\/articles"],
+                deny=[
+                    "#calendar",
+                    r"\/print",
+                ],
                 restrict_css=["#columnswrapper"],
             ),
             callback="parse_article",
@@ -20,7 +24,12 @@ class WaynemadsenreportFollowAllPagesSpider(CrawlSpider):
         ),
         Rule(
             LinkExtractor(
-                deny=[r"\/calendar", "#calendar", r"\/sendfriend"],
+                deny=[
+                    r"\.com\/calendar",
+                    r"\.com\/sendfriend",
+                    "#calendar",
+                    r"\/print",
+                ],
                 restrict_css=["#columnswrapper"],
             ),
         ),
