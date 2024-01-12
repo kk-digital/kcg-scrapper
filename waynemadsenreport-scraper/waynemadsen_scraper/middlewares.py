@@ -1,16 +1,15 @@
 import logging
-
-from scrapy import Spider
-from scrapy.exceptions import IgnoreRequest
-from scrapy.http import Response, TextResponse, Request
-
-from waynemadsen_scraper.exceptions import SessionExpired
 import time
+
+from scrapy.http import Request, Response, TextResponse
+
+from waynemadsen_scraper.spiders.waynemadsenreport_follow_all_pages import (
+    WaynemadsenreportFollowAllPagesSpider as Spider,
+)
 
 
 class CheckSession:
     performing_login = True
-    pending_requests = []
     logger = logging.getLogger(__name__)
 
     def process_response(self, request: Request, response: Response, spider: Spider):
@@ -23,21 +22,18 @@ class CheckSession:
                 or "Exclusive Content" in response.text
             ):
                 self.performing_login = False
-                request.meta["pending_requests"] = self.pending_requests
-                self.pending_requests = []
-
                 return response
-
-            self.logger.info("Retrying login.")
-            time.sleep(10)
-            raise SessionExpired("Need to renew session.")
 
         if "This page is available to members only" in response.text:
             if self.performing_login:
-                self.pending_requests.append(request)
-                raise IgnoreRequest("Waiting for login to complete.")
+                request.dont_filter = True
+                return request
 
             self.performing_login = True
-            raise SessionExpired("Need to renew session.")
+            login_request = spider.get_login_request()
+            login_request.meta["pending_request"] = request
+            self.logger.info("Retrying login.")
+            time.sleep(10)
+            return login_request
 
         return response

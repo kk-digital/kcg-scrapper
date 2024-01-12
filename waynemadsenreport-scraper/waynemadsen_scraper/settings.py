@@ -1,13 +1,5 @@
-# Scrapy settings for waynemadsen_scraper project
-#
-# For simplicity, this file contains only settings considered important or
-# commonly used. You can find more settings consulting the documentation:
-#
-#     https://docs.scrapy.org/en/latest/topics/settings.html
-#     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-#     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 import os
-from os import path
+from pathlib import Path
 
 # loading .env file
 if os.getenv("PYTHON_ENV", "development") == "development":
@@ -20,27 +12,12 @@ LOGIN_PASSWORD = os.environ["WAYNEMADSENDREPORT_PASSWORD"]
 
 # logging config
 LOG_LEVEL = "INFO"
-LOG_FILE = "waynemadsen_scraper.log"
-LOG_FILE_APPEND = False
 
 # output config
-OUTPUT_DIR = "output"
-PAGES_OUTPUT_DIR = path.join(OUTPUT_DIR, "pages")
-IMAGES_STORE = path.join(OUTPUT_DIR, "files")
-os.makedirs(OUTPUT_DIR, exist_ok=True)
-os.makedirs(PAGES_OUTPUT_DIR, exist_ok=True)
+OUTPUT_DIR = Path("output")
+HTML_DIR = OUTPUT_DIR / "full"
+HTML_DIR.mkdir(parents=True, exist_ok=True)
 
-FEEDS = {
-    path.join(OUTPUT_DIR, "items.csv"): {
-        "format": "csv",
-        "encoding": "utf8",
-        "store_empty": False,
-        "overwrite": True,
-    }
-}
-
-# scrapeops monitoring
-SCRAPEOPS_API_KEY = os.environ["SCRAPEOPS_KEY"]
 
 BOT_NAME = "waynemadsen_scraper"
 
@@ -60,9 +37,9 @@ ROBOTSTXT_OBEY = False
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 2
+DOWNLOAD_DELAY = 0
 # The download delay setting will honor only one of:
-CONCURRENT_REQUESTS_PER_DOMAIN = 4
+CONCURRENT_REQUESTS_PER_DOMAIN = 1
 # CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
@@ -92,7 +69,8 @@ DOWNLOADER_MIDDLEWARES = {
 }
 
 ROTATING_PROXY_LIST_PATH = "proxies.txt"
-ROTATING_PROXY_PAGE_RETRY_TIMES = 1
+ROTATING_PROXY_PAGE_RETRY_TIMES = 3
+
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
@@ -101,7 +79,7 @@ ROTATING_PROXY_PAGE_RETRY_TIMES = 1
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-ITEM_PIPELINES = {"scrapy.pipelines.images.ImagesPipeline": 100}
+# ITEM_PIPELINES = {}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
