@@ -8,6 +8,7 @@ from scrapy.spiders import CrawlSpider, Rule
 
 class WaynemadsenreportFollowAllPagesSpider(CrawlSpider):
     name = "waynemadsenreport-articles"
+    allowed_domains = ["waynemadsenreport.com"]
 
     rules = [
         Rule(
