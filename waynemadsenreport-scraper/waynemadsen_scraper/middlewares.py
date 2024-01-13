@@ -16,12 +16,7 @@ class CheckSession:
             return response
 
         if request.meta.get("login_request"):
-            if (
-                response.css("#loginform").get() is None
-                or "Exclusive Content" in response.text
-            ):
-                self.performing_login = False
-                return response
+            self.performing_login = False
 
         if "This page is available to members only" in response.text:
             if self.performing_login:
