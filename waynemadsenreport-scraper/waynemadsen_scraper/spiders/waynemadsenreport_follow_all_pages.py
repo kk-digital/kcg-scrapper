@@ -28,6 +28,7 @@ class WaynemadsenreportFollowAllPagesSpider(CrawlSpider):
                 deny=[
                     r"\.com\/calendar",
                     r"\.com\/sendfriend",
+                    r"\.com\/forum",
                     "#calendar",
                     r"\/print",
                 ],
