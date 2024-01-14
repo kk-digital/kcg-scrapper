@@ -42,11 +42,13 @@ class WaynemadsenreportFollowAllPagesSpider(CrawlSpider):
 
     def after_login(self, response: TextResponse):
         self.login_count += 1
+        pending_requests = response.meta["pending_requests"]
         self.logger.info(f"Logged in successfully. Total login: {self.login_count}")
-        self.logger.info(f"Resuming pending request.")
+        self.logger.info(
+            f"Resuming pending request. Total pending: {len(pending_requests)}"
+        )
 
-        pending_request = response.meta.get("pending_request")
-        if pending_request is not None:
+        for pending_request in pending_requests:
             pending_request.dont_filter = True
             yield pending_request
 
