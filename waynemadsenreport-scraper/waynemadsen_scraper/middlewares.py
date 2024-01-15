@@ -31,21 +31,17 @@ class CheckSession:
         is_login_request = request.meta.get("login_request")
 
         if "This page is available to members only" in response.text:
-            if not is_login_request:
-                if self.performing_login:
-                    self.pending_requests.append(request)
-                    raise IgnoreRequest("Ignoring request while logging in.")
-                if self.last_login_timestamp > request.meta["timestamp"]:
-                    request.dont_filter = True
-                    return request
+            if self.performing_login:
+                self.pending_requests.append(request)
+                raise IgnoreRequest("Ignoring request while logging in.")
+            if self.last_login_timestamp > request.meta["timestamp"]:
+                request.dont_filter = True
+                return request
 
             self.performing_login = True
             login_request = spider.get_login_request()
-            if is_login_request:
-                self.logger.info("Login failed, retrying.")
-            else:
-                self.pending_requests.append(request)
-                self.logger.info("Session expired, logging in.")
+            self.pending_requests.append(request)
+            self.logger.info("Session expired, logging in.")
             return login_request
 
         if is_login_request:
