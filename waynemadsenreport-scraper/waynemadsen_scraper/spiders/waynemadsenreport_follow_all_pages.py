@@ -29,6 +29,7 @@ class WaynemadsenreportFollowAllPagesSpider(CrawlSpider):
                     r"\.com\/calendar",
                     r"\.com\/sendfriend",
                     r"\.com\/forum",
+                    r"\.com\/downloads",
                     "#calendar",
                     r"\/print",
                 ],
