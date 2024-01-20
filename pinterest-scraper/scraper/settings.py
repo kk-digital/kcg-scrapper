@@ -17,24 +17,13 @@ NEWSPIDER_MODULE = "scraper.spiders"
 SCROLL_DELAY = 0.3
 CHECK_BOTTOM_TIMES = 33
 SHORT_WAIT = 3000
-PROXY_LIST_PATH = Path("proxies.txt")
-ROTATING_PROXY_LIST_PATH = str(PROXY_LIST_PATH)
 
 # output settings
 OUTPUT_FOLDER = Path("output")
 IMAGES_STORE = OUTPUT_FOLDER
 HTML_FILES_FOLDER = OUTPUT_FOLDER / "full"
-HTML_FILES_FOLDER.mkdir(exist_ok=True)
+HTML_FILES_FOLDER.mkdir(parents=True, exist_ok=True)
 
-FEEDS = {
-    OUTPUT_FOLDER
-    / "data.jsonl": {
-        "format": "jsonlines",
-        "encoding": "utf-8",
-        "store_empty": False,
-        "overwrite": False,
-    }
-}
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
@@ -83,6 +72,7 @@ DOWNLOADER_MIDDLEWARES = {
     "rotating_proxies.middlewares.BanDetectionMiddleware": 620,
 }
 
+ROTATING_PROXY_LIST_PATH = "proxies.txt"
 ROTATING_PROXY_PAGE_RETRY_TIMES = 2
 ROTATING_PROXY_BACKOFF_BASE = 30
 ROTATING_PROXY_BACKOFF_CAP = 60
