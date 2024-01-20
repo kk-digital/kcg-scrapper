@@ -7,7 +7,10 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
+import os
 from pathlib import Path
+
+is_production = os.environ.get("PYTHON_ENV", "development") == "production"
 
 BOT_NAME = "scraper"
 
@@ -123,7 +126,7 @@ DOWNLOAD_HANDLERS = {
 PLAYWRIGHT_BROWSER_TYPE = "firefox"
 
 PLAYWRIGHT_LAUNCH_OPTIONS = {
-    "headless": False,
+    "headless": True if is_production else False,
 }
 
 PLAYWRIGHT_MAX_CONTEXTS = 8
