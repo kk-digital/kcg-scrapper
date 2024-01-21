@@ -117,6 +117,8 @@ class PinsSpider(scrapy.Spider):
             f"Boards scraped count={self.scraped_boards_count} out of {self.board_count}"
         )
 
+        board_url = response.url
+        board_title = response.css(".R-d::text").get()
         for url in pin_urls:
             meta = self.get_playwright_request_meta(new_context=True)
             yield response.follow(
@@ -125,8 +127,8 @@ class PinsSpider(scrapy.Spider):
                 errback=self.errback_close_page,
                 meta=meta,
                 cb_kwargs={
-                    "board_url": response.url,
-                    "board_title": response.css(".R-d::text").get(),
+                    "board_url": board_url,
+                    "board_title": board_title,
                 },
             )
 
