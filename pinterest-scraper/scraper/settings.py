@@ -78,8 +78,6 @@ DOWNLOADER_MIDDLEWARES = {
 PROXY_LIST_PATH = Path("proxies.txt")
 ROTATING_PROXY_LIST_PATH = str(PROXY_LIST_PATH)
 ROTATING_PROXY_PAGE_RETRY_TIMES = 2
-ROTATING_PROXY_BACKOFF_BASE = 30
-ROTATING_PROXY_BACKOFF_CAP = 60
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
