@@ -1,6 +1,8 @@
-import hashlib
 import itertools
+import json
+import re
 import urllib.parse
+from json import JSONDecodeError
 from pathlib import Path
 from typing import Iterable
 
@@ -24,7 +26,6 @@ class PinsSpider(scrapy.Spider):
 
     def start_requests(self) -> Iterable[Request]:
         self.proxy_list_cycle = itertools.cycle(utils.load_proxies())
-        self.html_files_folder: Path = self.settings["HTML_FILES_FOLDER"]
         self.context_names = set()
 
         base_url = "https://www.pinterest.com/search/boards/?q={}&rs=typed"
@@ -120,12 +121,9 @@ class PinsSpider(scrapy.Spider):
         board_url = response.url
         board_title = response.css(".R-d::text").get()
         for url in pin_urls:
-            meta = self.get_playwright_request_meta(new_context=True)
             yield response.follow(
                 url,
                 callback=self.parse_pin,
-                errback=self.errback_close_page,
-                meta=meta,
                 cb_kwargs={
                     "board_url": board_url,
                     "board_title": board_title,
@@ -133,39 +131,36 @@ class PinsSpider(scrapy.Spider):
             )
 
     async def parse_pin(self, response: TextResponse, board_url: str, board_title: str):
-        self.logger.info(f"Scraping pin. Url {response.url}")
-        page: Page = response.meta["playwright_page"]
-        await page.close()
-        await page.context.close()
+        pin_url = response.url
+        try:
+            json_data = re.search(
+                r'<script data-relay-response="true" type="application\/json">(.+?)<\/script>',
+                response.text,
+                flags=re.S,
+            ).group(1)
 
-        pin_html = response.css(".hs0 > .zI7 > .XiG").get()
-        image_url = response.css(".PcK .hCL::attr(src)").get()
-        if pin_html is None or image_url is None:
+            data = json.loads(json_data)
+            data = data["response"]["data"]["v3GetPinQuery"]["data"]
+
+            self.scraped_pins_count += 1
+            self.logger.info(f"Pin scraped. Url: {pin_url}")
+            self.logger.info(
+                f"Pins scraped count={self.scraped_pins_count} out of {self.pin_count}"
+            )
+
+            image_url = data["imageLargeUrl"]
+            if not image_url:
+                self.logger.info(f"Pin {pin_url} has no image url")
+                return
+
+            yield {
+                "board_url": board_url,
+                "board_title": board_title,
+                "pin_url": pin_url,
+                "title": data["title"],
+                "description": data["closeupUnifiedDescription"],
+                "image_urls": [image_url],
+            }
+        except (KeyError, AttributeError, JSONDecodeError) as e:
+            self.logger.error(f"Error parsing pin {pin_url}: {repr(e)}")
             return
-
-        image_url_parsed = urllib.parse.urlparse(image_url)
-        image_url_path_parts = image_url_parsed.path.split("/")
-        image_url_path_parts[1] = "originals"
-        image_url_parsed = image_url_parsed._replace(
-            path="/".join(image_url_path_parts)
-        )
-        image_url = urllib.parse.urlunparse(image_url_parsed)
-
-        html_filename = hashlib.sha1(response.url.encode()).hexdigest() + ".html"
-        self.html_files_folder.joinpath(html_filename).write_text(
-            pin_html, encoding="utf-8"
-        )
-
-        self.scraped_pins_count += 1
-        self.logger.info(f"Pin scraped. Url: {response.url}")
-        self.logger.info(
-            f"Pins scraped count={self.scraped_pins_count} out of {self.pin_count}"
-        )
-
-        yield {
-            "board_url": board_url,
-            "board_title": board_title,
-            "pin_url": response.url,
-            "html_filename": f"full/{html_filename}",
-            "image_urls": [image_url],
-        }

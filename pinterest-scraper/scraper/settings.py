@@ -24,8 +24,7 @@ SHORT_WAIT = 3000
 # output settings
 OUTPUT_FOLDER = Path("output")
 IMAGES_STORE = OUTPUT_FOLDER
-HTML_FILES_FOLDER = OUTPUT_FOLDER / "full"
-HTML_FILES_FOLDER.mkdir(parents=True, exist_ok=True)
+OUTPUT_FOLDER.mkdir(parents=True, exist_ok=True)
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
