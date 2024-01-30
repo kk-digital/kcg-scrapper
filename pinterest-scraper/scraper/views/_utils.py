@@ -1,8 +1,13 @@
 import asyncio
+import logging
 import math
+import time
 from typing import Callable
 
+import psutil
 from playwright.async_api import Page
+
+logger = logging.getLogger(__name__)
 
 
 async def scroll_to_bottom_while_do(
@@ -21,8 +26,20 @@ async def scroll_to_bottom_while_do(
     amount_scrolled = client_height
     get_scrolled_from_api = False
     more_heading_locator = page.locator("h2.GTB")
+    time_counter = time.perf_counter()
 
     while True:
+        if time.perf_counter() - time_counter >= 10:
+            logger.info("Checking memory usage")
+            time_counter = time.perf_counter()
+            mem_usage_percent = psutil.virtual_memory().percent
+            logger.info(f"Memory usage is {mem_usage_percent}%")
+            if mem_usage_percent > 95:
+                logger.info(
+                    f"Memory usage {mem_usage_percent}% exceeded threshold, stopping scroll"
+                )
+                break
+
         do_result = do()
         if asyncio.iscoroutine(do_result):
             await do_result
