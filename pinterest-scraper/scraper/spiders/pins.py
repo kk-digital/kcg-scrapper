@@ -3,10 +3,10 @@ import json
 import re
 import urllib.parse
 from json import JSONDecodeError
-from pathlib import Path
 from typing import Iterable
 
 import scrapy
+from playwright._impl._errors import TargetClosedError
 from playwright.async_api import Page
 from scrapy.http import Request, Response, TextResponse
 
@@ -79,10 +79,14 @@ class PinsSpider(scrapy.Spider):
         request = failure.request
         self.logger.info(f"There was a problem scraping {request.url}")
         self.logger.error(repr(failure))
-        page = request.meta["playwright_page"]
-        await page.close()
-        if request.meta["playwright_context"]:
-            await page.context.close()
+        if failure.check(TargetClosedError):
+            request.dont_filter = True
+            yield request
+        else:
+            page = request.meta["playwright_page"]
+            await page.close()
+            if request.meta["playwright_context"]:
+                await page.context.close()
 
     async def extract_board_urls(self, response: Response):
         self.logger.info("Scraping boards")
