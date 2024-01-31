@@ -10,7 +10,6 @@ WORKDIR /usr/src/app
 COPY requirements.txt requirements.txt
 
 RUN pip install --no-cache-dir -r requirements.txt && \
-    apt-get update && \
     playwright install firefox && \
     playwright install-deps
 
