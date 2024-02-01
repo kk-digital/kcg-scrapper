@@ -1,7 +1,7 @@
 import hashlib
 from pathlib import Path
 
-from scrapy.http import FormRequest, Request, TextResponse
+from scrapy.http import FormRequest, TextResponse
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
@@ -9,6 +9,7 @@ from scrapy.spiders import CrawlSpider, Rule
 class WaynemadsenreportFollowAllPagesSpider(CrawlSpider):
     name = "waynemadsenreport-articles"
     allowed_domains = ["waynemadsenreport.com"]
+    start_urls = ["https://www.waynemadsenreport.com/sitemap"]
 
     rules = [
         Rule(
@@ -18,23 +19,10 @@ class WaynemadsenreportFollowAllPagesSpider(CrawlSpider):
                     "#calendar",
                     r"\/print",
                 ],
-                restrict_css=["#columnswrapper"],
+                restrict_css=[".documentContent"],
             ),
             callback="parse_article",
-            follow=True,
-        ),
-        Rule(
-            LinkExtractor(
-                deny=[
-                    r"\.com\/calendar",
-                    r"\.com\/sendfriend",
-                    r"\.com\/forum",
-                    r"\.com\/downloads",
-                    "#calendar",
-                    r"\/print",
-                ],
-                restrict_css=["#columnswrapper"],
-            ),
+            # follow=True,
         ),
     ]
 
@@ -46,17 +34,31 @@ class WaynemadsenreportFollowAllPagesSpider(CrawlSpider):
     login_count = 0
     article_count = 0
 
-    def after_login(self, response: TextResponse):
-        self.login_count += 1
-        pending_requests = response.meta["pending_requests"]
-        self.logger.info(f"Logged in successfully. Total login: {self.login_count}")
-        self.logger.info(
-            f"Resuming pending request. Total pending: {len(pending_requests)}"
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        settings = crawler.settings
+        email = settings["LOGIN_EMAIL"]
+        password = settings["LOGIN_PASSWORD"]
+        html_dir = settings["HTML_DIR"]
+        spider = super().from_crawler(
+            crawler, email=email, password=password, html_dir=html_dir, *args, **kwargs
         )
 
-        for pending_request in pending_requests:
-            pending_request.dont_filter = True
-            yield pending_request
+        return spider
+
+    def __init__(self, *a, email: str, password: str, html_dir: Path, **kw):
+        super().__init__(*a, **kw)
+        self.email = email
+        self.password = password
+        self.html_dir = html_dir
+
+    def after_login(self, response: TextResponse):
+        self.login_count += 1
+        self.logger.info(f"Logged in successfully. Total login: {self.login_count}")
+        pending_request = response.meta["pending_request"]
+        pending_request.dont_filter = True
+
+        yield pending_request
 
     def get_login_request(self):
         return FormRequest(
@@ -68,15 +70,8 @@ class WaynemadsenreportFollowAllPagesSpider(CrawlSpider):
             meta={"login_request": True},
             callback=self.after_login,
             dont_filter=True,
+            priority=100,
         )
-
-    def start_requests(self):
-        self.email = self.settings["LOGIN_EMAIL"]
-        self.password = self.settings["LOGIN_PASSWORD"]
-        self.html_dir: Path = self.settings["HTML_DIR"]
-
-        yield self.get_login_request()
-        yield Request(url="https://www.waynemadsenreport.com/sitemap")
 
     def parse_article(self, response):
         self.article_count += 1
