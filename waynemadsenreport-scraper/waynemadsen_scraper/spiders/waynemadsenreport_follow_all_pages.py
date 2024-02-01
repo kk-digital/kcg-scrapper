@@ -38,6 +38,11 @@ class WaynemadsenreportFollowAllPagesSpider(CrawlSpider):
         ),
     ]
 
+    article_external_link_extractor = LinkExtractor(
+        deny_domains="waynemadsenreport.com",
+        restrict_css=".documentContent",
+    )
+
     login_count = 0
     article_count = 0
 
@@ -81,12 +86,18 @@ class WaynemadsenreportFollowAllPagesSpider(CrawlSpider):
         content = response.css(".documentContent").get()
         self.html_dir.joinpath(filename).write_text(content, encoding="utf-8")
 
+        external_links = [
+            link.url
+            for link in self.article_external_link_extractor.extract_links(response)
+        ]
+
         title = response.css("h2#main-title::text").get()
         pub_date = response.css("#pubdate span::text").get()
 
-        return dict(
-            url=response.url,
-            title=title,
-            pub_date=pub_date,
-            html_filename="full/" + filename,
-        )
+        yield {
+            "url": response.url,
+            "title": title,
+            "pub_date": pub_date,
+            "html_filename": "full/" + filename,
+            "external_links": external_links,
+        }
