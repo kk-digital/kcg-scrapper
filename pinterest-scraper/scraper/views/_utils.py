@@ -29,16 +29,19 @@ async def scroll_to_bottom_while_do(
     time_counter = time.perf_counter()
 
     while True:
-        if time.perf_counter() - time_counter >= 10:
-            logger.debug("Checking memory usage")
+        logger.debug("Checking memory usage")
+        mem_usage_percent = psutil.virtual_memory().percent
+        swap_usage_percent = psutil.swap_memory().percent
+        if (time.perf_counter() - time_counter) >= 30:
             time_counter = time.perf_counter()
-            mem_usage_percent = psutil.virtual_memory().percent
-            logger.info(f"Memory usage is {mem_usage_percent}%")
-            if mem_usage_percent > 90:
-                logger.info(
-                    f"Memory usage {mem_usage_percent}% exceeded threshold, stopping scroll"
-                )
-                break
+            logger.info(
+                f"Memory usage {mem_usage_percent}%, swap usage {swap_usage_percent}%"
+            )
+        if mem_usage_percent > 90 or swap_usage_percent > 70:
+            logger.info(
+                f"Memory usage exceeded threshold. ram {mem_usage_percent}% swap {swap_usage_percent}&, stopping scroll"
+            )
+            break
 
         do_result = do()
         if asyncio.iscoroutine(do_result):
