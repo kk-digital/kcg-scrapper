@@ -1,0 +1,2 @@
+playwright==1.41.2
+sqlalchemy-2.0.25
