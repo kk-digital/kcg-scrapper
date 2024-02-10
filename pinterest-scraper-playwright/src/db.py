@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-from settings import SQLITE_DB_PATH
+from src.settings import SQLITE_DB_PATH
 
 
 class Base(DeclarativeBase):
@@ -15,6 +15,8 @@ class Url(Base):
     url: Mapped[str]
 
 
-engine = create_engine(f"sqlite:///{SQLITE_DB_PATH}")
+def setup_db() -> None:
+    engine = create_engine(f"sqlite:///{SQLITE_DB_PATH}")
+    Base.metadata.create_all(engine)
 
-Base.metadata.create_all(engine)
+    return engine
