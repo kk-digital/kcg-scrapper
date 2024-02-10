@@ -2,11 +2,11 @@ import itertools
 import urllib.parse
 from typing import Iterator
 
-from sqlalchemy import Engine
+from sqlalchemy import Engine, select
 from sqlalchemy.orm import Session
 
 from src.browser import Browser
-from src.db import setup_db
+from src.db import Url, setup_db
 from src.settings import OUTPUT_DIR, PROXY_LIST_PATH
 from src.views.board_grid import BoardGridView
 
@@ -39,15 +39,20 @@ class Scraper:
         self.session = Session(self.engine)
         self.proxy_list = itertools.cycle(self.load_proxy_list())
 
-    def scrape_board_urls(self) -> set:
+    def scrape_board_urls(self) -> list[str]:
         with Browser(url=self.initial_url, proxy=next(self.proxy_list)) as page:
             view = BoardGridView(page=page)
             view.start_view()
-            urls = view.get_board_urls()
 
-        print(list(urls))
+        urls = view.get_board_urls()
+        new_urls = []
+        for url in urls:
+            stmt = select(Url).where(Url.url == url)
+            result = self.session.scalars(stmt).first()
+            if result is None:
+                new_urls.append(url)
 
-        return urls
+        return new_urls
 
     def run(self) -> None:
         try:
