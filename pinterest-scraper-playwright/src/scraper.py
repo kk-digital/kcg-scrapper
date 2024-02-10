@@ -17,13 +17,15 @@ class Scraper:
         self.initial_url = (
             f"https://www.pinterest.com/search/boards/?q={query}&rs=typed"
         )
+        self.output_dir = OUTPUT_DIR
+        self.proxy_list_path = PROXY_LIST_PATH
         self.engine: Engine | None = None
         self.session: Session | None = None
         self.proxy_list: Iterator | None = None
 
     def load_proxy_list(self) -> list[dict]:
         proxy_list = []
-        with PROXY_LIST_PATH.open("r", encoding="utf-8") as fp:
+        with self.proxy_list_path.open("r", encoding="utf-8") as fp:
             for line in fp:
                 [credentials, server] = line.split("@")
                 [username, password] = credentials.split(":")
@@ -34,7 +36,7 @@ class Scraper:
         return proxy_list
 
     def setup(self) -> None:
-        OUTPUT_DIR.mkdir(exist_ok=True)
+        self.output_dir.mkdir(exist_ok=True)
         self.engine = setup_db()
         self.session = Session(self.engine)
         self.proxy_list = itertools.cycle(self.load_proxy_list())
