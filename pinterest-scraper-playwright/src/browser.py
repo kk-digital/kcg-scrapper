@@ -1,3 +1,5 @@
+import logging
+
 import psutil
 from playwright.sync_api import Page, sync_playwright
 
@@ -13,6 +15,7 @@ class Browser:
         self._context = None
         self._page = None
         self._headless = HEADLESS
+        self.logger = logging.getLogger(__name__)
 
     def get_page(self) -> Page:
         self._pw = sync_playwright().start()
@@ -35,6 +38,9 @@ class Browser:
         for proc in psutil.process_iter(["pid", "name"]):
             if "node" in proc.info["name"] or "firefox" in proc.info["name"]:
                 proc.kill()
+                self.logger.info(
+                    f"Killed {proc.info['name']} with pid {proc.info['pid']}"
+                )
 
     def __enter__(self) -> Page:
         return self.get_page()

@@ -1,4 +1,5 @@
 import itertools
+import logging
 import urllib.parse
 from typing import Iterator
 
@@ -22,6 +23,7 @@ class Scraper:
         self.engine: Engine | None = None
         self.session: Session | None = None
         self.proxy_list: Iterator | None = None
+        self.logger = logging.getLogger(__name__)
 
     def load_proxy_list(self) -> list[dict]:
         proxy_list = []
@@ -40,9 +42,16 @@ class Scraper:
         self.engine = setup_db()
         self.session = Session(self.engine)
         self.proxy_list = itertools.cycle(self.load_proxy_list())
+        logging.basicConfig(
+            level=logging.INFO,
+            format="%(asctime)s - %(levelname)s - %(name)s - %(funcName)s - %(message)s",
+            datefmt="%m-%d %H:%M:%S",
+        )
+        self.logger.info("Scraper setup complete")
 
     def scrape_board_urls(self) -> list[str]:
         with Browser(url=self.initial_url, proxy=next(self.proxy_list)) as page:
+            self.logger.info(f"Scraping board urls from {self.initial_url}")
             view = BoardGridView(page=page)
             view.start_view()
 
@@ -53,6 +62,7 @@ class Scraper:
             result = self.session.scalars(stmt).first()
             if result is None:
                 new_urls.append(url)
+        self.logger.info(f"Found {len(new_urls)} board urls")
 
         return new_urls
 
