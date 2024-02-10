@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from src.settings import SQLITE_DB_PATH
@@ -15,7 +15,7 @@ class Url(Base):
     url: Mapped[str]
 
 
-def setup_db() -> None:
+def setup_db() -> Engine:
     engine = create_engine(f"sqlite:///{SQLITE_DB_PATH}")
     Base.metadata.create_all(engine)
 
