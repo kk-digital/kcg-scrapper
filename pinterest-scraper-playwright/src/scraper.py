@@ -20,9 +20,9 @@ class Scraper:
         )
         self.output_dir = OUTPUT_DIR
         self.proxy_list_path = PROXY_LIST_PATH
-        self.engine: Engine | None = None
-        self.session: Session | None = None
-        self.proxy_list: Iterator | None = None
+        self.engine: Engine
+        self.session: Session
+        self.proxy_list: Iterator
         self.logger = logging.getLogger(__name__)
 
     def load_proxy_list(self) -> list[dict]:
