@@ -1,3 +1,4 @@
+import random
 import urllib.parse
 from pathlib import Path
 from typing import Iterable
@@ -39,5 +40,6 @@ def load_proxy_list(proxy_list_path: Path) -> list[dict]:
             proxy_list.append(
                 {"server": server, "username": username, "password": password}
             )
+    random.shuffle(proxy_list)
 
     return proxy_list
