@@ -1,8 +1,12 @@
+import logging
 import math
 import time
 from typing import Callable
 
+import psutil
 from playwright.sync_api import Page
+
+logger = logging.getLogger(__name__)
 
 
 def scroll_to_bottom_while_do(
@@ -19,8 +23,23 @@ def scroll_to_bottom_while_do(
     amount_scrolled = client_height
     get_scrolled_from_api = False
     more_heading_locator = page.locator("h2.GTB")
+    time_counter = time.perf_counter()
 
     while True:
+        logger.debug("Checking memory usage")
+        mem_usage_percent = psutil.virtual_memory().percent
+        swap_usage_percent = psutil.swap_memory().percent
+        if (time.perf_counter() - time_counter) >= 30:
+            time_counter = time.perf_counter()
+            logger.info(
+                f"Memory usage {mem_usage_percent}%, swap usage {swap_usage_percent}%"
+            )
+        if mem_usage_percent > 90 or swap_usage_percent > 70:
+            logger.info(
+                f"Memory usage exceeded threshold. ram {mem_usage_percent}% swap {swap_usage_percent}&, stopping scroll"
+            )
+            break
+
         do()
         page.mouse.wheel(0, scroll_amount)
 
