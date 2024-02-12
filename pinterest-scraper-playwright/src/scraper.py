@@ -37,6 +37,7 @@ class Scraper:
         )
         self.logger.info("Scraper setup complete")
 
+    @utils.default_retry
     def scrape_board_urls(self) -> list[str]:
         with Browser(url=self.initial_url, proxy=next(self.proxy_list)) as page:
             self.logger.info(f"Scraping board urls from {self.initial_url}")
@@ -50,6 +51,7 @@ class Scraper:
 
         return processed_urls
 
+    @utils.default_retry
     def scrape_board_pins(self, url: str) -> list[str]:
         with Browser(url=url, proxy=next(self.proxy_list)) as page:
             self.logger.info(f"Scraping board {url}")

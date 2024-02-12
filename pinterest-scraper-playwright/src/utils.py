@@ -1,12 +1,19 @@
+import logging
 import random
 import urllib.parse
+from functools import wraps
 from pathlib import Path
-from typing import Iterable
+from typing import Callable, Iterable
 
+from playwright.sync_api import TimeoutError
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from tenacity import after_log, retry, retry_if_exception_type, stop_after_attempt
 
+from src import settings
 from src.db import Url
+
+logger = logging.getLogger(__name__)
 
 
 def insert_urls(urls: Iterable, session: Session) -> None:
@@ -43,3 +50,16 @@ def load_proxy_list(proxy_list_path: Path) -> list[dict]:
     random.shuffle(proxy_list)
 
     return proxy_list
+
+
+def default_retry(func: Callable) -> Callable:
+    @wraps(func)
+    @retry(
+        retry=retry_if_exception_type(TimeoutError),
+        stop=stop_after_attempt(settings.RETRY_TIMES),
+        after=after_log(logger, logging.WARNING),
+    )
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+
+    return wrapper
