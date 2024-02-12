@@ -5,6 +5,7 @@ from functools import wraps
 from pathlib import Path
 from typing import Callable, Iterable
 
+from playwright._impl._errors import TargetClosedError
 from playwright.sync_api import TimeoutError
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -55,7 +56,7 @@ def load_proxy_list(proxy_list_path: Path) -> list[dict]:
 def default_retry(func: Callable) -> Callable:
     @wraps(func)
     @retry(
-        retry=retry_if_exception_type(TimeoutError),
+        retry=retry_if_exception_type((TimeoutError, TargetClosedError)),
         stop=stop_after_attempt(settings.RETRY_TIMES),
         after=after_log(logger, logging.WARNING),
     )
