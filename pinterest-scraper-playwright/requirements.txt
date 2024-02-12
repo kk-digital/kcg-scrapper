@@ -1,0 +1,7 @@
+playwright==1.41.2
+sqlalchemy==2.0.25
+psutil==5.9.8
+beautifulsoup4==4.12.3
+lxml==5.1.0
+fire==0.5.0
+tenacity==8.2.3
