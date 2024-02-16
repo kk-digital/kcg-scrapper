@@ -1,3 +1,4 @@
+import csv
 import json
 import re
 from pathlib import Path
@@ -15,12 +16,19 @@ class DownloadPinsSpider(Spider):
         self.pin_count = 0
         self.scraped_pins_count = 0
         urls_path = getattr(self, "urls_path")
-        with Path(urls_path).open("r", encoding="utf-8") as fp:
-            for url in fp:
+        with Path(urls_path).open("r", encoding="utf-8", newline="") as fp:
+            reader = csv.DictReader(fp)
+            for entry in reader:
                 self.pin_count += 1
-                yield Request(url)
+                yield Request(
+                    entry["pin_url"],
+                    cb_kwargs={
+                        "query": entry["query"],
+                        "board_url": entry["board_url"],
+                    },
+                )
 
-    def parse(self, response: TextResponse):
+    def parse(self, response: TextResponse, query: str, board_url: str):
         pin_url = response.url
         try:
             json_data = re.search(
@@ -44,6 +52,8 @@ class DownloadPinsSpider(Spider):
                 return
 
             yield {
+                "board_url": board_url,
+                "query": query,
                 "pin_url": pin_url,
                 "title": data["title"],
                 "description": data["closeupUnifiedDescription"],
