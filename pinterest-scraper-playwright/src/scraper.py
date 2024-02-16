@@ -1,3 +1,4 @@
+import csv
 import itertools
 import logging
 import urllib.parse
@@ -15,9 +16,9 @@ from src.views.pin_grid import PinGridView
 
 class Scraper:
     def __init__(self, query: str) -> None:
-        query = urllib.parse.quote_plus(query)
+        self.query = urllib.parse.quote_plus(query)
         self.base_url = "https://www.pinterest.com"
-        self.initial_url = f"{self.base_url}/search/boards/?q={query}&rs=typed"
+        self.initial_url = f"{self.base_url}/search/boards/?q={self.query}&rs=typed"
         self.output_dir = settings.OUTPUT_DIR
         self.proxy_list_path = settings.PROXY_LIST_PATH
         self.engine: Engine
@@ -66,11 +67,17 @@ class Scraper:
         return processed_urls
 
     def scrape_boards(self, urls: list[str]) -> None:
-        with self.output_dir.joinpath("pin_urls.txt").open("a", encoding="utf-8") as fp:
+        with self.output_dir.joinpath("pin_urls.csv").open(
+            "a", encoding="utf-8", newline=""
+        ) as fp:
+            writer = csv.DictWriter(fp, fieldnames=["query", "board_url", "pin_url"])
+            writer.writeheader()
             for url in urls:
                 pin_urls = self.scrape_board_pins(url)
                 for pin_url in pin_urls:
-                    fp.write(pin_url + "\n")
+                    writer.writerow(
+                        {"query": self.query, "board_url": url, "pin_url": pin_url}
+                    )
                 # append board url so it's not rescraped
                 pin_urls.append(url)
                 utils.insert_urls(pin_urls, self.session)
