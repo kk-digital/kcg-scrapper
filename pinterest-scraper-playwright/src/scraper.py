@@ -71,7 +71,8 @@ class Scraper:
             "a", encoding="utf-8", newline=""
         ) as fp:
             writer = csv.DictWriter(fp, fieldnames=["query", "board_url", "pin_url"])
-            writer.writeheader()
+            if fp.tell() == 0:
+                writer.writeheader()
             for url in urls:
                 pin_urls = self.scrape_board_pins(url)
                 for pin_url in pin_urls:
