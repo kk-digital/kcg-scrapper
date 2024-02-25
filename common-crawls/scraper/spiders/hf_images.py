@@ -21,8 +21,9 @@ class HfImagesSpider(scrapy.Spider):
         filename = hashlib.sha1(response.url.encode()).hexdigest() + ".jpg"
         file_path = self.images_store / filename
         try:
-            img = Image.open(BytesIO(response.body))
-            img.save(file_path, format="JPEG")
+            with Image.open(BytesIO(response.body)) as img:
+                rgb_img = img.convert("RGB")
+                rgb_img.save(file_path, format="JPEG")
 
             yield {"url": response.url, "filename": "full/" + filename}
 
