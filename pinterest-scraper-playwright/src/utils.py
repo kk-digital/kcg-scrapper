@@ -10,8 +10,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from tenacity import after_log, retry, retry_if_exception_type, stop_after_attempt
 
-from src import settings
-from src.db import Url
+import settings
+from db import Url
 
 logger = logging.getLogger(__name__)
 

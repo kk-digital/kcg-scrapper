@@ -2,8 +2,8 @@ from typing import Callable
 
 from playwright.sync_api import Page
 
-from src.settings import CHECK_BOTTOM_TIMES, SCROLL_DELAY, SHORT_WAIT
-from src.views._utils import scroll_to_bottom_while_do
+from settings import CHECK_BOTTOM_TIMES, SCROLL_DELAY, SHORT_WAIT
+from views._utils import scroll_to_bottom_while_do
 
 
 class BaseView:

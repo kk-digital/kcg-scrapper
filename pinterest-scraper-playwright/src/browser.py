@@ -3,7 +3,7 @@ import logging
 import psutil
 from playwright.sync_api import Page, sync_playwright
 
-from src.settings import HEADLESS
+from settings import HEADLESS
 
 
 class Browser:

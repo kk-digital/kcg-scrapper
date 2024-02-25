@@ -13,4 +13,4 @@ RUN pip install --no-cache-dir -r requirements.txt && \
 
 COPY . .
 
-ENTRYPOINT [ "python", "-m", "fire", "src/scraper.py", "Scraper", "run"]
+ENTRYPOINT [ "python", "src/scraper.py", "run"]

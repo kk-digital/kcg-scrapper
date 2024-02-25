@@ -4,14 +4,16 @@ import logging
 import urllib.parse
 from typing import Iterator
 
+import fire
 from sqlalchemy import Engine
 from sqlalchemy.orm import Session
 
-from src import settings, utils
-from src.browser import Browser
-from src.db import setup_db
-from src.views.board_grid import BoardGridView
-from src.views.pin_grid import PinGridView
+import settings
+import utils
+from browser import Browser
+from db import setup_db
+from views.board_grid import BoardGridView
+from views.pin_grid import PinGridView
 
 
 class Scraper:
@@ -91,3 +93,7 @@ class Scraper:
         finally:
             if self.session is not None:
                 self.session.close()
+
+
+if __name__ == "__main__":
+    fire.Fire(Scraper)

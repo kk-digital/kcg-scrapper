@@ -1,7 +1,7 @@
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-from src.settings import SQLITE_DB_PATH
+from settings import SQLITE_DB_PATH
 
 
 class Base(DeclarativeBase):

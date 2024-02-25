@@ -2,7 +2,7 @@ import re
 
 from bs4 import BeautifulSoup
 
-from src.views._base_view import BaseView
+from views._base_view import BaseView
 
 
 class PinGridView(BaseView):
