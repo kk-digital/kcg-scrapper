@@ -23,9 +23,7 @@ def job():
                 "overwrite": False,
             },
         }
-        process.settings["JOBDIR"] = "output/jobdir"
-
-        process.crawl("download-pins", urls_path="output/pin_urls.txt")
+        process.crawl("download-pins")
         process.start()
 
     p = Process(target=crawl)
