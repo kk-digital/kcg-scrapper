@@ -1,4 +1,4 @@
-# Scrapy settings for scraper project
+# Scrapy settings for scrapy_scraper project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -7,34 +7,25 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-import os
 from pathlib import Path
 
-is_production = os.environ.get("PYTHON_ENV", "development") == "production"
+BOT_NAME = "scrapy_scraper"
 
-BOT_NAME = "scraper"
-
-SPIDER_MODULES = ["scraper.spiders"]
-NEWSPIDER_MODULE = "scraper.spiders"
-
-SCROLL_DELAY = 0.3
-CHECK_BOTTOM_TIMES = 33
-SHORT_WAIT = 3000
-
-# output settings
-OUTPUT_FOLDER = Path("output")
-IMAGES_STORE = OUTPUT_FOLDER
-OUTPUT_FOLDER.mkdir(parents=True, exist_ok=True)
+SPIDER_MODULES = ["scrapy_scraper.spiders"]
+NEWSPIDER_MODULE = "scrapy_scraper.spiders"
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+# USER_AGENT = "scrapy_scraper (+http://www.yourdomain.com)"
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
 
-# logging config
 LOG_LEVEL = "INFO"
+
+OUTPUT_DIR = Path("output")
+IMAGES_STORE = OUTPUT_DIR
+SQLITE_DB_PATH = OUTPUT_DIR / "db.sqlite3"
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 # CONCURRENT_REQUESTS = 32
@@ -62,21 +53,17 @@ DOWNLOAD_DELAY = 1
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 # SPIDER_MIDDLEWARES = {
-#    "scraper.middlewares.ScraperSpiderMiddleware": 543,
+#    "scrapy_scraper.middlewares.ScrapyScraperSpiderMiddleware": 543,
 # }
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-    "scrapy.downloadermiddlewares.useragent.UserAgentMiddleware": None,
-    "scraper.middlewares.CustomUserAgentMiddleware": 500,
     "rotating_proxies.middlewares.RotatingProxyMiddleware": 610,
     "rotating_proxies.middlewares.BanDetectionMiddleware": 620,
 }
 
-PROXY_LIST_PATH = Path("proxies.txt")
-ROTATING_PROXY_LIST_PATH = str(PROXY_LIST_PATH)
-ROTATING_PROXY_PAGE_RETRY_TIMES = 2
+ROTATING_PROXY_LIST_PATH = "proxies.txt"
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
@@ -113,19 +100,3 @@ ITEM_PIPELINES = {"scrapy.pipelines.images.ImagesPipeline": 1}
 REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
-
-# scrapy-playwright settings
-
-DOWNLOAD_HANDLERS = {
-    "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
-    "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
-}
-
-PLAYWRIGHT_BROWSER_TYPE = "firefox"
-
-PLAYWRIGHT_LAUNCH_OPTIONS = {
-    "headless": True if is_production else False,
-}
-
-PLAYWRIGHT_MAX_CONTEXTS = 8
-PLAYWRIGHT_MAX_PAGES_PER_CONTEXT = 4
