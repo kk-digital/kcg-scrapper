@@ -1,15 +1,18 @@
+import itertools
 import logging
+import random
+from pathlib import Path
 
 import psutil
 from playwright.sync_api import Page, sync_playwright
-
-from src.settings import HEADLESS
+from settings import HEADLESS, PROXY_LIST_PATH
 
 
 class Browser:
-    def __init__(self, url: str, proxy: dict):
+    def __init__(self, url: str, proxy: dict, clean_process: bool):
         self._url = url
         self._proxy = proxy
+        self._skip_process_clean = not clean_process
         self._pw = None
         self._browser = None
         self._context = None
@@ -47,4 +50,30 @@ class Browser:
 
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         self.close()
-        self._clean_process()
+        if self._skip_process_clean == False:
+            self._clean_process()
+
+
+class BrowserManager:
+
+    def __init__(self, clean_process: bool) -> None:
+        self._proxy_list = itertools.cycle(self._load_proxy_list(PROXY_LIST_PATH))
+        self._clean_process = clean_process
+
+    def _load_proxy_list(self, proxy_list_path: Path) -> list[dict]:
+        proxy_list = []
+        with proxy_list_path.open("r", encoding="utf-8") as fp:
+            for line in fp:
+                [credentials, server] = line.split("@")
+                [username, password] = credentials.split(":")
+                proxy_list.append(
+                    {"server": server, "username": username, "password": password}
+                )
+        random.shuffle(proxy_list)
+
+        return proxy_list
+
+    def get_browser(self, url: str) -> Browser:
+        return Browser(
+            url, proxy=next(self._proxy_list), clean_process=self._clean_process
+        )
