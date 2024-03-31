@@ -39,16 +39,21 @@ class DownloadPinsSpider(Spider):
 
     def start_requests(self) -> Iterable[Request]:
         stmt = select(self.url_model).filter_by(scraped=False)
-        for url in self.session.scalars(stmt):
-            self.pending_count += 1
-            yield Request(
-                url.pin_url,
-                cb_kwargs={
-                    "query": url.query,
-                    "board_url": url.board_url,
-                    "row_id": url.id,
-                },
-            )
+        cursor = self.session.scalars(stmt)
+        while True:
+            urls = cursor.fetchmany(100)
+            if not urls:
+                break
+            for url in urls:
+                self.pending_count += 1
+                yield Request(
+                    url.pin_url,
+                    cb_kwargs={
+                        "query": url.query,
+                        "board_url": url.board_url,
+                        "row_id": url.id,
+                    },
+                )
 
     def parse(self, response: TextResponse, query: str, board_url: str, row_id: int):
         pin_url = response.url
