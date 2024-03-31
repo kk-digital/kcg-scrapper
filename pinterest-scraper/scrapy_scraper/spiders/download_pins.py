@@ -22,6 +22,7 @@ class DownloadPinsSpider(Spider):
         self.session_maker = setup_db()
         self.url_model: Any
         self.session: Session
+        self.pending_ids = []
 
     @classmethod
     def from_crawler(cls, crawler: Crawler, *args, **kwargs):
@@ -35,6 +36,13 @@ class DownloadPinsSpider(Spider):
         self.url_model = Base.classes.url
 
     def spider_closed(self, spider, reason):
+        stmt = (
+            update(self.url_model)
+            .where(self.url_model.id.in_(self.pending_ids))
+            .values(scraped=True)
+        )
+        self.session.execute(stmt)
+        self.session.commit()
         self.session.close()
 
     def start_requests(self) -> Iterable[Request]:
@@ -88,7 +96,4 @@ class DownloadPinsSpider(Spider):
         except (AttributeError, json.JSONDecodeError) as e:
             self.logger.error(f"Error parsing pin {pin_url}: {repr(e)}")
 
-        self.session.execute(
-            update(self.url_model).filter_by(id=row_id).values(scraped=True)
-        )
-        self.session.commit()
+        self.pending_ids.append(row_id)
