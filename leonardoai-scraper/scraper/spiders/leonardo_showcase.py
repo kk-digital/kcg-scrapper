@@ -1,10 +1,8 @@
-from playwright.async_api import Page
-
-from scraper.views.login import LoginView
-from scraper.views.showcase import ShowcaseView
-
 import scrapy
+from playwright.async_api import Page
 from scrapy import Request
+
+from scraper.views.showcase import ShowcaseView
 
 
 class LeonardoShowcaseSpider(scrapy.Spider):

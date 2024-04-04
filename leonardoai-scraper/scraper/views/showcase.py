@@ -9,20 +9,8 @@ class ShowcaseView:
         self._page = page
         self._scroll_times = settings["SCROLL_TIMES"]
         self._scroll_delay = settings["SCROLL_DELAY"]
-        # self._generations_data_dir = settings["GENERATIONS_DATA_DIR"]
         self._generations = []
         self._logger = logging.getLogger(__name__)
-
-    # now return generations to export
-    # def _insert_generations(self):
-    #     filename = (
-    #         self.generations_data_dir / f"generations-{math.trunc(time.time())}.json"
-    #     )
-    #     with open(filename, "w", encoding="utf-8") as fp:
-    #         json.dump(self.data_to_inset, fp)
-    #     self._logger.info(
-    #         f"Inserted {len(self.data_to_inset)} generations to {filename}"
-    #     )
 
     async def _start_scrolling(self):
         self._logger.debug("Start scrolling")
