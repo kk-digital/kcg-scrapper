@@ -30,21 +30,6 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 # logging
 
 LOG_LEVEL = "INFO"
-LOG_FILE = OUTPUT_DIR / "scrapy.log"
-LOG_FILE_APPEND = False
-
-# feeds
-
-FEEDS = {
-    OUTPUT_DIR
-    / "generations.jsonl": {
-        "format": "jsonlines",
-        "encoding": "utf-8",
-        "store_empty": False,
-        "overwrite": False,
-    }
-}
-
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
