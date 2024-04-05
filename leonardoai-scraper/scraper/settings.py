@@ -21,30 +21,13 @@ SCROLL_TIMES = 10
 SCROLL_DELAY = 2000  # ms
 
 OUTPUT_DIR = Path("output")
-STORAGE_STATE_FILE = OUTPUT_DIR / "storage.json"
-# GENERATIONS_DATA_DIR = OUTPUT_DIR / "generations_data"
+STORAGE_STATE_FILE = Path("storage.json")
 IMAGES_STORE = OUTPUT_DIR / "images"
-# GENERATIONS_DATA_DIR.mkdir(exist_ok=True)
 OUTPUT_DIR.mkdir(exist_ok=True)
 
 # logging
 
 LOG_LEVEL = "INFO"
-LOG_FILE = OUTPUT_DIR / "scrapy.log"
-LOG_FILE_APPEND = False
-
-# feeds
-
-FEEDS = {
-    OUTPUT_DIR
-    / "generations.jsonl": {
-        "format": "jsonlines",
-        "encoding": "utf-8",
-        "store_empty": False,
-        "overwrite": False,
-    }
-}
-
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
