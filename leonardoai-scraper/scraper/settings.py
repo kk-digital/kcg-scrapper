@@ -6,6 +6,7 @@
 #     https://docs.scrapy.org/en/latest/topics/settings.html
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
+import os
 from pathlib import Path
 
 BOT_NAME = "scraper"
@@ -25,8 +26,9 @@ STORAGE_STATE_FILE = Path("storage.json")
 IMAGES_STORE = OUTPUT_DIR / "images"
 OUTPUT_DIR.mkdir(exist_ok=True)
 
-# logging
+MONGO_URI = os.environ["MONGO_URI"]
 
+# logging
 LOG_LEVEL = "INFO"
 
 # Obey robots.txt rules
