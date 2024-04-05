@@ -14,6 +14,13 @@ def run_spider():
 
     def crawl():
         process = CrawlerProcess(get_project_settings())
+        process.settings["FEED"] = {
+            "output/generations.jsonl": {
+                "format": "jsonlines",
+                "encoding": "utf8",
+                "overwrite": False,
+            }
+        }
         process.crawl("leonardo-showcase")
         process.start()
 
