@@ -14,7 +14,7 @@ def run_spider():
 
     def crawl():
         process = CrawlerProcess(get_project_settings())
-        process.settings["FEED"] = {
+        process.settings["FEEDS"] = {
             "output/generations.jsonl": {
                 "format": "jsonlines",
                 "encoding": "utf8",
