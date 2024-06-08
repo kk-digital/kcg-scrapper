@@ -14,6 +14,7 @@ class ModelInformation:
     def __init__(self, name: str, model_hash: str, files: List[FileInformation]):
         self.name = name
         self.model_hash = model_hash
+        # The model hash is the full sha of the commit the repo is at
         self.files = files
 
 class HuggingfaceModels:
@@ -31,7 +32,7 @@ parser = argparse.ArgumentParser(
     prog='huggingface-scrapper'
 )
 parser.add_argument('-o', '--output', default="./output.json", type=str)
-parser.add_argument('-n', '--limit', default=3, type=int, help='Specifies the limit of models to fetch of all the models available in HF.')
+parser.add_argument('-n', '--limit', default=250, type=int, help='Specifies the limit of models to fetch of all the models available in HF.')
 
 args = parser.parse_args()
 
